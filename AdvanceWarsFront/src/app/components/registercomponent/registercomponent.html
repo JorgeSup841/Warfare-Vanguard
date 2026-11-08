@@ -1,0 +1,86 @@
+<div class="main-card">
+
+  <div class="left-panel">
+
+    <div class="panel-bg-image"></div>
+
+    <div class="hero-content">
+      <h1 class="hero-title">¡Bienvenido67,<br><span>Comandante67!</span></h1>
+      <p class="hero-subtitle">Registra tus credenciales, reúne a tu escuadrón y prepárate para la próxima misión.</p>
+    </div>
+
+    <div class="tank-illustration">
+      <img src="assets/tanquini.jpg" alt="Guerra Arcade Advance Wars">
+    </div>
+
+    <div class="arcade-footer">
+      <div class="status-indicator">
+        <span class="status-dot"></span>
+        <span>ONLINE</span>
+      </div>
+      <div class="score-tag">LISTO PARA UNA NUEVA AVENTURA?</div>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="form-header">
+      <h2 class="form-title">Crea tu perfil</h2>
+      <p class="form-subtitle">Completa los datos para comenzar tu campaña.</p>
+    </div>
+
+    <div class="form-container">
+
+      <div class="form-group">
+        <label class="form-label" for="usuario">Usuario</label>
+        <div class="input-wrapper">
+          <input type="text" id="usuario" class="form-input" placeholder="Tu nombre de comandante">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Contraseña</label>
+        <div class="input-wrapper">
+          <input type="password" id="password" #password class="form-input" placeholder="Mínimo 12 caracteres" minlength="12">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="confirm">Confirmar contraseña</label>
+        <div class="input-wrapper">
+          <input type="password" id="confirm" #confirm class="form-input" placeholder="Repite tu contraseña" minlength="12">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="nacimiento">Nacimiento</label>
+          <div class="input-wrapper">
+            <input type="date" id="nacimiento" class="form-input">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="correo">Correo Electrónico</label>
+          <div class="input-wrapper">
+            <input type="email" id="correo" class="form-input" placeholder="correo@ejemplo.com">
+          </div>
+        </div>
+      </div>
+
+      <div class="terms-container">
+        <input type="checkbox" id="terms">
+        <label for="terms">Acepto los <a href="#">términos de la misión</a> y la política de privacidad.</label>
+      </div>
+
+      <p class="form-error">{{ error }}</p>
+
+      <button type="button" class="btn-submit" (click)="registrar(password.value, confirm.value)">
+        PULSA START →
+      </button>
+    </div>
+
+    <div class="login-link">
+      ¿Ya tienes una cuenta? <a href="#">Inicia sesión</a>
+    </div>
+  </div>
+</div>
