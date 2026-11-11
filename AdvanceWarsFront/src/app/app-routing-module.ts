@@ -12,4 +12,7 @@ const routes: Routes = [
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule]
 })
+/**
+ * Sistema de redireccion de algunos componentes para facilitar el flujo de manejo de la web
+ */
 export class AppRoutingModule {}
