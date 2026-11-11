@@ -1,5 +1,7 @@
 package co.edu.unbosque.advancewars.model;
 
+
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,81 +13,77 @@ import jakarta.persistence.Table;
 @Table(name = "faction")
 public class Faction {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(nullable = false, unique = true, length = 30)
-    private String code;
+	@Column(nullable = false, unique = true, length = 30)
+	private String code;
 
-    @Column(nullable = false, unique = true, length = 50)
-    private String name;
+	@Column(nullable = false, unique = true, length = 50)
+	private String name;
 
-    @Column(length = 1000)
-    private String description;
+	@Column(length = 1000)
+	private String description;
 
-    protected Faction() {
-    }
+	protected Faction() {
+	}
 
-    public Faction(String code, String name, String description) {
-        this.code = code;
-        this.name = name;
-        this.description = description;
-    }
+	public Faction(String code, String name, String description) {
+		this.code = code;
+		this.name = name;
+		this.description = description;
+	}
 
-    public Long getId() {
-        return id;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public String getCode() {
-        return code;
-    }
+	public String getCode() {
+		return code;
+	}
 
-    public void setCode(String code) {
-        this.code = code;
-    }
+	public void setCode(String code) {
+		this.code = code;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public String getDescription() {
-        return description;
-    }
+	public String getDescription() {
+		return description;
+	}
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
+	@Override
+	public boolean equals(Object object) {
+		if (this == object) {
+			return true;
+		}
 
-        if (!(object instanceof Faction other)) {
-            return false;
-        }
+		if (!(object instanceof Faction other)) {
+			return false;
+		}
 
-        return id != null && id.equals(other.getId());
-    }
+		return id != null && id.equals(other.getId());
+	}
 
-    @Override
-    public int hashCode() {
-        return Faction.class.hashCode();
-    }
+	@Override
+	public int hashCode() {
+		return Faction.class.hashCode();
+	}
 
-    @Override
-    public String toString() {
-        return "Faction{" +
-            "id=" + id +
-            ", code='" + code + '\'' +
-            ", name='" + name + '\'' +
-            ", description='" + description + '\'' +
-            '}';
-    }
+	@Override
+	public String toString() {
+		return "Faction{" + "id=" + id + ", code='" + code + '\'' + ", name='" + name + '\'' + ", description='"
+				+ description + '\'' + '}';
+	}
 }

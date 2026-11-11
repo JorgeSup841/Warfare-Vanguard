@@ -1,4 +1,4 @@
-package co.edu.unbosque.advancewars.model;
+package co.edu.unbosque.advancewars.enums;
 
 public enum GameLogType {
     GAME_CREATED,

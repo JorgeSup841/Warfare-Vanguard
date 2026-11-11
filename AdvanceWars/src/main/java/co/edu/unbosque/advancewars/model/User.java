@@ -1,5 +1,7 @@
 package co.edu.unbosque.advancewars.model;
 
+import co.edu.unbosque.advancewars.enums.Role;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -26,61 +28,53 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false, unique = true, length = 50)
     private String username;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String password;
 
-    @Column(unique = true, length = 254)
+    @Column(nullable = false, unique = true, length = 254)
     private String email;
 
-    @Column(nullable = false)
+    @Column(name = "email_verified", nullable = false)
     private boolean emailVerified;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
     private Role role;
 
+    @Column(name = "account_non_expired", nullable = false)
     private boolean accountNonExpired;
 
+    @Column(name = "account_non_locked", nullable = false)
     private boolean accountNonLocked;
 
+    @Column(name = "credentials_non_expired", nullable = false)
     private boolean credentialsNonExpired;
 
+    @Column(nullable = false)
     private boolean enabled;
 
-    public User() {
+    protected User() {
         this.accountNonExpired = true;
         this.accountNonLocked = true;
         this.credentialsNonExpired = true;
-        this.enabled = true;
+        this.enabled = false;
         this.emailVerified = false;
         this.role = Role.USER;
     }
 
-    public User(String username, String password) {
-        this();
-        this.username = username;
-        this.password = password;
-    }
-
-    public User(String username, String password, Role role) {
-        this();
-        this.username = username;
-        this.password = password;
-        this.role = role;
-    }
-
     public User(String username, String password, String email) {
+        this(username, password, email, Role.USER);
+    }
+
+    public User(String username, String password, String email, Role role) {
         this();
         this.username = username;
         this.password = password;
         this.email = email;
-    }
-
-    public enum Role {
-        USER,
-        ADMIN
+        this.role = role;
     }
 
     @Override
@@ -178,6 +172,11 @@ public class User implements UserDetails {
         this.emailVerified = emailVerified;
     }
 
+    public void verifyEmail() {
+        this.emailVerified = true;
+        this.enabled = true;
+    }
+
     @Override
     public boolean equals(Object object) {
         if (this == object) {
@@ -199,15 +198,15 @@ public class User implements UserDetails {
     @Override
     public String toString() {
         return "User{" +
-            "id=" + id +
-            ", username='" + username + '\'' +
-            ", email='" + email + '\'' +
-            ", emailVerified=" + emailVerified +
-            ", role=" + role +
-            ", accountNonExpired=" + accountNonExpired +
-            ", accountNonLocked=" + accountNonLocked +
-            ", credentialsNonExpired=" + credentialsNonExpired +
-            ", enabled=" + enabled +
-            '}';
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", email='" + email + '\'' +
+                ", emailVerified=" + emailVerified +
+                ", role=" + role +
+                ", accountNonExpired=" + accountNonExpired +
+                ", accountNonLocked=" + accountNonLocked +
+                ", credentialsNonExpired=" + credentialsNonExpired +
+                ", enabled=" + enabled +
+                '}';
     }
 }

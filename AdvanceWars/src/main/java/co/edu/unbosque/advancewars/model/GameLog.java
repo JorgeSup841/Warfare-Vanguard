@@ -1,5 +1,7 @@
 package co.edu.unbosque.advancewars.model;
 
+import co.edu.unbosque.advancewars.enums.GameLogType;
+
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -18,141 +20,129 @@ import jakarta.persistence.Table;
 @Table(name = "game_log")
 public class GameLog {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "game_state_id", nullable = false)
-    private GameState gameState;
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "game_state_id", nullable = false)
+	private GameState gameState;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "player_id")
-    private Player player;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "player_id")
+	private Player player;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "event_type", nullable = false, length = 40)
-    private GameLogType eventType;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "event_type", nullable = false, length = 40)
+	private GameLogType eventType;
 
-    @Column(name = "round_number", nullable = false)
-    private int roundNumber;
+	@Column(name = "round_number", nullable = false)
+	private int roundNumber;
 
-    @Column(name = "turn_order", nullable = false)
-    private int turnOrder;
+	@Column(name = "turn_order", nullable = false)
+	private int turnOrder;
 
-    @Column(nullable = false, length = 1000)
-    private String description;
+	@Column(nullable = false, length = 1000)
+	private String description;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+	@Column(name = "created_at", nullable = false)
+	private LocalDateTime createdAt;
 
-    protected GameLog() {
-    }
+	protected GameLog() {
+	}
 
-    public GameLog(
-        GameState gameState,
-        Player player,
-        GameLogType eventType,
-        int roundNumber,
-        int turnOrder,
-        String description
-    ) {
-        this.gameState = gameState;
-        this.player = player;
-        this.eventType = eventType;
-        this.roundNumber = roundNumber;
-        this.turnOrder = turnOrder;
-        this.description = description;
-        this.createdAt = LocalDateTime.now();
-    }
+	public GameLog(GameState gameState, Player player, GameLogType eventType, int roundNumber, int turnOrder,
+			String description) {
+		this.gameState = gameState;
+		this.player = player;
+		this.eventType = eventType;
+		this.roundNumber = roundNumber;
+		this.turnOrder = turnOrder;
+		this.description = description;
+		this.createdAt = LocalDateTime.now();
+	}
 
-    public Long getId() {
-        return id;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public GameState getGameState() {
-        return gameState;
-    }
+	public GameState getGameState() {
+		return gameState;
+	}
 
-    public void setGameState(GameState gameState) {
-        this.gameState = gameState;
-    }
+	public void setGameState(GameState gameState) {
+		this.gameState = gameState;
+	}
 
-    public Player getPlayer() {
-        return player;
-    }
+	public Player getPlayer() {
+		return player;
+	}
 
-    public void setPlayer(Player player) {
-        this.player = player;
-    }
+	public void setPlayer(Player player) {
+		this.player = player;
+	}
 
-    public GameLogType getEventType() {
-        return eventType;
-    }
+	public GameLogType getEventType() {
+		return eventType;
+	}
 
-    public void setEventType(GameLogType eventType) {
-        this.eventType = eventType;
-    }
+	public void setEventType(GameLogType eventType) {
+		this.eventType = eventType;
+	}
 
-    public int getRoundNumber() {
-        return roundNumber;
-    }
+	public int getRoundNumber() {
+		return roundNumber;
+	}
 
-    public void setRoundNumber(int roundNumber) {
-        this.roundNumber = roundNumber;
-    }
+	public void setRoundNumber(int roundNumber) {
+		this.roundNumber = roundNumber;
+	}
 
-    public int getTurnOrder() {
-        return turnOrder;
-    }
+	public int getTurnOrder() {
+		return turnOrder;
+	}
 
-    public void setTurnOrder(int turnOrder) {
-        this.turnOrder = turnOrder;
-    }
+	public void setTurnOrder(int turnOrder) {
+		this.turnOrder = turnOrder;
+	}
 
-    public String getDescription() {
-        return description;
-    }
+	public String getDescription() {
+		return description;
+	}
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
 
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
+	@Override
+	public boolean equals(Object object) {
+		if (this == object) {
+			return true;
+		}
 
-        if (!(object instanceof GameLog other)) {
-            return false;
-        }
+		if (!(object instanceof GameLog other)) {
+			return false;
+		}
 
-        return id != null && id.equals(other.getId());
-    }
+		return id != null && id.equals(other.getId());
+	}
 
-    @Override
-    public int hashCode() {
-        return GameLog.class.hashCode();
-    }
+	@Override
+	public int hashCode() {
+		return GameLog.class.hashCode();
+	}
 
-    @Override
-    public String toString() {
-        return "GameLog{" +
-            "id=" + id +
-            ", eventType=" + eventType +
-            ", roundNumber=" + roundNumber +
-            ", turnOrder=" + turnOrder +
-            ", description='" + description + '\'' +
-            ", createdAt=" + createdAt +
-            '}';
-    }
+	@Override
+	public String toString() {
+		return "GameLog{" + "id=" + id + ", eventType=" + eventType + ", roundNumber=" + roundNumber + ", turnOrder="
+				+ turnOrder + ", description='" + description + '\'' + ", createdAt=" + createdAt + '}';
+	}
 }

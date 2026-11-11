@@ -1,5 +1,7 @@
 package co.edu.unbosque.advancewars.model;
 
+import co.edu.unbosque.advancewars.enums.PlayerStatus;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

@@ -1,5 +1,7 @@
 package co.edu.unbosque.advancewars.model;
 
+import co.edu.unbosque.advancewars.enums.OtpPurpose;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -20,186 +22,169 @@ import jakarta.persistence.Version;
 @Table(name = "otp_challenge")
 public class OtpChallenge {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(unique = true, nullable = false)
-    private String challengeId;
+	@Column(unique = true, nullable = false)
+	private String challengeId;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "user_id", nullable = false)
+	private User user;
 
-    @Column(nullable = false, length = 100)
-    private String codeHash;
+	@Column(nullable = false, length = 100)
+	private String codeHash;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Purpose purpose;
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private OtpPurpose purpose;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
+	@Column(nullable = false)
+	private LocalDateTime createdAt;
 
-    @Column(nullable = false)
-    private LocalDateTime expiresAt;
+	@Column(nullable = false)
+	private LocalDateTime expiresAt;
 
-    private LocalDateTime consumedAt;
+	private LocalDateTime consumedAt;
 
-    @Column(nullable = false)
-    private int attempts;
+	@Column(nullable = false)
+	private int attempts;
 
-    @Column(nullable = false)
-    private int maxAttempts;
+	@Column(nullable = false)
+	private int maxAttempts;
 
-    @Version
-    private Long version;
+	@Version
+	private Long version;
 
-    public OtpChallenge() {
-        this.attempts = 0;
-        this.maxAttempts = 5;
-    }
+	public OtpChallenge() {
+		this.attempts = 0;
+		this.maxAttempts = 5;
+	}
 
-    public OtpChallenge(
-        User user,
-        String codeHash,
-        Purpose purpose,
-        LocalDateTime expiresAt
-    ) {
-        this();
-        this.challengeId = UUID.randomUUID().toString();
-        this.user = user;
-        this.codeHash = codeHash;
-        this.purpose = purpose;
-        this.createdAt = LocalDateTime.now();
-        this.expiresAt = expiresAt;
-    }
+	public OtpChallenge(User user, String codeHash, OtpPurpose purpose, LocalDateTime expiresAt) {
+		this();
+		this.challengeId = UUID.randomUUID().toString();
+		this.user = user;
+		this.codeHash = codeHash;
+		this.purpose = purpose;
+		this.createdAt = LocalDateTime.now();
+		this.expiresAt = expiresAt;
+	}
+	public boolean isConsumed() {
+		return consumedAt != null;
+	}
 
-    public enum Purpose {
-        EMAIL_VERIFICATION,
-        LOGIN_2FA
-    }
+	public void registerFailedAttempt() {
+		attempts++;
+	}
 
-    public boolean isConsumed() {
-        return consumedAt != null;
-    }
+	public void consume() {
+		this.consumedAt = LocalDateTime.now();
+	}
 
-    public void registerFailedAttempt() {
-        attempts++;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public void consume() {
-        this.consumedAt = LocalDateTime.now();
-    }
+	public String getChallengeId() {
+		return challengeId;
+	}
 
-    public Long getId() {
-        return id;
-    }
+	public void setChallengeId(String challengeId) {
+		this.challengeId = challengeId;
+	}
 
-    public String getChallengeId() {
-        return challengeId;
-    }
+	public User getUser() {
+		return user;
+	}
 
-    public void setChallengeId(String challengeId) {
-        this.challengeId = challengeId;
-    }
+	public void setUser(User user) {
+		this.user = user;
+	}
 
-    public User getUser() {
-        return user;
-    }
+	public String getCodeHash() {
+		return codeHash;
+	}
 
-    public void setUser(User user) {
-        this.user = user;
-    }
+	public void setCodeHash(String codeHash) {
+		this.codeHash = codeHash;
+	}
 
-    public String getCodeHash() {
-        return codeHash;
-    }
+	public OtpPurpose getPurpose() {
+		return purpose;
+	}
 
-    public void setCodeHash(String codeHash) {
-        this.codeHash = codeHash;
-    }
+	public void setPurpose(OtpPurpose purpose) {
+		this.purpose = purpose;
+	}
 
-    public Purpose getPurpose() {
-        return purpose;
-    }
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
 
-    public void setPurpose(Purpose purpose) {
-        this.purpose = purpose;
-    }
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+	public LocalDateTime getExpiresAt() {
+		return expiresAt;
+	}
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+	public void setExpiresAt(LocalDateTime expiresAt) {
+		this.expiresAt = expiresAt;
+	}
 
-    public LocalDateTime getExpiresAt() {
-        return expiresAt;
-    }
+	public LocalDateTime getConsumedAt() {
+		return consumedAt;
+	}
 
-    public void setExpiresAt(LocalDateTime expiresAt) {
-        this.expiresAt = expiresAt;
-    }
+	public void setConsumedAt(LocalDateTime consumedAt) {
+		this.consumedAt = consumedAt;
+	}
 
-    public LocalDateTime getConsumedAt() {
-        return consumedAt;
-    }
+	public int getAttempts() {
+		return attempts;
+	}
 
-    public void setConsumedAt(LocalDateTime consumedAt) {
-        this.consumedAt = consumedAt;
-    }
+	public void setAttempts(int attempts) {
+		this.attempts = attempts;
+	}
 
-    public int getAttempts() {
-        return attempts;
-    }
+	public int getMaxAttempts() {
+		return maxAttempts;
+	}
 
-    public void setAttempts(int attempts) {
-        this.attempts = attempts;
-    }
+	public void setMaxAttempts(int maxAttempts) {
+		this.maxAttempts = maxAttempts;
+	}
 
-    public int getMaxAttempts() {
-        return maxAttempts;
-    }
+	public Long getVersion() {
+		return version;
+	}
 
-    public void setMaxAttempts(int maxAttempts) {
-        this.maxAttempts = maxAttempts;
-    }
+	@Override
+	public boolean equals(Object object) {
+		if (this == object) {
+			return true;
+		}
 
-    public Long getVersion() {
-        return version;
-    }
+		if (!(object instanceof OtpChallenge other)) {
+			return false;
+		}
 
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
+		return id != null && id.equals(other.getId());
+	}
 
-        if (!(object instanceof OtpChallenge other)) {
-            return false;
-        }
+	@Override
+	public int hashCode() {
+		return OtpChallenge.class.hashCode();
+	}
 
-        return id != null && id.equals(other.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return OtpChallenge.class.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return "OtpChallenge{" +
-            "id=" + id +
-            ", purpose=" + purpose +
-            ", createdAt=" + createdAt +
-            ", expiresAt=" + expiresAt +
-            ", consumedAt=" + consumedAt +
-            ", attempts=" + attempts +
-            ", maxAttempts=" + maxAttempts +
-            '}';
-    }
+	@Override
+	public String toString() {
+		return "OtpChallenge{" + "id=" + id + ", purpose=" + purpose + ", createdAt=" + createdAt + ", expiresAt="
+				+ expiresAt + ", consumedAt=" + consumedAt + ", attempts=" + attempts + ", maxAttempts=" + maxAttempts
+				+ '}';
+	}
 }
