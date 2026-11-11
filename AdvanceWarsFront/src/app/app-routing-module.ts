@@ -15,4 +15,5 @@ const routes: Routes = [
 /**
  * Sistema de redireccion de algunos componentes para facilitar el flujo de manejo de la web
  */
+// deepsource-ignore JS-0327
 export class AppRoutingModule {}

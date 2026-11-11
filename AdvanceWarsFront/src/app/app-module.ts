@@ -13,4 +13,8 @@ import { Iniciosesioncomponent } from './components/iniciosesioncomponent/inicio
   providers: [provideBrowserGlobalErrorListeners()],
   bootstrap: [App],
 })
+/**
+ * Módulo principal de la aplicación.
+ */
+// deepsource-ignore JS-0327
 export class AppModule {}
