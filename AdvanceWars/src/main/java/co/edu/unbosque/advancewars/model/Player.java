@@ -1,5 +1,7 @@
 package co.edu.unbosque.advancewars.model;
 
+import co.edu.unbosque.advancewars.enums.PlayerStatus;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -27,11 +29,12 @@ import jakarta.persistence.UniqueConstraint;
         )
     }
 )
+/** Representa a un jugador y su estado dentro de una partida. */
 public class Player {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // skipcq: JAVA-E1065
 
     @Column(name = "player_name", nullable = false, length = 40)
     private String name;
@@ -58,9 +61,11 @@ public class Player {
     @JoinColumn(name = "commander_id")
     private Commander commander;
 
+    /** Constructor requerido por JPA para materializar la entidad. */
     protected Player() {
     }
 
+    /** Construye un jugador con su nombre, orden de turno y dinero inicial. */
     public Player(String name, int turnOrder, int money) {
         this.name = name;
         this.turnOrder = turnOrder;
@@ -68,40 +73,49 @@ public class Player {
         this.status = PlayerStatus.ACTIVE;
     }
 
+    /** Asocia el jugador con la partida que lo contiene. */
     void assignGameState(GameState gameState) {
         this.gameState = gameState;
     }
 
+    /** Elimina la asociación del jugador con su partida actual. */
     void removeGameState() {
         this.gameState = null;
     }
 
+    /** Asigna la facción y el comandante seleccionados por el jugador. */
     public void assignSelection(Faction faction, Commander commander) {
         this.faction = faction;
         this.commander = commander;
     }
 
+    /** Limpia la facción y el comandante seleccionados. */
     public void clearSelection() {
         this.faction = null;
         this.commander = null;
     }
 
+    /** Cambia el estado del jugador a eliminado. */
     public void eliminate() {
         this.status = PlayerStatus.ELIMINATED;
     }
 
+    /** Suma una cantidad de dinero al saldo del jugador. */
     public void addMoney(int amount) {
         this.money += amount;
     }
 
+    /** Resta una cantidad de dinero al saldo del jugador. */
     public void subtractMoney(int amount) {
         this.money -= amount;
     }
 
+    /** Cambia el estado del jugador para indicar que ganó la partida. */
     void declareWinner() {
         this.status = PlayerStatus.WINNER;
     }
 
+    /** Indica si el jugador continúa activo en la partida. */
     public boolean isActive() {
         return status == PlayerStatus.ACTIVE;
     }

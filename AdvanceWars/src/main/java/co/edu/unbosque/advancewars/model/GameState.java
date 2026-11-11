@@ -1,5 +1,7 @@
 package co.edu.unbosque.advancewars.model;
 
+import co.edu.unbosque.advancewars.enums.GameStatus;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,21 +12,25 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 
+/** Mantiene el estado, los turnos y los participantes de una partida. */
 @Entity
 @Table(name = "game_state")
 public class GameState {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // skipcq: JAVA-E1065
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -48,27 +54,30 @@ public class GameState {
 
     private LocalDateTime finishedAt;
 
-    @OneToMany(
-        mappedBy = "gameState",
-        cascade = CascadeType.ALL,
-        orphanRemoval = true
-    )
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "game_map_id", unique = true)
+    private GameMap gameMap;
+
+    @OneToMany(mappedBy = "gameState", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Player> players = new ArrayList<>();
 
     @Version
-    private Long version;
+    private Long version; // skipcq: JAVA-E1065
 
+    /** Construye una partida en estado de configuración, opcionalmente con una semilla. */
     public GameState() {
         this.status = GameStatus.SETUP;
         this.currentRound = 0;
         this.currentPlayerOrder = 0;
     }
 
+    /** Construye una partida en estado de configuración, opcionalmente con una semilla. */
     public GameState(Long seed) {
         this();
         this.seed = seed;
     }
 
+    /** Inicializa los valores persistentes que deben existir antes de guardar la partida. */
     @PrePersist
     private void initialize() {
         if (createdAt == null) {
@@ -80,6 +89,7 @@ public class GameState {
         }
     }
 
+    /** Añade un jugador a la partida y establece la relación con esta partida. */
     public void addPlayer(Player player) {
         if (!players.contains(player)) {
             players.add(player);
@@ -87,12 +97,14 @@ public class GameState {
         }
     }
 
+    /** Retira un jugador de la partida y elimina la relación correspondiente. */
     public void removePlayer(Player player) {
         if (players.remove(player)) {
             player.removeGameState();
         }
     }
 
+    /** Inicia la partida y establece la ronda y el turno inicial. */
     public void startGame(int firstPlayerOrder) {
         status = GameStatus.IN_PROGRESS;
         currentRound = 1;
@@ -100,14 +112,17 @@ public class GameState {
         startedAt = LocalDateTime.now();
     }
 
+    /** Actualiza el orden del jugador que tiene el turno actual. */
     public void changeCurrentPlayer(int playerOrder) {
         currentPlayerOrder = playerOrder;
     }
 
+    /** Avanza el contador de rondas de la partida. */
     public void incrementRound() {
         currentRound++;
     }
 
+    /** Finaliza la partida y registra el orden del jugador ganador. */
     public void finishGame(int winnerPlayerOrder) {
         Player winner = findPlayerByOrder(winnerPlayerOrder);
 
@@ -120,11 +135,12 @@ public class GameState {
         this.finishedAt = LocalDateTime.now();
     }
 
+    /** Busca al jugador cuyo orden de turno coincide con el indicado. */
     public Player findPlayerByOrder(int playerOrder) {
         return players.stream()
-            .filter(player -> player.getTurnOrder() == playerOrder)
-            .findFirst()
-            .orElse(null);
+                .filter(player -> player.getTurnOrder() == playerOrder)
+                .findFirst()
+                .orElse(null);
     }
 
     public Long getId() {
@@ -195,6 +211,14 @@ public class GameState {
         this.finishedAt = finishedAt;
     }
 
+    public GameMap getGameMap() {
+        return gameMap;
+    }
+
+    public void setGameMap(GameMap gameMap) {
+        this.gameMap = gameMap;
+    }
+
     public List<Player> getPlayers() {
         return Collections.unmodifiableList(players);
     }
@@ -238,15 +262,15 @@ public class GameState {
     @Override
     public String toString() {
         return "GameState{" +
-            "id=" + id +
-            ", status=" + status +
-            ", currentRound=" + currentRound +
-            ", currentPlayerOrder=" + currentPlayerOrder +
-            ", winnerPlayerOrder=" + winnerPlayerOrder +
-            ", seed=" + seed +
-            ", createdAt=" + createdAt +
-            ", startedAt=" + startedAt +
-            ", finishedAt=" + finishedAt +
-            '}';
+                "id=" + id +
+                ", status=" + status +
+                ", currentRound=" + currentRound +
+                ", currentPlayerOrder=" + currentPlayerOrder +
+                ", winnerPlayerOrder=" + winnerPlayerOrder +
+                ", seed=" + seed +
+                ", createdAt=" + createdAt +
+                ", startedAt=" + startedAt +
+                ", finishedAt=" + finishedAt +
+                '}';
     }
 }
