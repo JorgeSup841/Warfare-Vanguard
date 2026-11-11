@@ -49,6 +49,7 @@ public class GameLog {
 	@Column(name = "created_at", nullable = false)
 	private LocalDateTime createdAt;
 
+	/** Constructor requerido por JPA para materializar la entidad. */
 	protected GameLog() {
 	}
 

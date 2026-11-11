@@ -73,6 +73,7 @@ public class UnitDefinition {
 	@JoinTable(name = "unit_definition_weapon", joinColumns = @JoinColumn(name = "unit_definition_id"), inverseJoinColumns = @JoinColumn(name = "weapon_id"))
 	private Set<Weapon> weapons = new HashSet<>();
 
+	/** Constructor requerido por JPA para materializar la entidad. */
 	protected UnitDefinition() {
 	}
 

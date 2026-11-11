@@ -20,6 +20,7 @@ public class Position implements Serializable {
 	@Column(name = "position_y", nullable = false)
 	private int y;
 
+	/** Constructor requerido por JPA para materializar la posición embebida. */
 	protected Position() {
 	}
 

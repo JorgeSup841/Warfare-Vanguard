@@ -57,6 +57,7 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private boolean enabled;
 
+    /** Constructor requerido por JPA para materializar la entidad. */
     protected User() {
         this.accountNonExpired = true;
         this.accountNonLocked = true;
@@ -168,6 +169,7 @@ public class User implements UserDetails {
         this.email = email;
     }
 
+    /** Indica si la dirección de correo electrónico fue verificada. */
     public boolean isEmailVerified() {
         return emailVerified;
     }

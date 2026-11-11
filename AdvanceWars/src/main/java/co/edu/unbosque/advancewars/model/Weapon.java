@@ -27,7 +27,7 @@ public class Weapon {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	private Long id; // skipcq: JAVA-E1065
 
 	@Column(nullable = false, unique = true, length = 40)
 	private String code;
@@ -54,6 +54,7 @@ public class Weapon {
 	@Column(name = "base_damage", nullable = false)
 	private Map<UnitType, Integer> damageByTarget = new HashMap<>();
 
+	/** Constructor requerido por JPA para materializar la entidad. */
 	protected Weapon() {
 	}
 
@@ -114,6 +115,7 @@ public class Weapon {
 		this.maxRange = maxRange;
 	}
 
+	/** Indica si el arma requiere munición para atacar. */
 	public boolean isUsesAmmunition() {
 		return usesAmmunition;
 	}

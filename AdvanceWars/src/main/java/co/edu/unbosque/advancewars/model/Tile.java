@@ -40,6 +40,7 @@ public class Tile {
 	@JoinColumn(name = "game_map_id", nullable = false)
 	private GameMap gameMap;
 
+	/** Constructor requerido por JPA para materializar la entidad. */
 	protected Tile() {
 	}
 
@@ -49,6 +50,7 @@ public class Tile {
 		this.terrainType = terrainType;
 	}
 
+	/** Asigna el mapa al que pertenece esta casilla. */
 	void assignGameMap(GameMap gameMap) {
 		this.gameMap = gameMap;
 	}

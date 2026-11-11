@@ -55,6 +55,7 @@ public class Commander {
 	@Column(name = "power_cost", nullable = false)
 	private int powerCost;
 
+	/** Constructor requerido por JPA para materializar la entidad. */
 	protected Commander() {
 	}
 

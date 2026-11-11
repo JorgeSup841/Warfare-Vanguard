@@ -40,6 +40,7 @@ public class GameMap {
 	@Transient
 	private Map<Position, Tile> tileIndex;
 
+	/** Constructor requerido por JPA para materializar la entidad. */
 	protected GameMap() {
 		this.tiles = new ArrayList<>();
 		this.tileIndex = new HashMap<>();

@@ -27,6 +27,7 @@ public class Faction {
 	@Column(length = 1000)
 	private String description;
 
+	/** Constructor requerido por JPA para materializar la entidad. */
 	protected Faction() {
 	}
 

@@ -51,6 +51,7 @@ public class PropertyDefinition {
 	@Column(name = "unit_category", nullable = false, length = 20)
 	private Set<UnitCategory> productionCategories = new HashSet<>();
 
+	/** Constructor requerido por JPA para materializar la entidad. */
 	protected PropertyDefinition() {
 	}
 

@@ -27,7 +27,7 @@ public class Unit {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	private Long id; // skipcq: JAVA-E1065
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "unit_definition_id", nullable = false)
@@ -62,6 +62,7 @@ public class Unit {
 	@Column(nullable = false)
 	private boolean capturedThisTurn;
 
+	/** Constructor requerido por JPA para materializar la entidad. */
 	protected Unit() {
 	}
 
@@ -167,6 +168,7 @@ public class Unit {
 		this.tile = tile;
 	}
 
+	/** Obtiene la posición actual de la unidad a partir de su casilla. */
 	public Position getPosition() {
 		return tile == null ? null : tile.getPosition();
 	}
@@ -195,6 +197,7 @@ public class Unit {
 		this.ammunition = ammunition == null ? new HashMap<>() : new HashMap<>(ammunition);
 	}
 
+	/** Indica si la unidad ya se movió durante el turno actual. */
 	public boolean isMovedThisTurn() {
 		return movedThisTurn;
 	}
@@ -203,6 +206,7 @@ public class Unit {
 		this.movedThisTurn = movedThisTurn;
 	}
 
+	/** Indica si la unidad ya atacó durante el turno actual. */
 	public boolean isAttackedThisTurn() {
 		return attackedThisTurn;
 	}
@@ -211,6 +215,7 @@ public class Unit {
 		this.attackedThisTurn = attackedThisTurn;
 	}
 
+	/** Indica si la unidad ya intentó capturar durante el turno actual. */
 	public boolean isCapturedThisTurn() {
 		return capturedThisTurn;
 	}

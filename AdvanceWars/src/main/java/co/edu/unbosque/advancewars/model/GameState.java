@@ -77,6 +77,7 @@ public class GameState {
         this.seed = seed;
     }
 
+    /** Inicializa los valores persistentes que deben existir antes de guardar la partida. */
     @PrePersist
     private void initialize() {
         if (createdAt == null) {

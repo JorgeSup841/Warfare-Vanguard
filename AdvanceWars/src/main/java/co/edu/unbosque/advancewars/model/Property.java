@@ -46,6 +46,7 @@ public class Property {
 	@Column(nullable = false)
 	private boolean operational;
 
+	/** Constructor requerido por JPA para materializar la entidad. */
 	protected Property() {
 	}
 

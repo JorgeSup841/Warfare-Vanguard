@@ -61,6 +61,7 @@ public class Player {
     @JoinColumn(name = "commander_id")
     private Commander commander;
 
+    /** Constructor requerido por JPA para materializar la entidad. */
     protected Player() {
     }
 
@@ -72,10 +73,12 @@ public class Player {
         this.status = PlayerStatus.ACTIVE;
     }
 
+    /** Asocia el jugador con la partida que lo contiene. */
     void assignGameState(GameState gameState) {
         this.gameState = gameState;
     }
 
+    /** Elimina la asociación del jugador con su partida actual. */
     void removeGameState() {
         this.gameState = null;
     }
@@ -107,6 +110,7 @@ public class Player {
         this.money -= amount;
     }
 
+    /** Cambia el estado del jugador para indicar que ganó la partida. */
     void declareWinner() {
         this.status = PlayerStatus.WINNER;
     }
