@@ -18,13 +18,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 
+/** Representa un desafío de un solo uso para los flujos de verificación y autenticación. */
 @Entity
 @Table(name = "otp_challenge")
 public class OtpChallenge {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	private Long id; // skipcq: JAVA-E1065
 
 	@Column(unique = true, nullable = false)
 	private String challengeId;
@@ -55,13 +56,15 @@ public class OtpChallenge {
 	private int maxAttempts;
 
 	@Version
-	private Long version;
+	private Long version; // skipcq: JAVA-E1065
 
+	/** Construye un desafío OTP asociado a un usuario, propósito, hash y vencimiento. */
 	public OtpChallenge() {
 		this.attempts = 0;
 		this.maxAttempts = 5;
 	}
 
+	/** Construye un desafío OTP asociado a un usuario, propósito, hash y vencimiento. */
 	public OtpChallenge(User user, String codeHash, OtpPurpose purpose, LocalDateTime expiresAt) {
 		this();
 		this.challengeId = UUID.randomUUID().toString();
@@ -71,14 +74,17 @@ public class OtpChallenge {
 		this.createdAt = LocalDateTime.now();
 		this.expiresAt = expiresAt;
 	}
+	/** Indica si el desafío OTP ya fue consumido. */
 	public boolean isConsumed() {
 		return consumedAt != null;
 	}
 
+	/** Registra un intento fallido de validación del código OTP. */
 	public void registerFailedAttempt() {
 		attempts++;
 	}
 
+	/** Marca el desafío OTP como consumido y registra la fecha correspondiente. */
 	public void consume() {
 		this.consumedAt = LocalDateTime.now();
 	}

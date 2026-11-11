@@ -1,9 +1,6 @@
 HELP.md
 target/
-bin/
-*.class
 .mvn/wrapper/maven-wrapper.jar
-
 !**/src/main/**/target/
 !**/src/test/**/target/
 
@@ -34,12 +31,3 @@ build/
 
 ### VS Code ###
 .vscode/
-
-### Environment files ###
-.env
-.env.*
-!.env.example
-
-### Operating system ###
-.DS_Store
-Thumbs.db

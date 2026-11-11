@@ -14,6 +14,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+/** Representa una propiedad del mapa, su dueño y su progreso de captura. */
 @Entity
 @Table(name = "game_property", uniqueConstraints = {
 		@UniqueConstraint(name = "uk_property_tile", columnNames = { "tile_id" }) })
@@ -21,7 +22,7 @@ public class Property {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	private Long id; // skipcq: JAVA-E1065
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "property_definition_id", nullable = false)
@@ -48,6 +49,7 @@ public class Property {
 	protected Property() {
 	}
 
+	/** Construye una propiedad para una definición y una casilla, opcionalmente con dueño. */
 	public Property(PropertyDefinition definition, Tile tile) {
 		this.definition = definition;
 		this.tile = tile;
@@ -55,31 +57,37 @@ public class Property {
 		this.operational = true;
 	}
 
+	/** Construye una propiedad para una definición y una casilla, opcionalmente con dueño. */
 	public Property(PropertyDefinition definition, Tile tile, Player owner) {
 		this(definition, tile);
 		this.owner = owner;
 	}
 
+	/** Actualiza el jugador que captura la propiedad y su progreso. */
 	public void updateCaptureState(Player capturingPlayer, int progress) {
 		this.capturingPlayer = capturingPlayer;
 		this.captureProgress = progress;
 	}
 
+	/** Completa la captura y asigna la propiedad al nuevo dueño. */
 	public void completeCapture(Player newOwner) {
 		this.owner = newOwner;
 		resetCaptureProgress();
 	}
 
+	/** Asigna el dueño de la propiedad y reinicia el progreso de captura. */
 	public void assignOwner(Player owner) {
 		this.owner = owner;
 		resetCaptureProgress();
 	}
 
+	/** Reinicia el progreso y elimina el jugador que estaba capturando. */
 	public void resetCaptureProgress() {
 		this.captureProgress = 0;
 		this.capturingPlayer = null;
 	}
 
+	/** Indica si el progreso alcanzó el umbral necesario para capturar. */
 	public boolean isCaptureComplete() {
 		return captureProgress >= definition.getCaptureThreshold();
 	}
@@ -128,6 +136,7 @@ public class Property {
 		this.captureProgress = captureProgress;
 	}
 
+	/** Indica si la propiedad se encuentra operativa. */
 	public boolean isOperational() {
 		return operational;
 	}

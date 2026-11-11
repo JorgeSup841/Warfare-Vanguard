@@ -8,6 +8,7 @@ import java.util.Objects;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
+/** Representa una coordenada bidimensional dentro del mapa. */
 @Embeddable
 public class Position implements Serializable {
 
@@ -22,6 +23,7 @@ public class Position implements Serializable {
 	protected Position() {
 	}
 
+	/** Construye una posición a partir de sus coordenadas horizontal y vertical. */
 	public Position(int x, int y) {
 		this.x = x;
 		this.y = y;

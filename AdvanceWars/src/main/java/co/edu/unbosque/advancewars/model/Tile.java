@@ -17,6 +17,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+/** Representa una casilla del mapa y su tipo de terreno. */
 @Entity
 @Table(name = "map_tile", uniqueConstraints = {
 		@UniqueConstraint(name = "uk_tile_map_position", columnNames = { "game_map_id", "position_x", "position_y" }) })
@@ -24,7 +25,7 @@ public class Tile {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	private Long id; // skipcq: JAVA-E1065
 
 	@Embedded
 	@AttributeOverride(name = "x", column = @Column(name = "position_x", nullable = false))
@@ -42,6 +43,7 @@ public class Tile {
 	protected Tile() {
 	}
 
+	/** Construye una casilla con su posición y tipo de terreno. */
 	public Tile(Position position, TerrainType terrainType) {
 		this.position = position;
 		this.terrainType = terrainType;

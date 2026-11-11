@@ -9,13 +9,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+/** Representa una facción disponible para los jugadores. */
 @Entity
 @Table(name = "faction")
 public class Faction {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	private Long id; // skipcq: JAVA-E1065
 
 	@Column(nullable = false, unique = true, length = 30)
 	private String code;
@@ -29,6 +30,7 @@ public class Faction {
 	protected Faction() {
 	}
 
+	/** Construye una facción con su código, nombre y descripción. */
 	public Faction(String code, String name, String description) {
 		this.code = code;
 		this.name = name;

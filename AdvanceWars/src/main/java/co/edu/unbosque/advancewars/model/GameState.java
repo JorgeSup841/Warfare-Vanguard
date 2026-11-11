@@ -23,13 +23,14 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 
+/** Mantiene el estado, los turnos y los participantes de una partida. */
 @Entity
 @Table(name = "game_state")
 public class GameState {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // skipcq: JAVA-E1065
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -61,14 +62,16 @@ public class GameState {
     private List<Player> players = new ArrayList<>();
 
     @Version
-    private Long version;
+    private Long version; // skipcq: JAVA-E1065
 
+    /** Construye una partida en estado de configuración, opcionalmente con una semilla. */
     public GameState() {
         this.status = GameStatus.SETUP;
         this.currentRound = 0;
         this.currentPlayerOrder = 0;
     }
 
+    /** Construye una partida en estado de configuración, opcionalmente con una semilla. */
     public GameState(Long seed) {
         this();
         this.seed = seed;
@@ -85,6 +88,7 @@ public class GameState {
         }
     }
 
+    /** Añade un jugador a la partida y establece la relación con esta partida. */
     public void addPlayer(Player player) {
         if (!players.contains(player)) {
             players.add(player);
@@ -92,12 +96,14 @@ public class GameState {
         }
     }
 
+    /** Retira un jugador de la partida y elimina la relación correspondiente. */
     public void removePlayer(Player player) {
         if (players.remove(player)) {
             player.removeGameState();
         }
     }
 
+    /** Inicia la partida y establece la ronda y el turno inicial. */
     public void startGame(int firstPlayerOrder) {
         status = GameStatus.IN_PROGRESS;
         currentRound = 1;
@@ -105,14 +111,17 @@ public class GameState {
         startedAt = LocalDateTime.now();
     }
 
+    /** Actualiza el orden del jugador que tiene el turno actual. */
     public void changeCurrentPlayer(int playerOrder) {
         currentPlayerOrder = playerOrder;
     }
 
+    /** Avanza el contador de rondas de la partida. */
     public void incrementRound() {
         currentRound++;
     }
 
+    /** Finaliza la partida y registra el orden del jugador ganador. */
     public void finishGame(int winnerPlayerOrder) {
         Player winner = findPlayerByOrder(winnerPlayerOrder);
 
@@ -125,6 +134,7 @@ public class GameState {
         this.finishedAt = LocalDateTime.now();
     }
 
+    /** Busca al jugador cuyo orden de turno coincide con el indicado. */
     public Player findPlayerByOrder(int playerOrder) {
         return players.stream()
                 .filter(player -> player.getTurnOrder() == playerOrder)

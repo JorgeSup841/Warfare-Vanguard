@@ -20,6 +20,7 @@ import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.MapKeyEnumerated;
 import jakarta.persistence.Table;
 
+/** Representa un arma y el daño base que causa a cada tipo de unidad. */
 @Entity
 @Table(name = "weapon")
 public class Weapon {
@@ -56,6 +57,7 @@ public class Weapon {
 	protected Weapon() {
 	}
 
+	/** Construye un arma con su alcance y configuración de munición. */
 	public Weapon(String code, String name, int minRange, int maxRange, boolean usesAmmunition,
 			int ammunitionCapacity) {
 		this.code = code;
@@ -66,10 +68,12 @@ public class Weapon {
 		this.ammunitionCapacity = ammunitionCapacity;
 	}
 
+	/** Define el daño que este arma causa contra un tipo de unidad. */
 	public void defineDamage(UnitType targetType, int damage) {
 		damageByTarget.put(targetType, damage);
 	}
 
+	/** Devuelve el daño base de esta arma contra el tipo de unidad indicado. */
 	public int getDamageAgainst(UnitType targetType) {
 		return damageByTarget.getOrDefault(targetType, 0);
 	}

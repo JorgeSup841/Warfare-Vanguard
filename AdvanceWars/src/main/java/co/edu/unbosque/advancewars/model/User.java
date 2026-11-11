@@ -18,6 +18,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+/** Representa una cuenta de usuario y sus datos de autenticación y autorización. */
 @Entity
 @Table(name = "useraccount")
 public class User implements UserDetails {
@@ -65,10 +66,12 @@ public class User implements UserDetails {
         this.role = Role.USER;
     }
 
+    /** Construye una cuenta con sus credenciales y rol. */
     public User(String username, String password, String email) {
         this(username, password, email, Role.USER);
     }
 
+    /** Construye una cuenta con sus credenciales y rol. */
     public User(String username, String password, String email, Role role) {
         this();
         this.username = username;
@@ -77,6 +80,7 @@ public class User implements UserDetails {
         this.role = role;
     }
 
+    /** Obtiene las autoridades de seguridad asociadas al rol del usuario. */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (role == null) {
@@ -172,6 +176,7 @@ public class User implements UserDetails {
         this.emailVerified = emailVerified;
     }
 
+    /** Marca el correo electrónico del usuario como verificado y habilita la cuenta. */
     public void verifyEmail() {
         this.emailVerified = true;
         this.enabled = true;

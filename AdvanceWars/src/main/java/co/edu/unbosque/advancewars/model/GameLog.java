@@ -16,13 +16,14 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+/** Registra un evento ocurrido durante una partida. */
 @Entity
 @Table(name = "game_log")
 public class GameLog {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	private Long id; // skipcq: JAVA-E1065
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "game_state_id", nullable = false)
@@ -51,6 +52,7 @@ public class GameLog {
 	protected GameLog() {
 	}
 
+	/** Construye un registro de evento y asigna la fecha de creación. */
 	public GameLog(GameState gameState, Player player, GameLogType eventType, int roundNumber, int turnOrder,
 			String description) {
 		this.gameState = gameState;

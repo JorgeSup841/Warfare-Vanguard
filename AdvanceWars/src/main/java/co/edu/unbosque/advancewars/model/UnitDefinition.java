@@ -21,13 +21,14 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
+/** Define las características, movimiento y armamento de un tipo de unidad. */
 @Entity
 @Table(name = "unit_definition")
 public class UnitDefinition {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	private Long id; // skipcq: JAVA-E1065
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, unique = true, length = 40)
@@ -75,6 +76,7 @@ public class UnitDefinition {
 	protected UnitDefinition() {
 	}
 
+	/** Construye la definición de una unidad con sus capacidades y estadísticas. */
 	public UnitDefinition(UnitType unitType, String name, UnitCategory category, MovementType movementType,
 			int productionCost, int maxHealth, int movementPoints, boolean usesFuel, int maxFuel,
 			int fuelConsumptionPerTurn, int fuelPerMovementPoint, boolean captureCapable) {
@@ -92,10 +94,12 @@ public class UnitDefinition {
 		this.captureCapable = captureCapable;
 	}
 
+	/** Añade un arma a la definición de la unidad. */
 	public void addWeapon(Weapon weapon) {
 		weapons.add(weapon);
 	}
 
+	/** Retira un arma de la definición de la unidad. */
 	public void removeWeapon(Weapon weapon) {
 		weapons.remove(weapon);
 	}
@@ -160,6 +164,7 @@ public class UnitDefinition {
 		this.movementPoints = movementPoints;
 	}
 
+	/** Indica si las unidades de este tipo consumen combustible. */
 	public boolean isUsesFuel() {
 		return usesFuel;
 	}
@@ -192,6 +197,7 @@ public class UnitDefinition {
 		this.fuelPerMovementPoint = fuelPerMovementPoint;
 	}
 
+	/** Indica si las unidades de este tipo pueden capturar propiedades. */
 	public boolean isCaptureCapable() {
 		return captureCapable;
 	}

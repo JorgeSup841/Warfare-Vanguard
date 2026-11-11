@@ -20,6 +20,7 @@ import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+/** Representa una unidad en partida y sus recursos y acciones de turno. */
 @Entity
 @Table(name = "game_unit", uniqueConstraints = { @UniqueConstraint(name = "uk_unit_tile", columnNames = "tile_id") })
 public class Unit {
@@ -64,6 +65,7 @@ public class Unit {
 	protected Unit() {
 	}
 
+	/** Construye una unidad con su definición, dueño y casilla inicial. */
 	public Unit(UnitDefinition definition, Player owner, Tile tile) {
 		this.definition = definition;
 		this.owner = owner;
@@ -83,46 +85,56 @@ public class Unit {
 		this.capturedThisTurn = false;
 	}
 
+	/** Mueve la unidad a una casilla y registra el combustible consumido. */
 	public void moveTo(Tile destination, int fuelCost) {
 		consumeFuel(fuelCost);
 		this.tile = destination;
 		this.movedThisTurn = true;
 	}
 
+	/** Descuenta del combustible actual la cantidad indicada. */
 	public void consumeFuel(int amount) {
 		this.currentFuel -= amount;
 	}
 
+	/** Recupera combustible sin superar la capacidad máxima de la unidad. */
 	public void refuel(int amount) {
 		this.currentFuel = Math.min(definition.getMaxFuel(), currentFuel + amount);
 	}
 
+	/** Descuenta la munición utilizada de un arma de la unidad. */
 	public void consumeAmmunition(String weaponCode, int amount) {
 		ammunition.put(weaponCode, ammunition.getOrDefault(weaponCode, 0) - amount);
 	}
 
+	/** Aplica daño a la unidad sin permitir que su salud sea negativa. */
 	public void receiveDamage(int damage) {
 		this.currentHealth = Math.max(0, currentHealth - damage);
 	}
 
+	/** Recupera salud sin superar la salud máxima de la unidad. */
 	public void repair(int amount) {
 		this.currentHealth = Math.min(definition.getMaxHealth(), currentHealth + amount);
 	}
 
+	/** Registra que la unidad ya realizó un ataque durante el turno. */
 	public void markAttacked() {
 		this.attackedThisTurn = true;
 	}
 
+	/** Registra que la unidad ya realizó una acción de captura durante el turno. */
 	public void markCaptured() {
 		this.capturedThisTurn = true;
 	}
 
+	/** Restablece las acciones realizadas por la unidad para el nuevo turno. */
 	public void resetTurnActions() {
 		this.movedThisTurn = false;
 		this.attackedThisTurn = false;
 		this.capturedThisTurn = false;
 	}
 
+	/** Indica si la salud actual de la unidad llegó a cero. */
 	public boolean isDestroyed() {
 		return currentHealth <= 0;
 	}

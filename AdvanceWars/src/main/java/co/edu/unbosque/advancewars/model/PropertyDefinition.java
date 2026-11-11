@@ -20,13 +20,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 
+/** Define las características económicas y de producción de un tipo de propiedad. */
 @Entity
 @Table(name = "property_definition")
 public class PropertyDefinition {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	private Long id; // skipcq: JAVA-E1065
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "property_type", nullable = false, unique = true, length = 30)
@@ -53,6 +54,7 @@ public class PropertyDefinition {
 	protected PropertyDefinition() {
 	}
 
+	/** Construye la definición de una propiedad con sus valores y categorías de producción. */
 	public PropertyDefinition(PropertyType type, String name, int income, int defenseBonus, int captureThreshold,
 			Set<UnitCategory> productionCategories) {
 		this.type = type;
@@ -63,14 +65,17 @@ public class PropertyDefinition {
 		setProductionCategories(productionCategories);
 	}
 
+	/** Habilita una categoría de unidades para producirse en esta propiedad. */
 	public void allowProduction(UnitCategory category) {
 		productionCategories.add(category);
 	}
 
+	/** Deshabilita una categoría de unidades para producirse en esta propiedad. */
 	public void disallowProduction(UnitCategory category) {
 		productionCategories.remove(category);
 	}
 
+	/** Actualiza los valores económicos y defensivos de la definición. */
 	public void updateValues(int income, int defenseBonus, int captureThreshold) {
 		this.income = income;
 		this.defenseBonus = defenseBonus;

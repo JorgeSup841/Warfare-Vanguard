@@ -19,13 +19,14 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 
+/** Representa el mapa de una partida y sus casillas. */
 @Entity
 @Table(name = "game_map")
 public class GameMap {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	private Long id; // skipcq: JAVA-E1065
 
 	@Column(nullable = false)
 	private int width;
@@ -44,6 +45,7 @@ public class GameMap {
 		this.tileIndex = new HashMap<>();
 	}
 
+	/** Construye un mapa con las dimensiones indicadas. */
 	public GameMap(int width, int height) {
 		this.width = width;
 		this.height = height;
@@ -51,6 +53,7 @@ public class GameMap {
 		this.tileIndex = new HashMap<>();
 	}
 
+	/** Añade una casilla al mapa y actualiza su índice de posiciones. */
 	public void addTile(Tile tile) {
 		if (!tiles.contains(tile)) {
 			tile.assignGameMap(this);
@@ -59,6 +62,7 @@ public class GameMap {
 		}
 	}
 
+	/** Retira una casilla del mapa y desvincula la relación con este mapa. */
 	public void removeTile(Tile tile) {
 		if (tiles.remove(tile)) {
 			tile.assignGameMap(null);
@@ -66,6 +70,7 @@ public class GameMap {
 		}
 	}
 
+	/** Busca la casilla ubicada en las coordenadas indicadas. */
 	public Optional<Tile> findTileAt(int x, int y) {
 		if (!isInsideMap(x, y)) {
 			return Optional.empty();
@@ -74,6 +79,7 @@ public class GameMap {
 		return Optional.ofNullable(getTileIndex().get(new Position(x, y)));
 	}
 
+	/** Obtiene las casillas ortogonalmente adyacentes a una posición. */
 	public List<Tile> findNeighborTiles(Position position) {
 		if (position == null || !isInsideMap(position)) {
 			return Collections.emptyList();
@@ -91,18 +97,22 @@ public class GameMap {
 		return Collections.unmodifiableList(neighbors);
 	}
 
+	/** Indica si la posición o las coordenadas pertenecen a los límites del mapa. */
 	public boolean isInsideMap(Position position) {
 		return position != null && isInsideMap(position.getX(), position.getY());
 	}
 
+	/** Indica si las coordenadas pertenecen a los límites del mapa. */
 	public boolean isInsideMap(int x, int y) {
 		return x >= 0 && x < width && y >= 0 && y < height;
 	}
 
+	/** Indica si el mapa contiene todas las casillas esperadas. */
 	public boolean isComplete() {
 		return tiles.size() == (long) width * height;
 	}
 
+	/** Calcula la cantidad de casillas que debe contener el mapa. */
 	public long getExpectedTileCount() {
 		return (long) width * height;
 	}
@@ -158,6 +168,7 @@ public class GameMap {
 		}
 	}
 
+	/** Devuelve la cantidad actual de casillas del mapa. */
 	public int getTileCount() {
 		return tiles.size();
 	}

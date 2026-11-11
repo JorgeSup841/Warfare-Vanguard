@@ -12,13 +12,14 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+/** Representa un comandante y sus habilidades pasivas y de poder. */
 @Entity
 @Table(name = "commander")
 public class Commander {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	private Long id; // skipcq: JAVA-E1065
 
 	@Column(nullable = false, unique = true, length = 30)
 	private String code;
@@ -57,6 +58,7 @@ public class Commander {
 	protected Commander() {
 	}
 
+	/** Construye un comandante con su facción, habilidades y coste de poder. */
 	public Commander(String code, String name, String description, Faction faction, String passiveAbilityName,
 			String passiveAbilityDescription, String passiveEffectCode, String powerName, String powerDescription,
 			String powerEffectCode, int powerCost) {
