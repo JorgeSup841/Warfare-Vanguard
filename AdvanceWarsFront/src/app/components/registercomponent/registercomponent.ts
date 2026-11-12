@@ -19,6 +19,6 @@ export class Registercomponent {
       return;
     }
     this.error = '';
-    // aquí sigue tu registro
+
   }
 }

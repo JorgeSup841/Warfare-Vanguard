@@ -5,11 +5,16 @@ import { App } from './app';
 import { Registercomponent } from './components/registercomponent/registercomponent';
 import { Navbarcomponent } from './components/navbarcomponent/navbarcomponent';
 import { Footercomponent } from './components/footercomponent/footercomponent';
+import { Iniciosesioncomponent } from './components/iniciosesioncomponent/iniciosesioncomponent';
 
 @NgModule({
-  declarations: [App, Registercomponent, Navbarcomponent, Footercomponent],
+  declarations: [App, Registercomponent, Navbarcomponent, Footercomponent, Iniciosesioncomponent],
   imports: [BrowserModule, AppRoutingModule],
   providers: [provideBrowserGlobalErrorListeners()],
   bootstrap: [App],
 })
+/**
+ * Módulo principal de la aplicación.
+ */
+// deepsource-ignore JS-0327
 export class AppModule {}
