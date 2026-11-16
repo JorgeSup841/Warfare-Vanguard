@@ -9,5 +9,5 @@ import { Component } from '@angular/core';
 /**
  * Componente para el inicio de sesion de los usuarios en el aplicativo
  */
-// deepsource-ignore JS-0327
+// skipcq: JS-0327
 export class Iniciosesioncomponent {}

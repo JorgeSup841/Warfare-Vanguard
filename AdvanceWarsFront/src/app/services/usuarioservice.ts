@@ -15,6 +15,11 @@ export class usuarioservice {
 
   private http = inject(HttpClient);
 
+  // Nombres con los que se guardan los datos de la sesión en el navegador.
+  private claveToken = 'jwtToken';
+  private claveRol = 'userRole';
+  private claveUsuario = 'username';
+
 
 
   /**
@@ -43,9 +48,9 @@ export class usuarioservice {
    * @param response respuesta del login
    */
   saveSession(response: AuthResponse): void {
-    localStorage.setItem('jwtToken', response.token);
-    localStorage.setItem('userRole', response.role);
-    localStorage.setItem('username', response.username);
+    localStorage.setItem(this.claveToken, response.token);
+    localStorage.setItem(this.claveRol, response.role);
+    localStorage.setItem(this.claveUsuario, response.username);
   }
 
   /**
@@ -53,7 +58,7 @@ export class usuarioservice {
    * @returns el token, o null si no hay sesión
    */
   getToken(): string | null {
-    return localStorage.getItem('jwtToken');
+    return localStorage.getItem(this.claveToken);
   }
 
   /**
@@ -61,7 +66,7 @@ export class usuarioservice {
    * @returns ADMIN o USER, o null si no hay sesión
    */
   getRole(): string | null {
-    return localStorage.getItem('userRole');
+    return localStorage.getItem(this.claveRol);
   }
 
   /**
@@ -76,7 +81,9 @@ export class usuarioservice {
    * Cierra la sesión borrando los datos guardados en el navegador.
    */
   logout(): void {
-    localStorage.clear();
+    localStorage.removeItem(this.claveToken);
+    localStorage.removeItem(this.claveRol);
+    localStorage.removeItem(this.claveUsuario);
   }
 
   /**
@@ -123,9 +130,10 @@ export class usuarioservice {
   /**
    * Elimina un usuario.
    * @param id id del usuario a eliminar
+   * @returns mensaje de respuesta del backend
    */
-  deleteUsuario(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/user/deletebyid/${id}`, { headers: this.getHeaders() });
+  deleteUsuario(id: number): Observable<string> {
+    return this.http.delete(`${this.baseUrl}/user/deletebyid/${id}`, { headers: this.getHeaders(), responseType: 'text' });
   }
 
 

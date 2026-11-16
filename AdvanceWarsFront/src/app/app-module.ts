@@ -16,5 +16,5 @@ import { Iniciosesioncomponent } from './components/iniciosesioncomponent/inicio
 /**
  * Módulo principal de la aplicación.
  */
-// deepsource-ignore JS-0327
+// skipcq: JS-0327
 export class AppModule {}
