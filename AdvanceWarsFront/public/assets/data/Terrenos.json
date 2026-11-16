@@ -1,0 +1,77 @@
+[
+  {
+    "terrainType": "PLAIN",
+    "name": "Llanura",
+    "defenseStars": 1,
+    "color": "#9bd36a",
+    "spriteUrl": "",
+    "movementCost": {
+      "FOOT": 1,
+      "MECH": 1,
+      "TREAD": 1,
+      "WHEEL": 2,
+      "AIR": 1,
+      "SHIP": 0
+    }
+  },
+  {
+    "terrainType": "FOREST",
+    "name": "Bosque",
+    "defenseStars": 2,
+    "color": "#3f8f3a",
+    "spriteUrl": "",
+    "movementCost": {
+      "FOOT": 1,
+      "MECH": 1,
+      "TREAD": 2,
+      "WHEEL": 3,
+      "AIR": 1,
+      "SHIP": 0
+    }
+  },
+  {
+    "terrainType": "MOUNTAIN",
+    "name": "Montaña",
+    "defenseStars": 4,
+    "color": "#a0785a",
+    "spriteUrl": "",
+    "movementCost": {
+      "FOOT": 2,
+      "MECH": 1,
+      "TREAD": 0,
+      "WHEEL": 0,
+      "AIR": 1,
+      "SHIP": 0
+    }
+  },
+  {
+    "terrainType": "WATER",
+    "name": "Agua",
+    "defenseStars": 0,
+    "color": "#3d8fd6",
+    "spriteUrl": "",
+    "movementCost": {
+      "FOOT": 0,
+      "MECH": 0,
+      "TREAD": 0,
+      "WHEEL": 0,
+      "AIR": 1,
+      "SHIP": 1
+    }
+  },
+  {
+    "terrainType": "ROAD",
+    "name": "Carretera",
+    "defenseStars": 0,
+    "color": "#c9c2a8",
+    "spriteUrl": "",
+    "movementCost": {
+      "FOOT": 1,
+      "MECH": 1,
+      "TREAD": 1,
+      "WHEEL": 1,
+      "AIR": 1,
+      "SHIP": 0
+    }
+  }
+]
