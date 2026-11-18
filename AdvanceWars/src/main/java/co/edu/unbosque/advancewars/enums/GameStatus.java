@@ -1,6 +1,8 @@
 package co.edu.unbosque.advancewars.enums;
 
-/** Define los estados posibles de una partida. */
+/**
+ * Representa el estado global de una partida de Advance Wars.
+ */
 public enum GameStatus {
     SETUP,
     IN_PROGRESS,

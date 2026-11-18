@@ -1,6 +1,9 @@
 package co.edu.unbosque.advancewars.enums;
 
-/** Define los tipos concretos de unidades disponibles en el juego. */
+
+/**
+ * Representa los tipos específicos de unidades militares disponibles en el juego.
+ */
 public enum UnitType {
     INFANTRY,
     MECH,

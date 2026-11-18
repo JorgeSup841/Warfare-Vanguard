@@ -1,6 +1,10 @@
 package co.edu.unbosque.advancewars.enums;
 
-/** Define los tipos de terreno que puede contener una casilla. */
+
+/**
+ * Representa los diferentes tipos de terreno que conforman el mapa del juego,
+ * afectando la defensa y el movimiento de las unidades.
+ */
 public enum TerrainType {
     PLAIN,
     FOREST,
