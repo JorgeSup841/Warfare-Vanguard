@@ -1,69 +1,71 @@
 package co.edu.unbosque.advancewars.model;
 
+
+
 import java.io.Serializable;
 import java.util.Objects;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
+/** Representa una coordenada bidimensional dentro del mapa. */
 @Embeddable
 public class Position implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    @Column(name = "position_x", nullable = false)
-    private int x;
+	@Column(name = "position_x", nullable = false)
+	private int x;
 
-    @Column(name = "position_y", nullable = false)
-    private int y;
+	@Column(name = "position_y", nullable = false)
+	private int y;
 
-    protected Position() {
-    }
+	/** Constructor requerido por JPA para materializar la posición embebida. */
+	protected Position() {
+	}
 
-    public Position(int x, int y) {
-        this.x = x;
-        this.y = y;
-    }
+	/** Construye una posición a partir de sus coordenadas horizontal y vertical. */
+	public Position(int x, int y) {
+		this.x = x;
+		this.y = y;
+	}
 
-    public int getX() {
-        return x;
-    }
+	public int getX() {
+		return x;
+	}
 
-    public void setX(int x) {
-        this.x = x;
-    }
+	public void setX(int x) {
+		this.x = x;
+	}
 
-    public int getY() {
-        return y;
-    }
+	public int getY() {
+		return y;
+	}
 
-    public void setY(int y) {
-        this.y = y;
-    }
+	public void setY(int y) {
+		this.y = y;
+	}
 
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
+	@Override
+	public boolean equals(Object object) {
+		if (this == object) {
+			return true;
+		}
 
-        if (!(object instanceof Position other)) {
-            return false;
-        }
+		if (!(object instanceof Position other)) {
+			return false;
+		}
 
-        return x == other.x && y == other.y;
-    }
+		return x == other.x && y == other.y;
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(x, y);
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hash(x, y);
+	}
 
-    @Override
-    public String toString() {
-        return "Position{" +
-            "x=" + x +
-            ", y=" + y +
-            '}';
-    }
+	@Override
+	public String toString() {
+		return "Position{" + "x=" + x + ", y=" + y + '}';
+	}
 }

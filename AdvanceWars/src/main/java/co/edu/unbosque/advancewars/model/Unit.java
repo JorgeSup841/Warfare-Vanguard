@@ -1,107 +1,92 @@
+
 package co.edu.unbosque.advancewars.model;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapKeyColumn;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.*;
 
 @Entity
-@Table(
-    name = "game_unit",
-    uniqueConstraints = {
-        @UniqueConstraint(
-            name = "uk_unit_tile",
-            columnNames = "tile_id"
-        )
-    }
-)
+@Table(name = "game_unit")
 public class Unit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    // Tipo de unidad.
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "unit_definition_id", nullable = false)
     private UnitDefinition definition;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    // Jugador dueño de la unidad.
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     private Player owner;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    // Casilla donde esta la unidad.
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tile_id", nullable = false, unique = true)
     private Tile tile;
 
-    @Column(nullable = false)
+    // Vida y combustible actuales.
     private int currentHealth;
-
-    @Column(nullable = false)
     private int currentFuel;
 
+    // Municion disponible para cada arma.
     @ElementCollection
     @CollectionTable(
         name = "unit_ammunition",
         joinColumns = @JoinColumn(name = "unit_id")
     )
     @MapKeyColumn(name = "weapon_code")
-    @Column(name = "remaining_ammunition", nullable = false)
+    @Column(name = "remaining_ammunition")
     private Map<String, Integer> ammunition = new HashMap<>();
 
-    @Column(nullable = false)
+    // Acciones realizadas durante el turno.
     private boolean movedThisTurn;
-
-    @Column(nullable = false)
     private boolean attackedThisTurn;
-
-    @Column(nullable = false)
     private boolean capturedThisTurn;
 
-    protected Unit() {
+    // Constructor necesario para JPA.
+    public Unit() {
     }
 
+    // Crea una unidad con sus valores iniciales.
     public Unit(UnitDefinition definition, Player owner, Tile tile) {
         this.definition = definition;
         this.owner = owner;
         this.tile = tile;
-        this.currentHealth = definition.getMaxHealth();
-        this.currentFuel = definition.isUsesFuel() ? definition.getMaxFuel() : 0;
-        this.ammunition = new HashMap<>();
 
+        this.currentHealth = definition.getMaxHealth();
+        this.currentFuel = definition.isUsesFuel()
+                ? definition.getMaxFuel() : 0;
+
+        // Carga la municion inicial de cada arma.
         for (Weapon weapon : definition.getWeapons()) {
             if (weapon.isUsesAmmunition()) {
-                ammunition.put(weapon.getCode(), weapon.getAmmunitionCapacity());
+                ammunition.put(
+                    weapon.getCode(),
+                    weapon.getAmmunitionCapacity()
+                );
             }
         }
-
-        this.movedThisTurn = false;
-        this.attackedThisTurn = false;
-        this.capturedThisTurn = false;
     }
 
+    // Mueve la unidad y consume combustible.
     public void moveTo(Tile destination, int fuelCost) {
         consumeFuel(fuelCost);
         this.tile = destination;
         this.movedThisTurn = true;
     }
 
+    // Descuenta combustible.
     public void consumeFuel(int amount) {
         this.currentFuel -= amount;
     }
 
+    // Recupera combustible sin superar el maximo.
     public void refuel(int amount) {
         this.currentFuel = Math.min(
             definition.getMaxFuel(),
@@ -109,14 +94,20 @@ public class Unit {
         );
     }
 
+    // Descuenta municion de un arma.
     public void consumeAmmunition(String weaponCode, int amount) {
-        ammunition.put(weaponCode, ammunition.getOrDefault(weaponCode, 0) - amount);
+        ammunition.put(
+            weaponCode,
+            ammunition.getOrDefault(weaponCode, 0) - amount
+        );
     }
 
+    // Reduce la vida sin bajar de cero.
     public void receiveDamage(int damage) {
         this.currentHealth = Math.max(0, currentHealth - damage);
     }
 
+    // Recupera vida sin superar el maximo.
     public void repair(int amount) {
         this.currentHealth = Math.min(
             definition.getMaxHealth(),
@@ -124,24 +115,34 @@ public class Unit {
         );
     }
 
+    // Marca que la unidad ya ataco.
     public void markAttacked() {
         this.attackedThisTurn = true;
     }
 
+    // Marca que la unidad ya capturo.
     public void markCaptured() {
         this.capturedThisTurn = true;
     }
 
+    // Reinicia las acciones para el siguiente turno.
     public void resetTurnActions() {
-        this.movedThisTurn = false;
-        this.attackedThisTurn = false;
-        this.capturedThisTurn = false;
+        movedThisTurn = false;
+        attackedThisTurn = false;
+        capturedThisTurn = false;
     }
 
+    // Comprueba si la unidad fue destruida.
     public boolean isDestroyed() {
         return currentHealth <= 0;
     }
 
+    // Devuelve la posicion actual.
+    public Position getPosition() {
+        return tile == null ? null : tile.getPosition();
+    }
+
+    // Getters y setters.
     public Long getId() {
         return id;
     }
@@ -170,10 +171,6 @@ public class Unit {
         this.tile = tile;
     }
 
-    public Position getPosition() {
-        return tile == null ? null : tile.getPosition();
-    }
-
     public int getCurrentHealth() {
         return currentHealth;
     }
@@ -196,8 +193,8 @@ public class Unit {
 
     public void setAmmunition(Map<String, Integer> ammunition) {
         this.ammunition = ammunition == null
-            ? new HashMap<>()
-            : new HashMap<>(ammunition);
+                ? new HashMap<>()
+                : new HashMap<>(ammunition);
     }
 
     public boolean isMovedThisTurn() {
@@ -222,35 +219,5 @@ public class Unit {
 
     public void setCapturedThisTurn(boolean capturedThisTurn) {
         this.capturedThisTurn = capturedThisTurn;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
-
-        if (!(object instanceof Unit other)) {
-            return false;
-        }
-
-        return id != null && id.equals(other.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return Unit.class.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return "Unit{" +
-            "id=" + id +
-            ", currentHealth=" + currentHealth +
-            ", currentFuel=" + currentFuel +
-            ", movedThisTurn=" + movedThisTurn +
-            ", attackedThisTurn=" + attackedThisTurn +
-            ", capturedThisTurn=" + capturedThisTurn +
-            '}';
     }
 }

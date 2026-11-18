@@ -1,22 +1,10 @@
+
 package co.edu.unbosque.advancewars.model;
 
-import java.util.Collections;
+import co.edu.unbosque.advancewars.enums.UnitType;
 import java.util.HashMap;
 import java.util.Map;
-
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.MapKeyColumn;
-import jakarta.persistence.MapKeyEnumerated;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "weapon")
@@ -26,24 +14,21 @@ public class Weapon {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 40)
+    // Codigo unico y nombre del arma.
+    @Column(unique = true, nullable = false)
     private String code;
 
-    @Column(nullable = false, length = 80)
     private String name;
 
-    @Column(nullable = false)
+    // Alcance minimo y maximo.
     private int minRange;
-
-    @Column(nullable = false)
     private int maxRange;
 
-    @Column(nullable = false)
+    // Municion del arma.
     private boolean usesAmmunition;
-
-    @Column(nullable = false)
     private int ammunitionCapacity;
 
+    // Daño que causa a cada tipo de unidad.
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
         name = "weapon_damage",
@@ -51,20 +36,18 @@ public class Weapon {
     )
     @MapKeyColumn(name = "target_unit_type")
     @MapKeyEnumerated(EnumType.STRING)
-    @Column(name = "base_damage", nullable = false)
+    @Column(name = "base_damage")
     private Map<UnitType, Integer> damageByTarget = new HashMap<>();
 
-    protected Weapon() {
+    // Constructor necesario para JPA.
+    public Weapon() {
     }
 
-    public Weapon(
-        String code,
-        String name,
-        int minRange,
-        int maxRange,
-        boolean usesAmmunition,
-        int ammunitionCapacity
-    ) {
+    // Crea un arma con sus caracteristicas.
+    public Weapon(String code, String name, int minRange,
+                  int maxRange, boolean usesAmmunition,
+                  int ammunitionCapacity) {
+
         this.code = code;
         this.name = name;
         this.minRange = minRange;
@@ -73,10 +56,12 @@ public class Weapon {
         this.ammunitionCapacity = ammunitionCapacity;
     }
 
+    // Establece el daño contra un tipo de unidad.
     public void defineDamage(UnitType targetType, int damage) {
         damageByTarget.put(targetType, damage);
     }
 
+    // Obtiene el daño contra un tipo de unidad.
     public int getDamageAgainst(UnitType targetType) {
         return damageByTarget.getOrDefault(targetType, 0);
     }
@@ -134,44 +119,12 @@ public class Weapon {
     }
 
     public Map<UnitType, Integer> getDamageByTarget() {
-        return Collections.unmodifiableMap(damageByTarget);
+        return new HashMap<>(damageByTarget);
     }
 
     public void setDamageByTarget(Map<UnitType, Integer> damageByTarget) {
         this.damageByTarget = damageByTarget == null
-            ? new HashMap<>()
-            : new HashMap<>(damageByTarget);
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
-
-        if (!(object instanceof Weapon other)) {
-            return false;
-        }
-
-        return id != null && id.equals(other.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return Weapon.class.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return "Weapon{" +
-            "id=" + id +
-            ", code='" + code + '\'' +
-            ", name='" + name + '\'' +
-            ", minRange=" + minRange +
-            ", maxRange=" + maxRange +
-            ", usesAmmunition=" + usesAmmunition +
-            ", ammunitionCapacity=" + ammunitionCapacity +
-            ", damageByTarget=" + damageByTarget +
-            '}';
+                ? new HashMap<>()
+                : new HashMap<>(damageByTarget);
     }
 }

@@ -1,5 +1,6 @@
-package co.edu.unbosque.advancewars.model;
+package co.edu.unbosque.advancewars.enums;
 
+/** Define los eventos que pueden registrarse en el historial de una partida. */
 public enum GameLogType {
     GAME_CREATED,
     GAME_STARTED,

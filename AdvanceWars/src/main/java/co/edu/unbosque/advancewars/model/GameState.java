@@ -1,3 +1,4 @@
+
 package co.edu.unbosque.advancewars.model;
 
 import java.time.LocalDateTime;
@@ -5,248 +6,239 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
-import jakarta.persistence.Version;
+import co.edu.unbosque.advancewars.enums.GameStatus;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "game_state")
 public class GameState {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private GameStatus status;
+	@Enumerated(EnumType.STRING)
+	private GameStatus status = GameStatus.SETUP;
 
-    @Column(nullable = false)
-    private int currentRound;
+	private int currentRound;
+	private int currentPlayerOrder;
+	private Integer winnerPlayerOrder;
+	private Long seed;
 
-    @Column(nullable = false)
-    private int currentPlayerOrder;
+	// Configuracion de la partida.
+	@Embedded
+	private GameConfiguration configuration;
 
-    @Column
-    private Integer winnerPlayerOrder;
+	// Usuario que creo la partida.
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "created_by")
+	private User createdBy;
 
-    private Long seed;
+	// Fechas de la partida.
+	private LocalDateTime createdAt;
+	private LocalDateTime startedAt;
+	private LocalDateTime finishedAt;
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+	// Mapa de la partida.
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn(name = "game_map_id", unique = true)
+	private GameMap gameMap;
 
-    private LocalDateTime startedAt;
+	// Jugadores de la partida.
+	@OneToMany(mappedBy = "gameState", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Player> players = new ArrayList<>();
 
-    private LocalDateTime finishedAt;
+	// Evita sobrescribir cambios simultaneos.
+	@Version
+	private Long version;
 
-    @OneToMany(
-        mappedBy = "gameState",
-        cascade = CascadeType.ALL,
-        orphanRemoval = true
-    )
-    private List<Player> players = new ArrayList<>();
+	// Constructor necesario para JPA.
+	public GameState() {
+		this.configuration = new GameConfiguration(2, 20, 15);
+	}
 
-    @Version
-    private Long version;
+	// Crea una partida con una semilla.
+	public GameState(Long seed) {
+		this();
+		this.seed = seed;
+	}
 
-    public GameState() {
-        this.status = GameStatus.SETUP;
-        this.currentRound = 0;
-        this.currentPlayerOrder = 0;
-    }
+	// Guarda la fecha al crear la partida.
+	@PrePersist
+	private void initialize() {
+		if (createdAt == null) {
+			createdAt = LocalDateTime.now();
+		}
+	}
 
-    public GameState(Long seed) {
-        this();
-        this.seed = seed;
-    }
+	// Agrega un jugador y lo relaciona con la partida.
+	public void addPlayer(Player player) {
+		if (player != null && !players.contains(player)) {
+			players.add(player);
+			player.assignGameState(this);
+		}
+	}
 
-    @PrePersist
-    private void initialize() {
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
+	// Elimina un jugador de la partida.
+	public void removePlayer(Player player) {
+		if (players.remove(player)) {
+			player.removeGameState();
+		}
+	}
 
-        if (status == null) {
-            status = GameStatus.SETUP;
-        }
-    }
+	// Inicia la partida.
+	public void startGame(int firstPlayerOrder) {
+		status = GameStatus.IN_PROGRESS;
+		currentRound = 1;
+		currentPlayerOrder = firstPlayerOrder;
+		startedAt = LocalDateTime.now();
+	}
 
-    public void addPlayer(Player player) {
-        if (!players.contains(player)) {
-            players.add(player);
-            player.assignGameState(this);
-        }
-    }
+	// Cambia el turno al jugador indicado.
+	public void changeCurrentPlayer(int playerOrder) {
+		currentPlayerOrder = playerOrder;
+	}
 
-    public void removePlayer(Player player) {
-        if (players.remove(player)) {
-            player.removeGameState();
-        }
-    }
+	// Avanza a la siguiente ronda.
+	public void incrementRound() {
+		currentRound++;
+	}
 
-    public void startGame(int firstPlayerOrder) {
-        status = GameStatus.IN_PROGRESS;
-        currentRound = 1;
-        currentPlayerOrder = firstPlayerOrder;
-        startedAt = LocalDateTime.now();
-    }
+	// Finaliza la partida y declara un ganador.
+	public void finishGame(int winnerPlayerOrder) {
+		Player winner = findPlayerByOrder(winnerPlayerOrder);
 
-    public void changeCurrentPlayer(int playerOrder) {
-        currentPlayerOrder = playerOrder;
-    }
+		if (winner != null) {
+			winner.declareWinner();
+		}
 
-    public void incrementRound() {
-        currentRound++;
-    }
+		this.winnerPlayerOrder = winnerPlayerOrder;
+		status = GameStatus.FINISHED;
+		finishedAt = LocalDateTime.now();
+	}
 
-    public void finishGame(int winnerPlayerOrder) {
-        Player winner = findPlayerByOrder(winnerPlayerOrder);
+	// Busca un jugador por su orden de turno.
+	public Player findPlayerByOrder(int order) {
+		for (Player player : players) {
+			if (player.getTurnOrder() == order) {
+				return player;
+			}
+		}
+		return null;
+	}
 
-        if (winner != null) {
-            winner.declareWinner();
-        }
+	public Long getId() {
+		return id;
+	}
 
-        this.winnerPlayerOrder = winnerPlayerOrder;
-        this.status = GameStatus.FINISHED;
-        this.finishedAt = LocalDateTime.now();
-    }
+	public GameStatus getStatus() {
+		return status;
+	}
 
-    public Player findPlayerByOrder(int playerOrder) {
-        return players.stream()
-            .filter(player -> player.getTurnOrder() == playerOrder)
-            .findFirst()
-            .orElse(null);
-    }
+	public void setStatus(GameStatus status) {
+		this.status = status;
+	}
 
-    public Long getId() {
-        return id;
-    }
+	public int getCurrentRound() {
+		return currentRound;
+	}
 
-    public GameStatus getStatus() {
-        return status;
-    }
+	public void setCurrentRound(int currentRound) {
+		this.currentRound = currentRound;
+	}
 
-    public void setStatus(GameStatus status) {
-        this.status = status;
-    }
+	public int getCurrentPlayerOrder() {
+		return currentPlayerOrder;
+	}
 
-    public int getCurrentRound() {
-        return currentRound;
-    }
+	public void setCurrentPlayerOrder(int currentPlayerOrder) {
+		this.currentPlayerOrder = currentPlayerOrder;
+	}
 
-    public void setCurrentRound(int currentRound) {
-        this.currentRound = currentRound;
-    }
+	public Integer getWinnerPlayerOrder() {
+		return winnerPlayerOrder;
+	}
 
-    public int getCurrentPlayerOrder() {
-        return currentPlayerOrder;
-    }
+	public void setWinnerPlayerOrder(Integer winnerPlayerOrder) {
+		this.winnerPlayerOrder = winnerPlayerOrder;
+	}
 
-    public void setCurrentPlayerOrder(int currentPlayerOrder) {
-        this.currentPlayerOrder = currentPlayerOrder;
-    }
+	public Long getSeed() {
+		return seed;
+	}
 
-    public Integer getWinnerPlayerOrder() {
-        return winnerPlayerOrder;
-    }
+	public void setSeed(Long seed) {
+		this.seed = seed;
+	}
 
-    public void setWinnerPlayerOrder(Integer winnerPlayerOrder) {
-        this.winnerPlayerOrder = winnerPlayerOrder;
-    }
+	public GameConfiguration getConfiguration() {
+		return configuration;
+	}
 
-    public Long getSeed() {
-        return seed;
-    }
+	public void setConfiguration(GameConfiguration configuration) {
+		this.configuration = configuration;
+	}
 
-    public void setSeed(Long seed) {
-        this.seed = seed;
-    }
+	public User getCreatedBy() {
+		return createdBy;
+	}
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+	public void setCreatedBy(User createdBy) {
+		this.createdBy = createdBy;
+	}
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
 
-    public LocalDateTime getStartedAt() {
-        return startedAt;
-    }
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
 
-    public void setStartedAt(LocalDateTime startedAt) {
-        this.startedAt = startedAt;
-    }
+	public LocalDateTime getStartedAt() {
+		return startedAt;
+	}
 
-    public LocalDateTime getFinishedAt() {
-        return finishedAt;
-    }
+	public void setStartedAt(LocalDateTime startedAt) {
+		this.startedAt = startedAt;
+	}
 
-    public void setFinishedAt(LocalDateTime finishedAt) {
-        this.finishedAt = finishedAt;
-    }
+	public LocalDateTime getFinishedAt() {
+		return finishedAt;
+	}
 
-    public List<Player> getPlayers() {
-        return Collections.unmodifiableList(players);
-    }
+	public void setFinishedAt(LocalDateTime finishedAt) {
+		this.finishedAt = finishedAt;
+	}
 
-    public void setPlayers(List<Player> players) {
-        for (Player existing : this.players) {
-            existing.removeGameState();
-        }
+	public GameMap getGameMap() {
+		return gameMap;
+	}
 
-        this.players.clear();
+	public void setGameMap(GameMap gameMap) {
+		this.gameMap = gameMap;
+	}
 
-        if (players != null) {
-            for (Player player : players) {
-                addPlayer(player);
-            }
-        }
-    }
+	public List<Player> getPlayers() {
+		return Collections.unmodifiableList(players);
+	}
 
-    public Long getVersion() {
-        return version;
-    }
+	// Reemplaza los jugadores manteniendo sus relaciones.
+	public void setPlayers(List<Player> newPlayers) {
+		List<Player> copy = newPlayers == null ? new ArrayList<>() : new ArrayList<>(newPlayers);
 
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
+		for (Player player : players) {
+			player.removeGameState();
+		}
 
-        if (!(object instanceof GameState other)) {
-            return false;
-        }
+		players.clear();
 
-        return id != null && id.equals(other.getId());
-    }
+		for (Player player : copy) {
+			addPlayer(player);
+		}
+	}
 
-    @Override
-    public int hashCode() {
-        return GameState.class.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return "GameState{" +
-            "id=" + id +
-            ", status=" + status +
-            ", currentRound=" + currentRound +
-            ", currentPlayerOrder=" + currentPlayerOrder +
-            ", winnerPlayerOrder=" + winnerPlayerOrder +
-            ", seed=" + seed +
-            ", createdAt=" + createdAt +
-            ", startedAt=" + startedAt +
-            ", finishedAt=" + finishedAt +
-            '}';
-    }
+	public Long getVersion() {
+		return version;
+	}
 }
