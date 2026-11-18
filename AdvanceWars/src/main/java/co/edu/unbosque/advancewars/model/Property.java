@@ -3,6 +3,7 @@ package co.edu.unbosque.advancewars.model;
 
 import jakarta.persistence.*;
 
+/** Representa una propiedad del mapa, su dueño y su progreso de captura. */
 @Entity
 @Table(name = "game_property")
 public class Property {

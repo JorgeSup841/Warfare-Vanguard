@@ -1,6 +1,8 @@
 
 package co.edu.unbosque.advancewars.model;
 
+import co.edu.unbosque.advancewars.enums.GameStatus;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,6 +11,7 @@ import java.util.List;
 import co.edu.unbosque.advancewars.enums.GameStatus;
 import jakarta.persistence.*;
 
+/** Mantiene el estado, los turnos y los participantes de una partida. */
 @Entity
 @Table(name = "game_state")
 public class GameState {

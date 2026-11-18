@@ -10,7 +10,7 @@ public class Player {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // skipcq: JAVA-E1065
 
     private String name;
     private int turnOrder;

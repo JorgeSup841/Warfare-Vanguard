@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import jakarta.persistence.*;
 
+/** Representa un arma y el daño base que causa a cada tipo de unidad. */
 @Entity
 @Table(name = "weapon")
 public class Weapon {

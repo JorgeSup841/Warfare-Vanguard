@@ -1,0 +1,11 @@
+{
+  "width": 20,
+  "height": 15,
+  "minWaterPercent": 10,
+  "maxWaterPercent": 25,
+  "minForestPercent": 10,
+  "maxForestPercent": 20,
+  "minMountainPercent": 5,
+  "maxMountainPercent": 15,
+  "neutralCities": 6
+}
