@@ -1,6 +1,8 @@
 package co.edu.unbosque.advancewars.enums;
 
-/** Define los estados posibles de un jugador dentro de una partida. */
+/**
+ * Representa el estado actual de un jugador en la partida.
+ */
 public enum PlayerStatus {
     ACTIVE,
     ELIMINATED,

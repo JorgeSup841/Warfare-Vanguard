@@ -1,71 +1,44 @@
+
 package co.edu.unbosque.advancewars.model;
 
 import co.edu.unbosque.advancewars.enums.PlayerStatus;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.*;
 
 @Entity
-@Table(
-    name = "game_player",
-    uniqueConstraints = {
-        @UniqueConstraint(
-            name = "uk_player_game_order",
-            columnNames = {"game_state_id", "turn_order"}
-        ),
-        @UniqueConstraint(
-            name = "uk_player_game_name",
-            columnNames = {"game_state_id", "player_name"}
-        )
-    }
-)
-/** Representa a un jugador y su estado dentro de una partida. */
+@Table(name = "game_player")
 public class Player {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // skipcq: JAVA-E1065
 
-    @Column(name = "player_name", nullable = false, length = 40)
     private String name;
-
-    @Column(name = "turn_order", nullable = false)
     private int turnOrder;
-
-    @Column(nullable = false)
     private int money;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
     private PlayerStatus status;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "game_state_id", nullable = false)
+    // Partida a la que pertenece el jugador.
+    @ManyToOne
+    @JoinColumn(name = "game_state_id")
     private GameState gameState;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    // Faccion seleccionada por el jugador.
+    @ManyToOne
     @JoinColumn(name = "faction_id")
     private Faction faction;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    // Comandante seleccionado.
+    @ManyToOne
     @JoinColumn(name = "commander_id")
     private Commander commander;
 
-    /** Constructor requerido por JPA para materializar la entidad. */
-    protected Player() {
+    // Constructor vacio necesario para JPA.
+    public Player() {
     }
 
-    /** Construye un jugador con su nombre, orden de turno y dinero inicial. */
+    // Crea un jugador con sus datos iniciales.
     public Player(String name, int turnOrder, int money) {
         this.name = name;
         this.turnOrder = turnOrder;
@@ -73,53 +46,54 @@ public class Player {
         this.status = PlayerStatus.ACTIVE;
     }
 
-    /** Asocia el jugador con la partida que lo contiene. */
+    // Asocia el jugador con una partida.
     void assignGameState(GameState gameState) {
         this.gameState = gameState;
     }
 
-    /** Elimina la asociación del jugador con su partida actual. */
+    // Elimina la asociacion con la partida.
     void removeGameState() {
         this.gameState = null;
     }
 
-    /** Asigna la facción y el comandante seleccionados por el jugador. */
+    // Asigna la faccion y el comandante.
     public void assignSelection(Faction faction, Commander commander) {
         this.faction = faction;
         this.commander = commander;
     }
 
-    /** Limpia la facción y el comandante seleccionados. */
+    // Elimina la seleccion actual.
     public void clearSelection() {
         this.faction = null;
         this.commander = null;
     }
 
-    /** Cambia el estado del jugador a eliminado. */
+    // Elimina al jugador de la partida.
     public void eliminate() {
         this.status = PlayerStatus.ELIMINATED;
     }
 
-    /** Suma una cantidad de dinero al saldo del jugador. */
+    // Agrega dinero al jugador.
     public void addMoney(int amount) {
         this.money += amount;
     }
 
-    /** Resta una cantidad de dinero al saldo del jugador. */
+    // Descuenta dinero al jugador.
     public void subtractMoney(int amount) {
         this.money -= amount;
     }
 
-    /** Cambia el estado del jugador para indicar que ganó la partida. */
+    // Declara al jugador ganador.
     void declareWinner() {
         this.status = PlayerStatus.WINNER;
     }
 
-    /** Indica si el jugador continúa activo en la partida. */
+    // Comprueba si el jugador sigue activo.
     public boolean isActive() {
         return status == PlayerStatus.ACTIVE;
     }
 
+    // Getters y setters.
     public Long getId() {
         return id;
     }
@@ -178,34 +152,5 @@ public class Player {
 
     public void setCommander(Commander commander) {
         this.commander = commander;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
-
-        if (!(object instanceof Player other)) {
-            return false;
-        }
-
-        return id != null && id.equals(other.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return Player.class.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return "Player{" +
-            "id=" + id +
-            ", name='" + name + '\'' +
-            ", turnOrder=" + turnOrder +
-            ", money=" + money +
-            ", status=" + status +
-            '}';
     }
 }

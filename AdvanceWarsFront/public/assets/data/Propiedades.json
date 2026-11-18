@@ -1,0 +1,58 @@
+[
+  {
+    "id": 1,
+    "type": "CITY",
+    "name": "Ciudad",
+    "income": 1000,
+    "defenseBonus": 3,
+    "captureThreshold": 20,
+    "productionCategories": [],
+    "spriteUrl": ""
+  },
+  {
+    "id": 2,
+    "type": "FACTORY",
+    "name": "Fábrica",
+    "income": 1000,
+    "defenseBonus": 3,
+    "captureThreshold": 20,
+    "productionCategories": [
+      "LAND"
+    ],
+    "spriteUrl": ""
+  },
+  {
+    "id": 3,
+    "type": "AIRPORT",
+    "name": "Aeropuerto",
+    "income": 1000,
+    "defenseBonus": 3,
+    "captureThreshold": 20,
+    "productionCategories": [
+      "AIR"
+    ],
+    "spriteUrl": ""
+  },
+  {
+    "id": 4,
+    "type": "PORT",
+    "name": "Puerto",
+    "income": 1000,
+    "defenseBonus": 3,
+    "captureThreshold": 20,
+    "productionCategories": [
+      "NAVAL"
+    ],
+    "spriteUrl": ""
+  },
+  {
+    "id": 5,
+    "type": "HEADQUARTERS",
+    "name": "Cuartel general",
+    "income": 1000,
+    "defenseBonus": 4,
+    "captureThreshold": 20,
+    "productionCategories": [],
+    "spriteUrl": ""
+  }
+]

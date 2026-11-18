@@ -37,7 +37,7 @@ public class GameMap {
 	@OneToMany(mappedBy = "gameMap", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Tile> tiles = new ArrayList<>();
 
-	@Transient
+	@Transient // no serializar o mejor dicho no guardar
 	private Map<Position, Tile> tileIndex;
 
 	/** Constructor requerido por JPA para materializar la entidad. */
