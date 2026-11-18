@@ -52,7 +52,7 @@ public class AuthController {
      */
     @PostMapping("/verify-email")
     public ResponseEntity<Map<String, String>> verifyEmail(@Valid @RequestBody OtpVerificationRequestDTO request) {
-        if (!auth.verifyEmail(request.challengeId(), request.code())) {
+        if (!auth.verifyEmail(request.getChallengeId(), request.getCode())) {
             return ResponseEntity.badRequest().body(Map.of("message", "Código inválido o vencido"));
         }
         return ResponseEntity.ok(Map.of("message", "Correo verificado"));
@@ -63,7 +63,7 @@ public class AuthController {
      */
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyLoginOtp(@Valid @RequestBody OtpVerificationRequestDTO request) {
-        AuthResponseDTO response = auth.verifyLoginOtp(request.challengeId(), request.code());
+        AuthResponseDTO response = auth.verifyLoginOtp(request.getChallengeId(), request.getCode());
         if (response == null) {
             return ResponseEntity.badRequest().body(Map.of("message", "Código inválido o vencido"));
         }
@@ -75,7 +75,7 @@ public class AuthController {
      */
     @PostMapping("/resend-otp")
     public ResponseEntity<AuthPendingResponseDTO> resend(@Valid @RequestBody OtpResendRequestDTO request) {
-        return ResponseEntity.ok(auth.resend(request.challengeId()));
+        return ResponseEntity.ok(auth.resend(request.getChallengeId()));
     }
 
     /**
@@ -83,7 +83,7 @@ public class AuthController {
      */
     @PostMapping("/forgot-password")
     public ResponseEntity<Map<String, String>> forgot(@Valid @RequestBody PasswordResetRequestDTO request) {
-        auth.forgotPassword(request.email());
+        auth.forgotPassword(request.getEmail());
         return ResponseEntity.ok(Map.of("message", "Si el correo está registrado, recibirás instrucciones"));
     }
 

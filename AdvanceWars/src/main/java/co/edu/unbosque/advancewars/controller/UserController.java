@@ -58,7 +58,7 @@ public class UserController {
     @PatchMapping("/{id}/role")
     public ResponseEntity<UserResponseDTO> role(@PathVariable Long id,
             @Valid @RequestBody RoleUpdateRequestDTO request, Principal principal) {
-        return ResponseEntity.ok(users.setRole(id, request.role(), principal.getName()));
+        return ResponseEntity.ok(users.setRole(id, request.getRole(), principal.getName()));
     }
 
     /**
@@ -67,6 +67,6 @@ public class UserController {
     @PatchMapping("/{id}/enabled")
     public ResponseEntity<UserResponseDTO> enabled(@PathVariable Long id,
             @Valid @RequestBody EnabledUpdateRequestDTO request, Principal principal) {
-        return ResponseEntity.ok(users.setEnabled(id, request.enabled(), principal.getName()));
+        return ResponseEntity.ok(users.setEnabled(id, request.getEnabled(), principal.getName()));
     }
 }

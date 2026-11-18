@@ -58,15 +58,15 @@ public class AuthService {
      */
     @Transactional
     public AuthPendingResponseDTO register(RegisterRequestDTO request) {
-        String username = normalize(request.username());
-        String address = normalize(request.email());
+        String username = normalize(request.getUsername());
+        String address = normalize(request.getEmail());
         if (username.length() < 3 || address.length() > 254 || username.length() > 50) {
             throw new BadRequestException("Nombre o correo inválido");
         }
         if (users.existsByUsername(username) || users.existsByEmailIgnoreCase(address)) {
             throw new ConflictException("Nombre de usuario o correo no disponible");
         }
-        User user = users.save(new User(username, passwords.encode(request.password()), address, Role.USER));
+        User user = users.save(new User(username, passwords.encode(request.getPassword()), address, Role.USER));
         OtpService.IssuedOtp issued = otp.issue(user, OtpPurpose.EMAIL_VERIFICATION);
         email.sendOtp(issued);
         return pending("EMAIL_VERIFICATION_REQUIRED", issued);
@@ -77,11 +77,11 @@ public class AuthService {
      */
     @Transactional
     public AuthPendingResponseDTO login(LoginRequestDTO request) {
-        String username = normalize(request.username());
+        String username = normalize(request.getUsername());
         if (!limiter.allowed(username)) throw new OtpService.OtpLimitException("Demasiados intentos");
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                    username, request.password()));
+                    username, request.getPassword()));
         } catch (AuthenticationException exception) {
             limiter.failed(username);
             throw new co.edu.unbosque.advancewars.exception.AuthenticationFailedException("Credenciales inválidas o cuenta no verificada");
@@ -128,9 +128,9 @@ public class AuthService {
      */
     @Transactional
     public boolean resetPassword(PasswordResetConfirmDTO request) {
-        OtpService.CheckResult checked = otp.verify(request.challengeId(), request.code(), OtpPurpose.PASSWORD_RESET);
+        OtpService.CheckResult checked = otp.verify(request.getChallengeId(), request.getCode(), OtpPurpose.PASSWORD_RESET);
         if (!checked.valid()) return false;
-        checked.user().setPassword(passwords.encode(request.newPassword()));
+        checked.user().setPassword(passwords.encode(request.getNewPassword()));
         return true;
     }
 
