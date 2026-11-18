@@ -97,7 +97,7 @@ public class OtpService {
         }
         challenge.consume();
         repository.save(challenge);
-        return new CheckResult(true, challenge.getUser());
+        return CheckResult.success(challenge.getUser());
     }
 
     /**
@@ -116,11 +116,45 @@ public class OtpService {
     /**
      * Expresa el resultado de la comprobación de un desafío OTP.
      */
-    public record CheckResult(boolean valid, User user) {
+    public static final class CheckResult {
+        private final boolean valid;
+        private final User user;
+
         /**
-         * Representa una verificación OTP fallida sin usuario autenticado.
+         * Crea un resultado inmutable con su estado y el usuario asociado.
          */
-        public static CheckResult invalid() { return new CheckResult(false, null); }
+        private CheckResult(boolean valid, User user) {
+            this.valid = valid;
+            this.user = user;
+        }
+
+        /**
+         * Indica si el desafío OTP fue verificado correctamente.
+         */
+        public boolean valid() {
+            return valid;
+        }
+
+        /**
+         * Devuelve el usuario verificado o null si no fue válido.
+         */
+        public User user() {
+            return user;
+        }
+
+        /**
+         * Crea el resultado correspondiente a un código OTP válido.
+         */
+        public static CheckResult success(User user) {
+            return new CheckResult(true, java.util.Objects.requireNonNull(user));
+        }
+
+        /**
+         * Crea el resultado correspondiente a un código OTP inválido.
+         */
+        public static CheckResult invalid() {
+            return new CheckResult(false, null);
+        }
     }
     /**
      * Indica que se superó un límite de emisión de códigos OTP.

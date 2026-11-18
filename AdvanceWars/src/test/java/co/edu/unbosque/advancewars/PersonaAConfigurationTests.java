@@ -6,7 +6,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Verifica las propiedades configurables de BCrypt y la limitación de intentos.
+ */
 class PersonaAConfigurationTests {
+    /**
+     * Comprueba el cifrado BCrypt y el rechazo de un coste no permitido.
+     */
     @Test
     void bcryptConfigurable() {
         PasswordEncoder encoder = new SecurityConfig().passwordEncoder(12);
@@ -14,6 +20,9 @@ class PersonaAConfigurationTests {
         assertThrows(IllegalArgumentException.class, () -> new SecurityConfig().passwordEncoder(8));
     }
 
+    /**
+     * Comprueba el bloqueo de intentos y su restablecimiento tras el éxito.
+     */
     @Test
     void loginLimiterConfigurable() {
         LoginRateLimiter limiter = new LoginRateLimiter(900, 2, 1000);

@@ -57,7 +57,8 @@ public class PdfReportService {
             lines.add("Ronda " + event.getRoundNumber() + " - " + event.getEventType()
                     + " - " + event.getDescription());
         }
-        try (PDDocument document = new PDDocument(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+        try (PDDocument document = new PDDocument();
+                ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             PDType1Font font = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
             PDPage page = null;
             PDPageContentStream stream = null;

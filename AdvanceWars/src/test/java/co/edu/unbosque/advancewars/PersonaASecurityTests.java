@@ -10,13 +10,22 @@ import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Comprueba el cifrado, la vinculación de OTP y la validez de JWT.
+ */
 class PersonaASecurityTests {
+    /**
+     * Proporciona una clave determinista únicamente para las pruebas unitarias.
+     */
     private static String key() {
         byte[] data = new byte[32];
         Arrays.fill(data, (byte) 0x2A);
         return Base64.getEncoder().encodeToString(data);
     }
 
+    /**
+     * Comprueba la aleatoriedad de los cifrados y el rechazo de texto manipulado.
+     */
     @Test
     void cifradoAleatorioYAutenticado() {
         CryptoService service = new CryptoService(key());
@@ -28,6 +37,9 @@ class PersonaASecurityTests {
         assertThrows(CryptoService.CryptoException.class, () -> service.decrypt(changed));
     }
 
+    /**
+     * Comprueba que el hash OTP depende del código y de su propósito.
+     */
     @Test
     void otpNoPermiteOtroCodigo() {
         OtpHashService service = new OtpHashService(key());
@@ -37,6 +49,9 @@ class PersonaASecurityTests {
         assertFalse(service.matches("uuid-ejemplo", OtpPurpose.EMAIL_VERIFICATION, "012345", hashed));
     }
 
+    /**
+     * Comprueba que modificar las credenciales invalida el JWT previo.
+     */
     @Test
     void jwtSeInvalidaCuandoCambiaLaClave() {
         JwtUtil service = new JwtUtil(key(), 3600000);
