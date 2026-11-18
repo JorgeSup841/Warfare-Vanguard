@@ -1,167 +1,131 @@
+
 package co.edu.unbosque.advancewars.model;
 
 import co.edu.unbosque.advancewars.enums.UnitType;
-
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.MapKeyColumn;
-import jakarta.persistence.MapKeyEnumerated;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 /** Representa un arma y el daño base que causa a cada tipo de unidad. */
 @Entity
 @Table(name = "weapon")
 public class Weapon {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id; // skipcq: JAVA-E1065
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@Column(nullable = false, unique = true, length = 40)
-	private String code;
+    // Codigo unico y nombre del arma.
+    @Column(unique = true, nullable = false)
+    private String code;
 
-	@Column(nullable = false, length = 80)
-	private String name;
+    private String name;
 
-	@Column(nullable = false)
-	private int minRange;
+    // Alcance minimo y maximo.
+    private int minRange;
+    private int maxRange;
 
-	@Column(nullable = false)
-	private int maxRange;
+    // Municion del arma.
+    private boolean usesAmmunition;
+    private int ammunitionCapacity;
 
-	@Column(nullable = false)
-	private boolean usesAmmunition;
+    // Daño que causa a cada tipo de unidad.
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+        name = "weapon_damage",
+        joinColumns = @JoinColumn(name = "weapon_id")
+    )
+    @MapKeyColumn(name = "target_unit_type")
+    @MapKeyEnumerated(EnumType.STRING)
+    @Column(name = "base_damage")
+    private Map<UnitType, Integer> damageByTarget = new HashMap<>();
 
-	@Column(nullable = false)
-	private int ammunitionCapacity;
+    // Constructor necesario para JPA.
+    public Weapon() {
+    }
 
-	@ElementCollection(fetch = FetchType.EAGER)
-	@CollectionTable(name = "weapon_damage", joinColumns = @JoinColumn(name = "weapon_id"))
-	@MapKeyColumn(name = "target_unit_type")
-	@MapKeyEnumerated(EnumType.STRING)
-	@Column(name = "base_damage", nullable = false)
-	private Map<UnitType, Integer> damageByTarget = new HashMap<>();
+    // Crea un arma con sus caracteristicas.
+    public Weapon(String code, String name, int minRange,
+                  int maxRange, boolean usesAmmunition,
+                  int ammunitionCapacity) {
 
-	/** Constructor requerido por JPA para materializar la entidad. */
-	protected Weapon() {
-	}
+        this.code = code;
+        this.name = name;
+        this.minRange = minRange;
+        this.maxRange = maxRange;
+        this.usesAmmunition = usesAmmunition;
+        this.ammunitionCapacity = ammunitionCapacity;
+    }
 
-	/** Construye un arma con su alcance y configuración de munición. */
-	public Weapon(String code, String name, int minRange, int maxRange, boolean usesAmmunition,
-			int ammunitionCapacity) {
-		this.code = code;
-		this.name = name;
-		this.minRange = minRange;
-		this.maxRange = maxRange;
-		this.usesAmmunition = usesAmmunition;
-		this.ammunitionCapacity = ammunitionCapacity;
-	}
+    // Establece el daño contra un tipo de unidad.
+    public void defineDamage(UnitType targetType, int damage) {
+        damageByTarget.put(targetType, damage);
+    }
 
-	/** Define el daño que este arma causa contra un tipo de unidad. */
-	public void defineDamage(UnitType targetType, int damage) {
-		damageByTarget.put(targetType, damage);
-	}
+    // Obtiene el daño contra un tipo de unidad.
+    public int getDamageAgainst(UnitType targetType) {
+        return damageByTarget.getOrDefault(targetType, 0);
+    }
 
-	/** Devuelve el daño base de esta arma contra el tipo de unidad indicado. */
-	public int getDamageAgainst(UnitType targetType) {
-		return damageByTarget.getOrDefault(targetType, 0);
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    public String getCode() {
+        return code;
+    }
 
-	public String getCode() {
-		return code;
-	}
+    public void setCode(String code) {
+        this.code = code;
+    }
 
-	public void setCode(String code) {
-		this.code = code;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public int getMinRange() {
+        return minRange;
+    }
 
-	public int getMinRange() {
-		return minRange;
-	}
+    public void setMinRange(int minRange) {
+        this.minRange = minRange;
+    }
 
-	public void setMinRange(int minRange) {
-		this.minRange = minRange;
-	}
+    public int getMaxRange() {
+        return maxRange;
+    }
 
-	public int getMaxRange() {
-		return maxRange;
-	}
+    public void setMaxRange(int maxRange) {
+        this.maxRange = maxRange;
+    }
 
-	public void setMaxRange(int maxRange) {
-		this.maxRange = maxRange;
-	}
+    public boolean isUsesAmmunition() {
+        return usesAmmunition;
+    }
 
-	/** Indica si el arma requiere munición para atacar. */
-	public boolean isUsesAmmunition() {
-		return usesAmmunition;
-	}
+    public void setUsesAmmunition(boolean usesAmmunition) {
+        this.usesAmmunition = usesAmmunition;
+    }
 
-	public void setUsesAmmunition(boolean usesAmmunition) {
-		this.usesAmmunition = usesAmmunition;
-	}
+    public int getAmmunitionCapacity() {
+        return ammunitionCapacity;
+    }
 
-	public int getAmmunitionCapacity() {
-		return ammunitionCapacity;
-	}
+    public void setAmmunitionCapacity(int ammunitionCapacity) {
+        this.ammunitionCapacity = ammunitionCapacity;
+    }
 
-	public void setAmmunitionCapacity(int ammunitionCapacity) {
-		this.ammunitionCapacity = ammunitionCapacity;
-	}
+    public Map<UnitType, Integer> getDamageByTarget() {
+        return new HashMap<>(damageByTarget);
+    }
 
-	public Map<UnitType, Integer> getDamageByTarget() {
-		return Collections.unmodifiableMap(damageByTarget);
-	}
-
-	public void setDamageByTarget(Map<UnitType, Integer> damageByTarget) {
-		this.damageByTarget = damageByTarget == null ? new HashMap<>() : new HashMap<>(damageByTarget);
-	}
-
-	@Override
-	public boolean equals(Object object) {
-		if (this == object) {
-			return true;
-		}
-
-		if (!(object instanceof Weapon other)) {
-			return false;
-		}
-
-		return id != null && id.equals(other.getId());
-	}
-
-	@Override
-	public int hashCode() {
-		return Weapon.class.hashCode();
-	}
-
-	@Override
-	public String toString() {
-		return "Weapon{" + "id=" + id + ", code='" + code + '\'' + ", name='" + name + '\'' + ", minRange=" + minRange
-				+ ", maxRange=" + maxRange + ", usesAmmunition=" + usesAmmunition + ", ammunitionCapacity="
-				+ ammunitionCapacity + ", damageByTarget=" + damageByTarget + '}';
-	}
+    public void setDamageByTarget(Map<UnitType, Integer> damageByTarget) {
+        this.damageByTarget = damageByTarget == null
+                ? new HashMap<>()
+                : new HashMap<>(damageByTarget);
+    }
 }
