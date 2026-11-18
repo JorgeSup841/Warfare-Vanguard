@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "code": "RED",
+    "name": "Ejército Carmesí",
+    "description": "Fuerza equilibrada.",
+    "color": "#d63031"
+  },
+  {
+    "id": 2,
+    "code": "BLUE",
+    "name": "Legión Azur",
+    "description": "Especialistas en defensa.",
+    "color": "#0984e3"
+  },
+  {
+    "id": 3,
+    "code": "GREEN",
+    "name": "Frente Esmeralda",
+    "description": "Dominan el aire.",
+    "color": "#00b894"
+  },
+  {
+    "id": 4,
+    "code": "YELLOW",
+    "name": "Guardia Ámbar",
+    "description": "Maestros de la artillería.",
+    "color": "#fdcb6e"
+  }
+]

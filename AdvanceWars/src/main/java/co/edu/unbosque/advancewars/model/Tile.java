@@ -4,6 +4,7 @@ package co.edu.unbosque.advancewars.model;
 import co.edu.unbosque.advancewars.enums.TerrainType;
 import jakarta.persistence.*;
 
+/** Representa una casilla del mapa y su tipo de terreno. */
 @Entity
 @Table(name = "map_tile", uniqueConstraints = {
     @UniqueConstraint(columnNames = {

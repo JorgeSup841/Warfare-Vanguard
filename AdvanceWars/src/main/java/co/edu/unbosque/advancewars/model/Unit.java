@@ -1,12 +1,15 @@
 
 package co.edu.unbosque.advancewars.model;
 
+
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import jakarta.persistence.*;
 
+/** Representa una unidad en partida y sus recursos y acciones de turno. */
 @Entity
 @Table(name = "game_unit")
 public class Unit {
