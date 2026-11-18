@@ -19,16 +19,25 @@ import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Genera un PDF con el resumen y el historial de una partida.
+ */
 @Service
 public class PdfReportService {
     private final GameStateRepository games;
     private final GameLogRepository logs;
 
+    /**
+     * Inyecta los repositorios de partidas y de eventos.
+     */
     public PdfReportService(GameStateRepository games, GameLogRepository logs) {
         this.games = games;
         this.logs = logs;
     }
 
+    /**
+     * Construye un documento PDF a partir de una partida y sus eventos.
+     */
     @Transactional(readOnly = true)
     public byte[] create(Long gameId) {
         GameState game = games.findById(gameId)
@@ -81,12 +90,18 @@ public class PdfReportService {
         }
     }
 
+    /**
+     * Prepara texto seguro para la fuente básica del PDF.
+     */
     private String ascii(String value) {
         String normalized = Normalizer.normalize(value.replaceAll("[\\r\\n\\t]", " "),
                 Normalizer.Form.NFD).replaceAll("\\p{M}", "");
         return normalized.replaceAll("[^\\x20-\\x7E]", "?");
     }
 
+    /**
+     * Divide una línea extensa para su representación en el PDF.
+     */
     private List<String> split(String value, int max) {
         List<String> result = new ArrayList<>();
         if (value.isBlank()) return List.of(" ");

@@ -11,6 +11,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Gestiona emisión, caducidad, intentos y consumo de desafíos OTP.
+ */
 @Service
 public class OtpService {
     private final OtpChallengeRepository repository;
@@ -22,6 +25,9 @@ public class OtpService {
     private final int maxAttempts;
     private final SecureRandom secureRandom = new SecureRandom();
 
+    /**
+     * Configura expiración, frecuencia y límites de intentos OTP.
+     */
     public OtpService(OtpChallengeRepository repository, OtpHashService hashService,
             @Value("${app.otp.ttl-seconds}") long ttlSeconds,
             @Value("${app.otp.resend-cooldown-seconds}") long resendCooldownSeconds,
@@ -42,6 +48,9 @@ public class OtpService {
         this.maxAttempts = maxAttempts;
     }
 
+    /**
+     * Crea un desafío de uso único, guarda su huella y devuelve sus datos de envío.
+     */
     @Transactional(noRollbackFor = OtpLimitException.class)
     public IssuedOtp issue(User user, OtpPurpose purpose) {
         LocalDateTime now = LocalDateTime.now();
@@ -68,6 +77,9 @@ public class OtpService {
                 user.getEmail(), purpose);
     }
 
+    /**
+     * Comprueba el propósito, expiración, intentos y huella del OTP antes de consumirlo.
+     */
     @Transactional
     public CheckResult verify(String challengeId, String code, OtpPurpose expectedPurpose) {
         OtpChallenge challenge = repository.findByChallengeId(challengeId).orElse(null);
@@ -88,17 +100,35 @@ public class OtpService {
         return new CheckResult(true, challenge.getUser());
     }
 
+    /**
+     * Busca un desafío existente por su identificador.
+     */
     @Transactional(readOnly = true)
     public OtpChallenge getChallenge(String challengeId) {
         return repository.findByChallengeId(challengeId).orElse(null);
     }
 
+    /**
+     * Agrupa los datos de un código OTP emitido para su envío por correo.
+     */
     public record IssuedOtp(String challengeId, String code, LocalDateTime expiresAt,
                             String email, OtpPurpose purpose) {}
+    /**
+     * Expresa el resultado de la comprobación de un desafío OTP.
+     */
     public record CheckResult(boolean valid, User user) {
+        /**
+         * Representa una verificación OTP fallida sin usuario autenticado.
+         */
         public static CheckResult invalid() { return new CheckResult(false, null); }
     }
+    /**
+     * Indica que se superó un límite de emisión de códigos OTP.
+     */
     public static class OtpLimitException extends RuntimeException {
+        /**
+         * Crea un error indicando que se superó un límite de emisión OTP.
+         */
         public OtpLimitException(String message) { super(message); }
     }
 }

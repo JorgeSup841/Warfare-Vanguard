@@ -9,8 +9,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configura la documentación OpenAPI y el esquema de autorización Bearer.
+ */
 @Configuration
 public class OpenApiConfig {
+    /**
+     * Declara metadatos de la API y el mecanismo Bearer JWT.
+     */
     @Bean
     public OpenAPI customOpenAPI(
             @Value("${app.openapi.title}") String title,

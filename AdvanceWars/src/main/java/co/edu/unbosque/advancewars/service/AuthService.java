@@ -23,6 +23,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Coordina registro, verificación, login de dos factores y recuperación.
+ */
 @Service
 public class AuthService {
     private final UserRepository users;
@@ -34,6 +37,9 @@ public class AuthService {
     private final UserService userService;
     private final LoginRateLimiter limiter;
 
+    /**
+     * Inyecta los servicios de credenciales, OTP, correo y usuarios.
+     */
     public AuthService(UserRepository users, PasswordEncoder passwords,
             AuthenticationManager authenticationManager, JwtUtil jwt, OtpService otp,
             EmailService email, UserService userService, LoginRateLimiter limiter) {
@@ -47,6 +53,9 @@ public class AuthService {
         this.limiter = limiter;
     }
 
+    /**
+     * Normaliza los datos, registra un usuario USER y solicita la verificación del correo.
+     */
     @Transactional
     public AuthPendingResponseDTO register(RegisterRequestDTO request) {
         String username = normalize(request.username());
@@ -63,6 +72,9 @@ public class AuthService {
         return pending("EMAIL_VERIFICATION_REQUIRED", issued);
     }
 
+    /**
+     * Comprueba las credenciales y emite un OTP para completar el inicio de sesión.
+     */
     @Transactional
     public AuthPendingResponseDTO login(LoginRequestDTO request) {
         String username = normalize(request.username());
@@ -85,6 +97,9 @@ public class AuthService {
         return pending("LOGIN_OTP_REQUIRED", issued);
     }
 
+    /**
+     * Consume un OTP correcto y habilita la cuenta verificada.
+     */
     @Transactional
     public boolean verifyEmail(String challengeId, String code) {
         OtpService.CheckResult checked = otp.verify(challengeId, code, OtpPurpose.EMAIL_VERIFICATION);
@@ -93,6 +108,9 @@ public class AuthService {
         return true;
     }
 
+    /**
+     * Comprueba el segundo factor y genera el JWT definitivo.
+     */
     @Transactional
     public AuthResponseDTO verifyLoginOtp(String challengeId, String code) {
         OtpService.CheckResult checked = otp.verify(challengeId, code, OtpPurpose.LOGIN_2FA);
@@ -105,6 +123,9 @@ public class AuthService {
         return new AuthResponseDTO(jwt.generateToken(user), "Bearer", userService.toDto(user));
     }
 
+    /**
+     * Comprueba el OTP de recuperación y guarda la contraseña codificada.
+     */
     @Transactional
     public boolean resetPassword(PasswordResetConfirmDTO request) {
         OtpService.CheckResult checked = otp.verify(request.challengeId(), request.code(), OtpPurpose.PASSWORD_RESET);
@@ -113,6 +134,9 @@ public class AuthService {
         return true;
     }
 
+    /**
+     * Solicita un OTP de recuperación sin revelar qué correos están registrados.
+     */
     @Transactional(noRollbackFor = {OtpService.OtpLimitException.class, MailException.class})
     public void forgotPassword(String emailAddress) {
         users.findByEmail(normalize(emailAddress)).ifPresent(user -> {
@@ -126,6 +150,9 @@ public class AuthService {
         });
     }
 
+    /**
+     * Emite un nuevo OTP relacionado con el desafío original.
+     */
     @Transactional
     public AuthPendingResponseDTO resend(String challengeId) {
         OtpChallenge previous = otp.getChallenge(challengeId);
@@ -141,10 +168,16 @@ public class AuthService {
         return pending("OTP_SENT", issued);
     }
 
+    /**
+     * Construye una respuesta de autenticación pendiente.
+     */
     private AuthPendingResponseDTO pending(String status, OtpService.IssuedOtp issued) {
         return new AuthPendingResponseDTO(status, issued.challengeId(), issued.expiresAt());
     }
 
+    /**
+     * Normaliza un identificador para facilitar búsquedas sin diferenciar mayúsculas.
+     */
     private String normalize(String value) {
         return value.strip().toLowerCase(Locale.ROOT);
     }

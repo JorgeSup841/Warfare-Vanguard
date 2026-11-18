@@ -24,9 +24,15 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
+/**
+ * Configura autenticación, BCrypt, rutas protegidas y CORS.
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    /**
+     * Proporciona el codificador de contraseñas BCrypt configurable.
+     */
     @Bean
     public PasswordEncoder passwordEncoder(@Value("${app.security.bcrypt.strength}") int bcryptStrength) {
         if (bcryptStrength < 10 || bcryptStrength > 14) {
@@ -35,6 +41,9 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder(bcryptStrength);
     }
 
+    /**
+     * Configura el proveedor de autenticación mediante usuarios persistidos.
+     */
     @Bean
     public AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService,
             PasswordEncoder passwordEncoder) {
@@ -43,11 +52,17 @@ public class SecurityConfig {
         return provider;
     }
 
+    /**
+     * Proporciona el gestor de autenticación de Spring Security.
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationProvider authenticationProvider) {
         return new ProviderManager(authenticationProvider);
     }
 
+    /**
+     * Restringe los orígenes y encabezados admitidos por CORS.
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource(
             @Value("${app.cors.allowed-origin}") String allowedOrigin,
@@ -64,6 +79,9 @@ public class SecurityConfig {
         return source;
     }
 
+    /**
+     * Define sesiones sin estado, validación JWT y permisos por ruta.
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
             JwtUtil jwtUtil, UserDetailsService userDetailsService,

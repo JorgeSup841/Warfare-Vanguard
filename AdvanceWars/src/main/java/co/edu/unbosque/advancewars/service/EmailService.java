@@ -6,12 +6,18 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+/**
+ * Envía por SMTP los códigos de verificación de la aplicación.
+ */
 @Service
 public class EmailService {
     private final JavaMailSender mailSender;
     private final String from;
     private final long otpTtlSeconds;
 
+    /**
+     * Inyecta el transportador SMTP y el remitente configurado.
+     */
     public EmailService(JavaMailSender mailSender,
             @Value("${app.mail.from}") String from,
             @Value("${app.otp.ttl-seconds}") long otpTtlSeconds) {
@@ -20,6 +26,9 @@ public class EmailService {
         this.otpTtlSeconds = otpTtlSeconds;
     }
 
+    /**
+     * Envía el código OTP al correo del destinatario con el asunto adecuado.
+     */
     public void sendOtp(OtpService.IssuedOtp issued) {
         String subject = switch (issued.purpose()) {
             case EMAIL_VERIFICATION -> "AdvanceWars - Verifica tu correo";

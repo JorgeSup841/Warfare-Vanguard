@@ -18,23 +18,38 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Expone los endpoints REST para registro, acceso y recuperación de cuentas.
+ */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
     private final AuthService auth;
 
+    /**
+     * Inyecta el servicio de autenticación.
+     */
     public AuthController(AuthService auth) { this.auth = auth; }
 
+    /**
+     * Registra una cuenta y devuelve el desafío de verificación.
+     */
     @PostMapping("/register")
     public ResponseEntity<AuthPendingResponseDTO> register(@Valid @RequestBody RegisterRequestDTO request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(auth.register(request));
     }
 
+    /**
+     * Comprueba las credenciales y solicita el segundo factor.
+     */
     @PostMapping("/login")
     public ResponseEntity<AuthPendingResponseDTO> login(@Valid @RequestBody LoginRequestDTO request) {
         return ResponseEntity.ok(auth.login(request));
     }
 
+    /**
+     * Comprueba el OTP de verificación de correo.
+     */
     @PostMapping("/verify-email")
     public ResponseEntity<Map<String, String>> verifyEmail(@Valid @RequestBody OtpVerificationRequestDTO request) {
         if (!auth.verifyEmail(request.challengeId(), request.code())) {
@@ -43,6 +58,9 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Correo verificado"));
     }
 
+    /**
+     * Completa el segundo factor y devuelve la sesión JWT.
+     */
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyLoginOtp(@Valid @RequestBody OtpVerificationRequestDTO request) {
         AuthResponseDTO response = auth.verifyLoginOtp(request.challengeId(), request.code());
@@ -52,17 +70,26 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Reenvía un desafío OTP según los límites configurados.
+     */
     @PostMapping("/resend-otp")
     public ResponseEntity<AuthPendingResponseDTO> resend(@Valid @RequestBody OtpResendRequestDTO request) {
         return ResponseEntity.ok(auth.resend(request.challengeId()));
     }
 
+    /**
+     * Solicita el restablecimiento de contraseña sin revelar la existencia de la cuenta.
+     */
     @PostMapping("/forgot-password")
     public ResponseEntity<Map<String, String>> forgot(@Valid @RequestBody PasswordResetRequestDTO request) {
         auth.forgotPassword(request.email());
         return ResponseEntity.ok(Map.of("message", "Si el correo está registrado, recibirás instrucciones"));
     }
 
+    /**
+     * Actualiza la contraseña cuando el OTP es válido.
+     */
     @PostMapping("/reset-password")
     public ResponseEntity<Map<String, String>> reset(@Valid @RequestBody PasswordResetConfirmDTO request) {
         if (!auth.resetPassword(request)) {

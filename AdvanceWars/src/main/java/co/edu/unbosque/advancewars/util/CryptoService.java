@@ -13,6 +13,9 @@ import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+/**
+ * Cifra y descifra valores recuperables mediante AES-256-GCM.
+ */
 @Service
 public class CryptoService {
     private static final int NONCE_LENGTH = 12;
@@ -21,12 +24,18 @@ public class CryptoService {
     private final SecretKey key;
     private final SecureRandom secureRandom = new SecureRandom();
 
+    /**
+     * Inicializa AES-256 a partir de la clave suministrada externamente.
+     */
     public CryptoService(@Value("${app.crypto.key}") String keyBase64) {
         byte[] decoded = Base64.getDecoder().decode(keyBase64);
         if (decoded.length != 32) throw new IllegalArgumentException("La clave AES debe tener 256 bits");
         this.key = new SecretKeySpec(decoded, "AES");
     }
 
+    /**
+     * Cifra un valor con AES-GCM y un nonce aleatorio por operación.
+     */
     public String encrypt(String value) {
         if (value == null) return null;
         try {
@@ -42,6 +51,9 @@ public class CryptoService {
         }
     }
 
+    /**
+     * Recupera un valor cifrado comprobando la etiqueta de autenticación.
+     */
     public String decrypt(String encoded) {
         if (encoded == null) return null;
         if (!encoded.startsWith(PREFIX)) throw new CryptoException("Formato de cifrado inválido");
@@ -58,8 +70,17 @@ public class CryptoService {
         }
     }
 
+    /**
+     * Indica un error al procesar un dato cifrado.
+     */
     public static class CryptoException extends RuntimeException {
+        /**
+         * Crea una excepción técnica sin exponer el valor protegido.
+         */
         public CryptoException(String message) { super(message); }
+        /**
+         * Crea una excepción técnica sin exponer el valor protegido.
+         */
         public CryptoException(String message, Throwable cause) { super(message, cause); }
     }
 }

@@ -15,34 +15,55 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Expone las consultas y operaciones de administración de usuarios.
+ */
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
     private final UserService users;
 
+    /**
+     * Inyecta el servicio de gestión de usuarios.
+     */
     public UserController(UserService users) { this.users = users; }
 
+    /**
+     * Consulta los datos públicos de la cuenta autenticada.
+     */
     @GetMapping("/me")
     public ResponseEntity<UserResponseDTO> me(Principal principal) {
         return ResponseEntity.ok(users.me(principal.getName()));
     }
 
+    /**
+     * Consulta los usuarios mediante autorización administrativa.
+     */
     @GetMapping
     public ResponseEntity<List<UserResponseDTO>> list() {
         return ResponseEntity.ok(users.list());
     }
 
+    /**
+     * Consulta un usuario por su identificador.
+     */
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> find(@PathVariable Long id) {
         return ResponseEntity.ok(users.find(id));
     }
 
+    /**
+     * Actualiza el rol de una cuenta con las restricciones del servicio.
+     */
     @PatchMapping("/{id}/role")
     public ResponseEntity<UserResponseDTO> role(@PathVariable Long id,
             @Valid @RequestBody RoleUpdateRequestDTO request, Principal principal) {
         return ResponseEntity.ok(users.setRole(id, request.role(), principal.getName()));
     }
 
+    /**
+     * Habilita o deshabilita una cuenta según las reglas del servicio.
+     */
     @PatchMapping("/{id}/enabled")
     public ResponseEntity<UserResponseDTO> enabled(@PathVariable Long id,
             @Valid @RequestBody EnabledUpdateRequestDTO request, Principal principal) {
