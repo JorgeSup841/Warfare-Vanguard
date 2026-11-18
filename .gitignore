@@ -28,3 +28,7 @@ yarn-debug.log*
 yarn-error.log*
 *.properties
 *.properties
+
+AdvanceWars/src/main/resources/application.properties
+
+*.properties
