@@ -9,15 +9,20 @@ export class generadormapaservice {
 
   /** Genera un mapa completo garantizando que todas las bases estén conectadas. */
   generar(config: configuracionmapa, semilla: number, jugadores: number): mapa {
+    return generadormapaservice.generarMapa(config, semilla, jugadores);
+  }
+
+  /** Ejecuta el ciclo de generación y validación de conectividad del mapa. */
+  private static generarMapa(config: configuracionmapa, semilla: number, jugadores: number): mapa {
     const maximoIntentos = 20;
     let cuadricula: tipoterreno[][] = [];
 
     for (let intento = 0; intento < maximoIntentos; intento++) {
       const aleatorio = generadormapaservice.crearAleatorio(semilla + intento);
       const sinAgua = intento === maximoIntentos - 1;
-      cuadricula = this.crearTerreno(config, aleatorio, jugadores, sinAgua);
+      cuadricula = generadormapaservice.crearTerreno(config, aleatorio, jugadores, sinAgua);
 
-      if (this.basesConectadas(cuadricula, config.width, config.height, jugadores)) {
+      if (generadormapaservice.basesConectadas(cuadricula, config.width, config.height, jugadores)) {
         break;
       }
     }
@@ -49,7 +54,7 @@ export class generadormapaservice {
   }
 
   /** Construye la matriz de terrenos distribuyendo agua, montañas y bosques. */
-  private crearTerreno(
+  private static crearTerreno(
     config: configuracionmapa,
     aleatorio: () => number,
     jugadores: number,
@@ -77,9 +82,9 @@ export class generadormapaservice {
       aleatorio
     );
 
-    this.esparcir(cuadricula, 'WATER', agua, jugadores, aleatorio);
-    this.esparcir(cuadricula, 'MOUNTAIN', montanas, jugadores, aleatorio);
-    this.esparcir(cuadricula, 'FOREST', bosques, jugadores, aleatorio);
+    generadormapaservice.esparcir(cuadricula, 'WATER', agua, jugadores, aleatorio);
+    generadormapaservice.esparcir(cuadricula, 'MOUNTAIN', montanas, jugadores, aleatorio);
+    generadormapaservice.esparcir(cuadricula, 'FOREST', bosques, jugadores, aleatorio);
 
     return cuadricula;
   }
@@ -91,7 +96,7 @@ export class generadormapaservice {
   }
 
   /** Esparce grupos de un tipo de terreno por la cuadrícula evitando las zonas de base. */
-  private esparcir(
+  private static esparcir(
     cuadricula: tipoterreno[][],
     tipo: tipoterreno,
     cantidad: number,
@@ -110,7 +115,10 @@ export class generadormapaservice {
     while (colocadas < cantidad && pasos > 0) {
       pasos--;
 
-      if (cuadricula[posY][posX] === 'PLAIN' && !this.esZonaBase(posX, posY, ancho, alto, jugadores)) {
+      if (
+        cuadricula[posY][posX] === 'PLAIN' &&
+        !generadormapaservice.esZonaBase(posX, posY, ancho, alto, jugadores)
+      ) {
         cuadricula[posY][posX] = tipo;
         colocadas++;
       }
@@ -127,14 +135,14 @@ export class generadormapaservice {
   }
 
   /** Verifica si una coordenada pertenece al perímetro protegido alrededor de alguna base. */
-  private esZonaBase(posX: number, posY: number, ancho: number, alto: number, jugadores: number): boolean {
+  private static esZonaBase(posX: number, posY: number, ancho: number, alto: number, jugadores: number): boolean {
     return generadormapaservice.calcularPosicionesBase(ancho, alto, jugadores).some(
       base => Math.abs(base.x - posX) <= 1 && Math.abs(base.y - posY) <= 1
     );
   }
 
   /** Comprueba mediante búsqueda en anchura que todas las bases estén comunicadas por tierra. */
-  private basesConectadas(cuadricula: tipoterreno[][], ancho: number, alto: number, jugadores: number): boolean {
+  private static basesConectadas(cuadricula: tipoterreno[][], ancho: number, alto: number, jugadores: number): boolean {
     const bases = generadormapaservice.calcularPosicionesBase(ancho, alto, jugadores);
     const visitada: boolean[][] = cuadricula.map(fila => fila.map(() => false));
     const cola: { x: number; y: number }[] = [bases[0]];
