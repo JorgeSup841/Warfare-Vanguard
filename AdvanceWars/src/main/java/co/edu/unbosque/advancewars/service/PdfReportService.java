@@ -6,6 +6,7 @@ import co.edu.unbosque.advancewars.model.GameState;
 import co.edu.unbosque.advancewars.model.Player;
 import co.edu.unbosque.advancewars.repository.GameLogRepository;
 import co.edu.unbosque.advancewars.repository.GameStateRepository;
+import co.edu.unbosque.advancewars.repository.UserRepository;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.Normalizer;
@@ -26,33 +27,51 @@ import org.springframework.transaction.annotation.Transactional;
 public class PdfReportService {
     private final GameStateRepository games;
     private final GameLogRepository logs;
+    private final UserRepository users;
 
     /**
      * Inyecta los repositorios de partidas y de eventos.
      */
-    public PdfReportService(GameStateRepository games, GameLogRepository logs) {
+    public PdfReportService(GameStateRepository games, GameLogRepository logs,
+            UserRepository users) {
         this.games = games;
         this.logs = logs;
+        this.users = users;
     }
 
     /**
      * Construye un documento PDF a partir de una partida y sus eventos.
      */
     @Transactional(readOnly = true)
-    public byte[] create(Long gameId) {
-        GameState game = games.findById(gameId)
-                .orElseThrow(() -> new ResourceNotFoundException("Partida no encontrada"));
+    public byte[] create(Long gameId, String username, boolean administrator) {
+        GameState game;
+        if (administrator) {
+            game = games.findById(gameId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Partida no encontrada"));
+        } else {
+            Long userId = users.findByUsername(username)
+                    .orElseThrow(() -> new ResourceNotFoundException("Partida no encontrada"))
+                    .getId();
+            game = games.findByIdAndCreatedBy_Id(gameId, userId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Partida no encontrada"));
+        }
         List<String> lines = new ArrayList<>();
         lines.add("ADVANCEWARS - REPORTE DE PARTIDA #" + game.getId());
         lines.add("Estado: " + game.getStatus() + " | Ronda: " + game.getCurrentRound());
-        lines.add("Semilla: " + game.getSeed() + " | Inicio: " + game.getStartedAt());
+        lines.add("Creada: " + game.getCreatedAt() + " | Inicio: " + game.getStartedAt());
+        lines.add("Finalizada: " + game.getFinishedAt() + " | Semilla: " + game.getSeed());
+        lines.add("Creador: " + (game.getCreatedBy() != null ? game.getCreatedBy().getUsername() : "No disponible"));
         lines.add("Ganador (orden): " + game.getWinnerPlayerOrder());
         lines.add("Jugadores:");
         for (Player player : game.getPlayers()) {
-            lines.add("  " + player.getTurnOrder() + ". " + player.getName() + " - " + player.getStatus());
+            String faction = player.getFaction() == null ? "Sin faccion" : player.getFaction().getName();
+            String commander = player.getCommander() == null ? "Sin comandante" : player.getCommander().getName();
+            lines.add("  " + player.getTurnOrder() + ". " + player.getName() + " - " + player.getStatus()
+                    + " | " + faction + " | " + commander + " | Fondos: " + player.getMoney());
         }
-        lines.add("Historial:");
         List<GameLog> events = logs.findAllByGameState_IdOrderByCreatedAtAscIdAsc(gameId);
+        lines.add("Eventos registrados: " + events.size());
+        lines.add("Historial:");
         for (GameLog event : events) {
             lines.add("Ronda " + event.getRoundNumber() + " - " + event.getEventType()
                     + " - " + event.getDescription());

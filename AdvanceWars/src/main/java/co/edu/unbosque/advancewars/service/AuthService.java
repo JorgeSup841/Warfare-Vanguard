@@ -131,6 +131,8 @@ public class AuthService {
         OtpService.CheckResult checked = otp.verify(request.getChallengeId(), request.getCode(), OtpPurpose.PASSWORD_RESET);
         if (!checked.valid()) return false;
         checked.user().setPassword(passwords.encode(request.getNewPassword()));
+        otp.invalidateActiveForUser(checked.user(), OtpPurpose.LOGIN_2FA);
+        otp.invalidateActiveForUser(checked.user(), OtpPurpose.PASSWORD_RESET);
         return true;
     }
 
@@ -156,12 +158,16 @@ public class AuthService {
     @Transactional
     public AuthPendingResponseDTO resend(String challengeId) {
         OtpChallenge previous = otp.getChallenge(challengeId);
-        if (previous == null || previous.isConsumed()) {
+        if (previous == null || previous.isConsumed()
+                || !previous.getExpiresAt().isAfter(java.time.LocalDateTime.now())) {
             throw new BadRequestException("Desafío inválido o vencido");
         }
         User user = previous.getUser();
         if (previous.getPurpose() == OtpPurpose.EMAIL_VERIFICATION && user.isEmailVerified()) {
             throw new BadRequestException("Cuenta ya verificada");
+        }
+        if (!user.isEnabled() && previous.getPurpose() == OtpPurpose.LOGIN_2FA) {
+            throw new BadRequestException("Cuenta inhabilitada");
         }
         OtpService.IssuedOtp issued = otp.issue(user, previous.getPurpose());
         email.sendOtp(issued);

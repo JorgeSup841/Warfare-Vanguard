@@ -47,6 +47,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .setSubject(user.getUsername())
                 .claim("uid", user.getId())
+                .claim("roles", java.util.List.of("ROLE_" + user.getRole().name()))
                 .claim("cv", credentialFingerprint(user))
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(now.plusMillis(expirationMillis)))
