@@ -14,24 +14,15 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-/**
- * Valida el JWT Bearer y establece la identidad autenticada.
- */
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
 
-    /**
-     * Inyecta la utilidad JWT y el cargador de usuarios.
-     */
     public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
     }
 
-    /**
-     * Intenta autenticar una petición con el JWT Bearer antes de continuar la cadena.
-     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
             FilterChain chain) throws ServletException, IOException {
@@ -41,9 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 var claims = jwtUtil.parse(authorization.substring(7));
                 User user = (User) userDetailsService.loadUserByUsername(claims.getSubject());
-                if (user.isEnabled() && user.isEmailVerified() && user.isAccountNonLocked()
-                        && user.isAccountNonExpired() && user.isCredentialsNonExpired()
-                        && jwtUtil.belongsTo(claims, user)) {
+                if (jwtUtil.validateClaims(claims, user)) {
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

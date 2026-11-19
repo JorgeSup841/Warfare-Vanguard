@@ -8,33 +8,34 @@ import co.edu.unbosque.advancewars.dto.OtpVerificationRequestDTO;
 import co.edu.unbosque.advancewars.dto.PasswordResetConfirmDTO;
 import co.edu.unbosque.advancewars.dto.PasswordResetRequestDTO;
 import co.edu.unbosque.advancewars.dto.RegisterRequestDTO;
-import co.edu.unbosque.advancewars.service.AuthService;
-import co.edu.unbosque.advancewars.service.UserService;
 import co.edu.unbosque.advancewars.dto.UserResponseDTO;
 import co.edu.unbosque.advancewars.security.PublicRequestRateLimiter;
+import co.edu.unbosque.advancewars.service.AuthService;
+import co.edu.unbosque.advancewars.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import jakarta.servlet.http.HttpServletRequest;
-import java.security.Principal;
-import org.springframework.web.bind.annotation.GetMapping;
 import jakarta.validation.Valid;
+import java.security.Principal;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Expone los endpoints REST para registro, acceso y recuperación de cuentas.
- */
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Autenticación", description = "Registro, verificación de correo, inicio de sesión con OTP y recuperación")
 public class AuthController {
     private final AuthService auth;
     private final UserService users;
     private final PublicRequestRateLimiter publicRequestRateLimiter;
 
-    /** Inyecta los servicios de autenticación, usuarios y protección de la API. */
     public AuthController(AuthService auth, UserService users,
             PublicRequestRateLimiter publicRequestRateLimiter) {
         this.auth = auth;
@@ -42,35 +43,36 @@ public class AuthController {
         this.publicRequestRateLimiter = publicRequestRateLimiter;
     }
 
-    /** Devuelve los datos de la cuenta autenticada. */
     @GetMapping("/me")
+    @Operation(summary = "Consultar el usuario autenticado", description = "Requiere JWT Bearer válido")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<UserResponseDTO> me(Principal principal) {
         return ResponseEntity.ok(users.me(principal.getName()));
     }
 
-    /**
-     * Registra una cuenta y devuelve el desafío de verificación.
-     */
     @PostMapping("/register")
-    public ResponseEntity<AuthPendingResponseDTO> register(@Valid @RequestBody RegisterRequestDTO request, HttpServletRequest httpRequest) {
+    @Operation(summary = "Registrar usuario", description = "Crea una cuenta USER deshabilitada y envía OTP de verificación al correo")
+    @SecurityRequirements
+    public ResponseEntity<AuthPendingResponseDTO> register(@Valid @RequestBody RegisterRequestDTO request,
+            HttpServletRequest httpRequest) {
         publicRequestRateLimiter.check(httpRequest.getRemoteAddr());
         return ResponseEntity.status(HttpStatus.CREATED).body(auth.register(request));
     }
 
-    /**
-     * Comprueba las credenciales y solicita el segundo factor.
-     */
     @PostMapping("/login")
-    public ResponseEntity<AuthPendingResponseDTO> login(@Valid @RequestBody LoginRequestDTO request, HttpServletRequest httpRequest) {
+    @Operation(summary = "Iniciar sesión", description = "Valida usuario y contraseña y envía un OTP. Aún no devuelve un JWT")
+    @SecurityRequirements
+    public ResponseEntity<AuthPendingResponseDTO> login(@Valid @RequestBody LoginRequestDTO request,
+            HttpServletRequest httpRequest) {
         publicRequestRateLimiter.check(httpRequest.getRemoteAddr());
         return ResponseEntity.ok(auth.login(request));
     }
 
-    /**
-     * Comprueba el OTP de verificación de correo.
-     */
     @PostMapping("/verify-email")
-    public ResponseEntity<Map<String, String>> verifyEmail(@Valid @RequestBody OtpVerificationRequestDTO request, HttpServletRequest httpRequest) {
+    @Operation(summary = "Verificar correo electrónico", description = "Valida el código OTP de activación de la cuenta")
+    @SecurityRequirements
+    public ResponseEntity<Map<String, String>> verifyEmail(@Valid @RequestBody OtpVerificationRequestDTO request,
+            HttpServletRequest httpRequest) {
         publicRequestRateLimiter.check(httpRequest.getRemoteAddr());
         if (!auth.verifyEmail(request.getChallengeId(), request.getCode())) {
             return ResponseEntity.badRequest().body(Map.of("message", "Código inválido o vencido"));
@@ -78,11 +80,11 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Correo verificado"));
     }
 
-    /**
-     * Completa el segundo factor y devuelve la sesión JWT.
-     */
     @PostMapping("/verify-otp")
-    public ResponseEntity<?> verifyLoginOtp(@Valid @RequestBody OtpVerificationRequestDTO request, HttpServletRequest httpRequest) {
+    @Operation(summary = "Confirmar segundo factor", description = "Valida el OTP de login y solo entonces entrega el JWT")
+    @SecurityRequirements
+    public ResponseEntity<?> verifyLoginOtp(@Valid @RequestBody OtpVerificationRequestDTO request,
+            HttpServletRequest httpRequest) {
         publicRequestRateLimiter.check(httpRequest.getRemoteAddr());
         AuthResponseDTO response = auth.verifyLoginOtp(request.getChallengeId(), request.getCode());
         if (response == null) {
@@ -91,30 +93,30 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Reenvía un desafío OTP según los límites configurados.
-     */
     @PostMapping("/resend-otp")
-    public ResponseEntity<AuthPendingResponseDTO> resend(@Valid @RequestBody OtpResendRequestDTO request, HttpServletRequest httpRequest) {
+    @Operation(summary = "Reenviar código OTP", description = "Emite un nuevo desafío respetando las restricciones de frecuencia")
+    @SecurityRequirements
+    public ResponseEntity<AuthPendingResponseDTO> resend(@Valid @RequestBody OtpResendRequestDTO request,
+            HttpServletRequest httpRequest) {
         publicRequestRateLimiter.check(httpRequest.getRemoteAddr());
         return ResponseEntity.ok(auth.resend(request.getChallengeId()));
     }
 
-    /**
-     * Solicita el restablecimiento de contraseña sin revelar la existencia de la cuenta.
-     */
     @PostMapping("/forgot-password")
-    public ResponseEntity<Map<String, String>> forgot(@Valid @RequestBody PasswordResetRequestDTO request, HttpServletRequest httpRequest) {
+    @Operation(summary = "Solicitar recuperación de contraseña", description = "Envía instrucciones de recuperación sin revelar si existe el usuario")
+    @SecurityRequirements
+    public ResponseEntity<Map<String, String>> forgot(@Valid @RequestBody PasswordResetRequestDTO request,
+            HttpServletRequest httpRequest) {
         publicRequestRateLimiter.check(httpRequest.getRemoteAddr());
         auth.forgotPassword(request.getEmail());
         return ResponseEntity.ok(Map.of("message", "Si el correo está registrado, recibirás instrucciones"));
     }
 
-    /**
-     * Actualiza la contraseña cuando el OTP es válido.
-     */
     @PostMapping("/reset-password")
-    public ResponseEntity<Map<String, String>> reset(@Valid @RequestBody PasswordResetConfirmDTO request, HttpServletRequest httpRequest) {
+    @Operation(summary = "Cambiar contraseña con OTP", description = "Comprueba OTP de recuperación y almacena la contraseña mediante BCrypt")
+    @SecurityRequirements
+    public ResponseEntity<Map<String, String>> reset(@Valid @RequestBody PasswordResetConfirmDTO request,
+            HttpServletRequest httpRequest) {
         publicRequestRateLimiter.check(httpRequest.getRemoteAddr());
         if (!auth.resetPassword(request)) {
             return ResponseEntity.badRequest().body(Map.of("message", "Código inválido o vencido"));
