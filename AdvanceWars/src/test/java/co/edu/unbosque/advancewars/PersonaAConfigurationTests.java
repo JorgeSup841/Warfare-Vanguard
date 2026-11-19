@@ -9,7 +9,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
+/**
+ * Comprueba las restricciones configurables de BCrypt y del limitador de login.
+ */
 class PersonaAConfigurationTests {
+    /** Comprueba el factor de BCrypt y el rechazo de valores inseguros. */
     @Test
     void bcryptConfigurable() {
         SecurityConfig config = new SecurityConfig(mock(JwtUtil.class), mock(UserDetailsService.class));
@@ -18,6 +22,7 @@ class PersonaAConfigurationTests {
         assertThrows(IllegalArgumentException.class, () -> config.passwordEncoder(8));
     }
 
+    /** Comprueba el bloqueo y restablecimiento tras varios intentos fallidos. */
     @Test
     void loginLimiterConfigurable() {
         LoginRateLimiter limiter = new LoginRateLimiter(900, 2, 1000);

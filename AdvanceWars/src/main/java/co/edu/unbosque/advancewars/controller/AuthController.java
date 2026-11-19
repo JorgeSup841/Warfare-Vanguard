@@ -28,6 +28,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Expone el registro, la verificación de correo y la autenticación con OTP.
+ * Las operaciones públicas están limitadas por dirección de origen.
+ */
 @RestController
 @RequestMapping("/api/auth")
 @Tag(name = "Autenticación", description = "Registro, verificación de correo, inicio de sesión con OTP y recuperación")
@@ -36,6 +40,13 @@ public class AuthController {
     private final UserService users;
     private final PublicRequestRateLimiter publicRequestRateLimiter;
 
+    /**
+     * Inicializa las dependencias de autenticación, usuarios y control de solicitudes.
+     *
+     * @param auth servicio de registro e inicio de sesión
+     * @param users servicio de consulta de usuarios
+     * @param publicRequestRateLimiter límite de peticiones públicas
+     */
     public AuthController(AuthService auth, UserService users,
             PublicRequestRateLimiter publicRequestRateLimiter) {
         this.auth = auth;
@@ -43,6 +54,12 @@ public class AuthController {
         this.publicRequestRateLimiter = publicRequestRateLimiter;
     }
 
+    /**
+     * Consulta el perfil correspondiente al JWT autenticado.
+     *
+     * @param principal identidad autenticada
+     * @return datos públicos del usuario
+     */
     @GetMapping("/me")
     @Operation(summary = "Consultar el usuario autenticado", description = "Requiere JWT Bearer válido")
     @SecurityRequirement(name = "bearerAuth")
@@ -50,6 +67,13 @@ public class AuthController {
         return ResponseEntity.ok(users.me(principal.getName()));
     }
 
+    /**
+     * Registra una cuenta pendiente de verificación por correo.
+     *
+     * @param request datos del usuario que se registra
+     * @param httpRequest solicitud usada para limitar intentos
+     * @return desafío OTP de activación y estado HTTP 201
+     */
     @PostMapping("/register")
     @Operation(summary = "Registrar usuario", description = "Crea una cuenta USER deshabilitada y envía OTP de verificación al correo")
     @SecurityRequirements
@@ -59,6 +83,13 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(auth.register(request));
     }
 
+    /**
+     * Valida las credenciales e inicia el segundo factor mediante OTP.
+     *
+     * @param request usuario y contraseña
+     * @param httpRequest solicitud usada para limitar intentos
+     * @return desafío OTP sin emitir todavía un JWT
+     */
     @PostMapping("/login")
     @Operation(summary = "Iniciar sesión", description = "Valida usuario y contraseña y envía un OTP. Aún no devuelve un JWT")
     @SecurityRequirements
@@ -68,6 +99,13 @@ public class AuthController {
         return ResponseEntity.ok(auth.login(request));
     }
 
+    /**
+     * Comprueba el OTP de registro para activar el correo de la cuenta.
+     *
+     * @param request identificador del desafío y código recibido
+     * @param httpRequest solicitud usada para limitar intentos
+     * @return confirmación o respuesta de código inválido
+     */
     @PostMapping("/verify-email")
     @Operation(summary = "Verificar correo electrónico", description = "Valida el código OTP de activación de la cuenta")
     @SecurityRequirements
@@ -80,6 +118,13 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Correo verificado"));
     }
 
+    /**
+     * Confirma el OTP de inicio de sesión y entrega el JWT válido.
+     *
+     * @param request identificador del desafío y código recibido
+     * @param httpRequest solicitud usada para limitar intentos
+     * @return token de acceso o error de verificación
+     */
     @PostMapping("/verify-otp")
     @Operation(summary = "Confirmar segundo factor", description = "Valida el OTP de login y solo entonces entrega el JWT")
     @SecurityRequirements
@@ -93,6 +138,13 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Reenvía un desafío OTP respetando el tiempo de espera configurado.
+     *
+     * @param request desafío cuyo código se solicita de nuevo
+     * @param httpRequest solicitud usada para limitar intentos
+     * @return nuevo desafío y su vencimiento
+     */
     @PostMapping("/resend-otp")
     @Operation(summary = "Reenviar código OTP", description = "Emite un nuevo desafío respetando las restricciones de frecuencia")
     @SecurityRequirements
@@ -102,6 +154,13 @@ public class AuthController {
         return ResponseEntity.ok(auth.resend(request.getChallengeId()));
     }
 
+    /**
+     * Solicita un código de recuperación sin revelar si el correo existe.
+     *
+     * @param request dirección de correo de recuperación
+     * @param httpRequest solicitud usada para limitar intentos
+     * @return mensaje genérico sobre el envío de instrucciones
+     */
     @PostMapping("/forgot-password")
     @Operation(summary = "Solicitar recuperación de contraseña", description = "Envía instrucciones de recuperación sin revelar si existe el usuario")
     @SecurityRequirements
@@ -112,6 +171,13 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Si el correo está registrado, recibirás instrucciones"));
     }
 
+    /**
+     * Cambia la contraseña tras validar el desafío OTP de recuperación.
+     *
+     * @param request código y nueva contraseña
+     * @param httpRequest solicitud usada para limitar intentos
+     * @return confirmación del cambio o rechazo del código
+     */
     @PostMapping("/reset-password")
     @Operation(summary = "Cambiar contraseña con OTP", description = "Comprueba OTP de recuperación y almacena la contraseña mediante BCrypt")
     @SecurityRequirements

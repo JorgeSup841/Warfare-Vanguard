@@ -14,10 +14,20 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+/**
+ * Examina tokens Bearer por petición y configura la identidad autenticada.
+ * Solo establece el contexto si la firma y el estado del usuario son válidos.
+ */
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
 
+    /**
+     * Inicializa el verificador JWT y el servicio que consulta usuarios actuales.
+     *
+     * @param jwtUtil utilidad de creación y validación de JWT
+     * @param userDetailsService recupera usuarios desde el almacenamiento
+     */
     public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
