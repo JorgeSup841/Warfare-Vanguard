@@ -63,6 +63,12 @@ public class MapGenerationService {
             }
         }
 
+        // Las posiciones de las bases siempre quedan como llanuras.
+        terrain[1][1] = TerrainType.PLAIN;
+        terrain[height - 2][width - 2] = TerrainType.PLAIN;
+        terrain[1][width - 2] = TerrainType.PLAIN;
+        terrain[height - 2][1] = TerrainType.PLAIN;
+
         // Convertimos la matriz en los modelos que ya tenemos.
         GameMap map = new GameMap(width, height);
 

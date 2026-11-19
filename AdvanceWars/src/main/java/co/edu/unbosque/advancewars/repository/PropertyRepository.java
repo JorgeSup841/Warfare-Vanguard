@@ -20,6 +20,9 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
     /** Comprueba si una casilla ya tiene una propiedad asociada. */
     boolean existsByTile_Id(Long tileId);
 
+    /** Devuelve todas las propiedades de una partida, incluso las neutrales. */
+    List<Property> findAllByTile_GameMap_Id(Long gameMapId);
+
     /** Cuenta las propiedades de un jugador. */
     long countByOwner_Id(Long ownerId);
 
