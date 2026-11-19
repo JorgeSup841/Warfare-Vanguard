@@ -1,0 +1,74 @@
+<section class="juego">
+
+  <header class="juego__cabecera">
+    <span class="badge">TABLERO DE BATALLA</span>
+    <h1>MAPA ALEATORIO</h1>
+  </header>
+
+  <div class="juego__controles">
+    <div class="control">
+      <label for="semilla">SEMILLA</label>
+      <input id="semilla" type="number" [(ngModel)]="semilla" />
+      <button type="button" class="btn btn--claro" (click)="usarSemilla()">USAR</button>
+    </div>
+
+    <div class="control">
+      <span class="control__titulo">JUGADORES</span>
+      @for (n of [2, 3, 4]; track n) {
+        <button type="button" class="btn btn--chico" [class.activo]="jugadores === n" (click)="fijarJugadores(n)">
+          {{ n }}
+        </button>
+      }
+      </div>
+    <button type="button" class="btn" (click)="nuevoMapa()">NUEVO MAPA</button>
+  </div>
+
+  <div class="juego__tablero">
+
+    <div class="juego__marco">
+      <div class="juego__lienzo" #contenedor [style.aspect-ratio]="proporcion()"></div>
+    </div>
+
+    <aside class="juego__panel">
+
+      <div class="caja">
+        <h2>CASILLA</h2>
+        @if (seleccion(); as s) {
+          <p class="caja__posicion">Posición: {{ s.x }}, {{ s.y }}</p>
+          @if (s.terreno; as t) {
+            <p class="caja__terreno">{{ t.name }}</p>
+            <p>Defensa: {{ t.defenseStars }} de 4</p>
+
+            <table>
+              <thead>
+              <tr><th>Unidad</th><th>Costo</th></tr>
+              </thead>
+              <tbody>
+                @for (m of tiposMovimiento; track m.codigo) {
+                  <tr>
+                    <td>{{ m.nombre }}</td>
+                    <td>{{ costoDe(t, m.codigo) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        } @else {
+          <p class="caja__vacio">Pasa el mouse sobre el mapa para ver la casilla.</p>
+        }
+      </div>
+
+      <div class="caja">
+        <h2>LEYENDA</h2>
+        @for (t of terrenos(); track t.terrainType) {
+          <div class="leyenda">
+            <i class="leyenda__color" [style.background]="t.color"></i>
+            {{ t.name }}
+          </div>
+        }
+        <p class="caja__vacio">Los números 1 a 4 son las bases de cada jugador.</p>
+      </div>
+
+    </aside>
+  </div>
+</section>

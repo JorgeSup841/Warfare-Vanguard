@@ -1,0 +1,201 @@
+:host {
+  display: block;
+  font-family: 'Courier New', monospace;
+}
+
+.juego {
+  min-height: 100vh;
+  padding: 32px 40px;
+  background-color: #2d5a3d;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+  color: #fff;
+}
+
+/* Cabecera */
+.juego__cabecera {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.badge {
+  display: inline-block;
+  background: #14201a;
+  color: #7dff7d;
+  padding: 6px 12px;
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+
+.juego__cabecera h1 {
+  margin: 12px 0 0;
+  font-size: 32px;
+  color: #ffd84d;
+  text-shadow: 4px 4px 0 #14201a;
+}
+
+/* Controles */
+.juego__controles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #14201a;
+  border: 3px solid #14201a;
+  font-size: 13px;
+  letter-spacing: 2px;
+}
+
+.control input {
+  width: 110px;
+  padding: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  border: 3px solid #14201a;
+  background: #fff;
+}
+
+/* Botones */
+.btn {
+  padding: 12px 20px;
+  background: #f26430;
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  letter-spacing: 2px;
+  border: 3px solid #14201a;
+  box-shadow: 5px 5px 0 #14201a;
+  cursor: pointer;
+}
+
+.btn:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 3px 3px 0 #14201a;
+}
+
+.btn--claro {
+  background: #fbf6e9;
+  color: #14201a;
+  padding: 8px 14px;
+  box-shadow: none;
+}
+
+.btn--chico {
+  padding: 8px 14px;
+  background: #fbf6e9;
+  color: #14201a;
+  box-shadow: none;
+}
+
+.btn--chico.activo {
+  background: #ffd84d;
+}
+
+/* Tablero y panel */
+.juego__tablero {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+  justify-content: center;
+  align-items: flex-start;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.juego__marco {
+  flex: 1 1 600px;
+  min-width: 0;
+  max-width: 900px;
+  border: 4px solid #14201a;
+  box-shadow: 8px 8px 0 #14201a;
+  background: #14201a;
+}
+
+.juego__lienzo {
+  width: 100%;
+  font-size: 0;
+}
+
+.juego__panel {
+  flex: 0 0 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.caja {
+  padding: 16px;
+  background: #fbf6e9;
+  color: #14201a;
+  border: 4px solid #14201a;
+  box-shadow: 6px 6px 0 #14201a;
+  font-size: 13px;
+}
+
+.caja h2 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  letter-spacing: 3px;
+  color: #2d5a3d;
+}
+
+.caja p {
+  margin: 4px 0;
+}
+
+.caja__terreno {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.caja__vacio {
+  color: #666;
+  line-height: 1.4;
+}
+
+table {
+  width: 100%;
+  margin-top: 10px;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 4px 6px;
+  text-align: left;
+  border-bottom: 1px solid #d9d2bd;
+}
+
+.leyenda {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0;
+}
+
+.leyenda__color {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #14201a;
+}
+
+@media (max-width: 700px) {
+  .juego {
+    padding: 20px 16px;
+  }
+  .juego__panel {
+    flex: 1 1 100%;
+  }
+}

@@ -26,7 +26,7 @@ export class juegoservice {
    * @returns lista de unidades
    */
   getUnidades(): Observable<unidad[]> {
-    return this.http.get<unidad[]>(`${this.baseUrl}/unidades.json`);
+    return this.http.get<unidad[]>(`${this.baseUrl}/Unidades.json`);
   }
 
   /**
@@ -34,7 +34,7 @@ export class juegoservice {
    * @returns lista de terrenos
    */
   getTerrenos(): Observable<terreno[]> {
-    return this.http.get<terreno[]>(`${this.baseUrl}/terrenos.json`);
+    return this.http.get<terreno[]>(`${this.baseUrl}/Terrenos.json`);
   }
 
   /**
@@ -42,7 +42,7 @@ export class juegoservice {
    * @returns lista de propiedades
    */
   getPropiedades(): Observable<propiedad[]> {
-    return this.http.get<propiedad[]>(`${this.baseUrl}/propiedades.json`);
+    return this.http.get<propiedad[]>(`${this.baseUrl}/Propiedades.json`);
   }
 
   /**
@@ -50,7 +50,7 @@ export class juegoservice {
    * @returns lista de facciones
    */
   getFacciones(): Observable<faccion[]> {
-    return this.http.get<faccion[]>(`${this.baseUrl}/facciones.json`);
+    return this.http.get<faccion[]>(`${this.baseUrl}/Facciones.json`);
   }
 
   /**
@@ -58,7 +58,7 @@ export class juegoservice {
    * @returns lista de comandantes
    */
   getComandantes(): Observable<comandante[]> {
-    return this.http.get<comandante[]>(`${this.baseUrl}/comandantes.json`);
+    return this.http.get<comandante[]>(`${this.baseUrl}/Comandantes.json`);
   }
 
   /**
@@ -66,6 +66,6 @@ export class juegoservice {
    * @returns mínimos y máximos de agua, bosque, montaña y tamaño del mapa
    */
   getConfiguracionMapa(): Observable<configuracionmapa> {
-    return this.http.get<configuracionmapa>(`${this.baseUrl}/configuracionmapa.json`);
+    return this.http.get<configuracionmapa>(`${this.baseUrl}/Configuracionmapa.json`);
   }
 }
