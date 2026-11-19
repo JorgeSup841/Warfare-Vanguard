@@ -7,25 +7,35 @@ import co.edu.unbosque.advancewars.exception.ResourceNotFoundException;
 import co.edu.unbosque.advancewars.model.User;
 import co.edu.unbosque.advancewars.repository.UserRepository;
 import java.util.List;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Gestiona consultas y cambios autorizados de cuentas de usuario.
+ * Gestiona la consulta de perfiles y operaciones administrativas de usuarios.
+ * Nunca expone contraseñas al construir los DTO de respuesta.
  */
 @Service
 public class UserService {
     private final UserRepository repository;
+    private final ModelMapper modelMapper;
 
     /**
-     * Inyecta el repositorio de usuarios.
+     * Inicializa la persistencia y conversión entre entidades y DTO.
+     *
+     * @param repository repositorio de cuentas
+     * @param modelMapper conversor de usuarios a DTO de respuesta
      */
-    public UserService(UserRepository repository) {
+    public UserService(UserRepository repository, ModelMapper modelMapper) {
         this.repository = repository;
+        this.modelMapper = modelMapper;
     }
 
     /**
-     * Consulta los datos públicos de la cuenta autenticada.
+     * Consulta el perfil de la cuenta autenticada.
+     *
+     * @param username nombre del usuario autenticado
+     * @return DTO público del usuario
      */
     @Transactional(readOnly = true)
     public UserResponseDTO me(String username) {
@@ -35,7 +45,9 @@ public class UserService {
     }
 
     /**
-     * Devuelve los usuarios disponibles con datos de salida seguros.
+     * Recupera todos los perfiles para uso administrativo.
+     *
+     * @return lista de usuarios convertidos a DTO
      */
     @Transactional(readOnly = true)
     public List<UserResponseDTO> list() {
@@ -43,7 +55,10 @@ public class UserService {
     }
 
     /**
-     * Consulta los datos públicos del usuario solicitado.
+     * Obtiene una cuenta por identificador.
+     *
+     * @param id identificador de la cuenta
+     * @return DTO público de la cuenta solicitada
      */
     @Transactional(readOnly = true)
     public UserResponseDTO find(Long id) {
@@ -51,7 +66,12 @@ public class UserService {
     }
 
     /**
-     * Actualiza un rol, impidiendo la automodificación administrativa.
+     * Actualiza el rol de una cuenta distinta a la del administrador.
+     *
+     * @param id identificador de la cuenta objetivo
+     * @param role nuevo rol
+     * @param actingUsername nombre del administrador que efectúa el cambio
+     * @return perfil con rol actualizado
      */
     @Transactional
     public UserResponseDTO setRole(Long id, Role role, String actingUsername) {
@@ -64,7 +84,12 @@ public class UserService {
     }
 
     /**
-     * Modifica la habilitación de una cuenta según su verificación.
+     * Modifica el estado de una cuenta respetando la verificación por correo.
+     *
+     * @param id identificador de la cuenta objetivo
+     * @param enabled nuevo estado de habilitación
+     * @param actingUsername nombre del administrador que efectúa el cambio
+     * @return perfil con estado actualizado
      */
     @Transactional
     public UserResponseDTO setEnabled(Long id, boolean enabled, String actingUsername) {
@@ -80,15 +105,20 @@ public class UserService {
     }
 
     /**
-     * Convierte una entidad User en su representación pública.
+     * Convierte la entidad persistida en una respuesta sin credenciales.
+     *
+     * @param user entidad de usuario
+     * @return DTO para el cliente
      */
     public UserResponseDTO toDto(User user) {
-        return new UserResponseDTO(user.getId(), user.getUsername(), user.getEmail(),
-                user.getRole(), user.isEmailVerified(), user.isEnabled());
+        return modelMapper.map(user, UserResponseDTO.class);
     }
 
     /**
-     * Busca un usuario por id o señala que no existe.
+     * Busca una cuenta y rechaza identificadores inexistentes.
+     *
+     * @param id identificador solicitado
+     * @return entidad recuperada
      */
     private User load(Long id) {
         return repository.findById(id)
