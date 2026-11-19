@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import co.edu.unbosque.advancewars.dto.CreateGameDTO;
 import co.edu.unbosque.advancewars.dto.GameDTO;
 import co.edu.unbosque.advancewars.dto.MapDTO;
+import co.edu.unbosque.advancewars.dto.UnitDTO;
 import co.edu.unbosque.advancewars.model.User;
 import co.edu.unbosque.advancewars.repository.UserRepository; // Ajusta el nombre si tu repositorio se llama distinto
 import co.edu.unbosque.advancewars.service.GameService;
@@ -52,6 +53,18 @@ public class GameController {
     @GetMapping("/{id}")
     public GameDTO getMyGame(@PathVariable Long id, @AuthenticationPrincipal User creator) {
         return gameService.getMyGame(id, resolveUser(creator));
+    }
+
+    /** Comienza la partida y crea los soldados iniciales. */
+    @PostMapping("/{id}/start")
+    public GameDTO startGame(@PathVariable Long id, @AuthenticationPrincipal User creator) {
+        return gameService.startGame(id, resolveUser(creator));
+    }
+
+    /** Lista las unidades que hay sobre el tablero. */
+    @GetMapping("/{id}/units")
+    public List<UnitDTO> getMyUnits(@PathVariable Long id, @AuthenticationPrincipal User creator) {
+        return gameService.getMyUnits(id, resolveUser(creator));
     }
 
     /** Temporal: devuelve un usuario de la BD si la peticion no trae JWT. */
