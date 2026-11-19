@@ -1,18 +1,19 @@
-
 import { Injectable } from '@angular/core';
 import { mapa, casilla, tipoterreno, configuracionmapa } from '../models/mapa';
 
+/** Servicio encargado de generar mapas aleatorios jugables a partir de una semilla. */
 @Injectable({
   providedIn: 'root'
 })
 export class generadormapaservice {
 
+  /** Genera un mapa completo garantizando que todas las bases estén conectadas. */
   generar(config: configuracionmapa, semilla: number, jugadores: number): mapa {
     const maximoIntentos = 20;
     let cuadricula: tipoterreno[][] = [];
 
     for (let intento = 0; intento < maximoIntentos; intento++) {
-      const aleatorio = this.crearAleatorio(semilla + intento);
+      const aleatorio = generadormapaservice.crearAleatorio(semilla + intento);
       const sinAgua = intento === maximoIntentos - 1;
       cuadricula = this.crearTerreno(config, aleatorio, jugadores, sinAgua);
 
@@ -21,10 +22,11 @@ export class generadormapaservice {
       }
     }
 
-    return this.aMapa(cuadricula, config.width, config.height);
+    return generadormapaservice.aMapa(cuadricula, config.width, config.height);
   }
 
-  posicionesBase(ancho: number, alto: number, jugadores: number): { x: number; y: number }[] {
+  /** Calcula las coordenadas iniciales de las bases según el tamaño del mapa y el número de jugadores. */
+  static calcularPosicionesBase(ancho: number, alto: number, jugadores: number): { x: number; y: number }[] {
     const esquinas = [
       { x: 1, y: 1 },
       { x: ancho - 2, y: alto - 2 },
@@ -34,17 +36,19 @@ export class generadormapaservice {
     return esquinas.slice(0, jugadores);
   }
 
-  private crearAleatorio(semilla: number): () => number {
+  /** Crea un generador pseudoaleatorio determinista basado en la semilla recibida. */
+  private static crearAleatorio(semilla: number): () => number {
     let estado = semilla >>> 0;
     return () => {
       estado = (estado + 0x6d2b79f5) >>> 0;
-      let t = estado;
-      t = Math.imul(t ^ (t >>> 15), t | 1);
-      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      let mezcla = estado;
+      mezcla = Math.imul(mezcla ^ (mezcla >>> 15), mezcla | 1);
+      mezcla ^= mezcla + Math.imul(mezcla ^ (mezcla >>> 7), mezcla | 61);
+      return ((mezcla ^ (mezcla >>> 14)) >>> 0) / 4294967296;
     };
   }
 
+  /** Construye la matriz de terrenos distribuyendo agua, montañas y bosques. */
   private crearTerreno(
     config: configuracionmapa,
     aleatorio: () => number,
@@ -52,14 +56,26 @@ export class generadormapaservice {
     sinAgua: boolean
   ): tipoterreno[][] {
     const cuadricula: tipoterreno[][] = [];
-    for (let y = 0; y < config.height; y++) {
+    for (let fila = 0; fila < config.height; fila++) {
       cuadricula.push(new Array<tipoterreno>(config.width).fill('PLAIN'));
     }
 
     const total = config.width * config.height;
-    const agua = sinAgua ? 0 : this.cantidad(total, config.minWaterPercent, config.maxWaterPercent, aleatorio);
-    const montanas = this.cantidad(total, config.minMountainPercent, config.maxMountainPercent, aleatorio);
-    const bosques = this.cantidad(total, config.minForestPercent, config.maxForestPercent, aleatorio);
+    const agua = sinAgua
+      ? 0
+      : generadormapaservice.calcularCantidad(total, config.minWaterPercent, config.maxWaterPercent, aleatorio);
+    const montanas = generadormapaservice.calcularCantidad(
+      total,
+      config.minMountainPercent,
+      config.maxMountainPercent,
+      aleatorio
+    );
+    const bosques = generadormapaservice.calcularCantidad(
+      total,
+      config.minForestPercent,
+      config.maxForestPercent,
+      aleatorio
+    );
 
     this.esparcir(cuadricula, 'WATER', agua, jugadores, aleatorio);
     this.esparcir(cuadricula, 'MOUNTAIN', montanas, jugadores, aleatorio);
@@ -68,11 +84,13 @@ export class generadormapaservice {
     return cuadricula;
   }
 
-  private cantidad(total: number, minimo: number, maximo: number, aleatorio: () => number): number {
+  /** Calcula la cantidad exacta de casillas de un terreno según su rango porcentual. */
+  private static calcularCantidad(total: number, minimo: number, maximo: number, aleatorio: () => number): number {
     const porcentaje = minimo + aleatorio() * (maximo - minimo);
     return Math.floor((total * porcentaje) / 100);
   }
 
+  /** Esparce grupos de un tipo de terreno por la cuadrícula evitando las zonas de base. */
   private esparcir(
     cuadricula: tipoterreno[][],
     tipo: tipoterreno,
@@ -85,37 +103,39 @@ export class generadormapaservice {
     const direcciones = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 
     let colocadas = 0;
-    let x = Math.floor(aleatorio() * ancho);
-    let y = Math.floor(aleatorio() * alto);
+    let posX = Math.floor(aleatorio() * ancho);
+    let posY = Math.floor(aleatorio() * alto);
     let pasos = cantidad * 30;
 
     while (colocadas < cantidad && pasos > 0) {
       pasos--;
 
-      if (cuadricula[y][x] === 'PLAIN' && !this.esZonaBase(x, y, ancho, alto, jugadores)) {
-        cuadricula[y][x] = tipo;
+      if (cuadricula[posY][posX] === 'PLAIN' && !this.esZonaBase(posX, posY, ancho, alto, jugadores)) {
+        cuadricula[posY][posX] = tipo;
         colocadas++;
       }
 
       if (aleatorio() < 0.08) {
-        x = Math.floor(aleatorio() * ancho);
-        y = Math.floor(aleatorio() * alto);
+        posX = Math.floor(aleatorio() * ancho);
+        posY = Math.floor(aleatorio() * alto);
       } else {
-        const d = direcciones[Math.floor(aleatorio() * 4)];
-        x = Math.min(ancho - 1, Math.max(0, x + d[0]));
-        y = Math.min(alto - 1, Math.max(0, y + d[1]));
+        const direccion = direcciones[Math.floor(aleatorio() * 4)];
+        posX = Math.min(ancho - 1, Math.max(0, posX + direccion[0]));
+        posY = Math.min(alto - 1, Math.max(0, posY + direccion[1]));
       }
     }
   }
 
-  private esZonaBase(x: number, y: number, ancho: number, alto: number, jugadores: number): boolean {
-    return this.posicionesBase(ancho, alto, jugadores).some(
-      b => Math.abs(b.x - x) <= 1 && Math.abs(b.y - y) <= 1
+  /** Verifica si una coordenada pertenece al perímetro protegido alrededor de alguna base. */
+  private esZonaBase(posX: number, posY: number, ancho: number, alto: number, jugadores: number): boolean {
+    return generadormapaservice.calcularPosicionesBase(ancho, alto, jugadores).some(
+      base => Math.abs(base.x - posX) <= 1 && Math.abs(base.y - posY) <= 1
     );
   }
 
+  /** Comprueba mediante búsqueda en anchura que todas las bases estén comunicadas por tierra. */
   private basesConectadas(cuadricula: tipoterreno[][], ancho: number, alto: number, jugadores: number): boolean {
-    const bases = this.posicionesBase(ancho, alto, jugadores);
+    const bases = generadormapaservice.calcularPosicionesBase(ancho, alto, jugadores);
     const visitada: boolean[][] = cuadricula.map(fila => fila.map(() => false));
     const cola: { x: number; y: number }[] = [bases[0]];
     visitada[bases[0].y][bases[0].x] = true;
@@ -124,29 +144,35 @@ export class generadormapaservice {
     let frente = 0;
     while (frente < cola.length) {
       const actual = cola[frente++];
-      for (const d of direcciones) {
-        const nx = actual.x + d[0];
-        const ny = actual.y + d[1];
-        const dentro = nx >= 0 && ny >= 0 && nx < ancho && ny < alto;
-        if (dentro && !visitada[ny][nx] && this.sePuedeCruzar(cuadricula[ny][nx])) {
-          visitada[ny][nx] = true;
-          cola.push({ x: nx, y: ny });
+      for (const direccion of direcciones) {
+        const siguienteX = actual.x + direccion[0];
+        const siguienteY = actual.y + direccion[1];
+        const dentro = siguienteX >= 0 && siguienteY >= 0 && siguienteX < ancho && siguienteY < alto;
+        if (
+          dentro &&
+          !visitada[siguienteY][siguienteX] &&
+          generadormapaservice.sePuedeCruzar(cuadricula[siguienteY][siguienteX])
+        ) {
+          visitada[siguienteY][siguienteX] = true;
+          cola.push({ x: siguienteX, y: siguienteY });
         }
       }
     }
 
-    return bases.every(b => visitada[b.y][b.x]);
+    return bases.every(base => visitada[base.y][base.x]);
   }
 
-  private sePuedeCruzar(tipo: tipoterreno): boolean {
+  /** Indica si una casilla es transitable por unidades terrestres básicas. */
+  private static sePuedeCruzar(tipo: tipoterreno): boolean {
     return tipo !== 'WATER' && tipo !== 'MOUNTAIN';
   }
 
-  private aMapa(cuadricula: tipoterreno[][], ancho: number, alto: number): mapa {
+  /** Convierte la matriz interna de terrenos en el objeto mapa final con lista de casillas. */
+  private static aMapa(cuadricula: tipoterreno[][], ancho: number, alto: number): mapa {
     const tiles: casilla[] = [];
-    for (let y = 0; y < alto; y++) {
-      for (let x = 0; x < ancho; x++) {
-        tiles.push({ x, y, terrainType: cuadricula[y][x] });
+    for (let fila = 0; fila < alto; fila++) {
+      for (let columna = 0; columna < ancho; columna++) {
+        tiles.push({ x: columna, y: fila, terrainType: cuadricula[fila][columna] });
       }
     }
     return { width: ancho, height: alto, tiles };
