@@ -1,0 +1,22 @@
+
+
+:host {
+  display: block;
+  font-family: 'Courier New', monospace;
+}
+
+.navbar {
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+  background: #14201a;
+  border-bottom: 4px solid #f26430;
+}
+
+.navbar__logo {
+  color: #ffd84d;
+  font-size: 24px;
+  font-weight: bold;
+  letter-spacing: 4px;
+  text-decoration: none;
+}
