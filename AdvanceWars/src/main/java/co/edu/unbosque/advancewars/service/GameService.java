@@ -24,9 +24,11 @@ import co.edu.unbosque.advancewars.repository.GameStateRepository;
 public class GameService {
 
     private final GameStateRepository gameRepository;
+    private final MapGenerationService mapGenerationService;
 
-    public GameService(GameStateRepository gameRepository) {
+    public GameService(GameStateRepository gameRepository, MapGenerationService mapGenerationService) {
         this.gameRepository = gameRepository;
+        this.mapGenerationService = mapGenerationService;
     }
 
     /** Crea una partida en configuracion, con jugadores y sin mapa por ahora. */
@@ -54,6 +56,7 @@ public class GameService {
         for (int i = 0; i < names.size(); i++) {
             game.addPlayer(new Player(names.get(i), i + 1, 0));
         }
+        game.setGameMap(mapGenerationService.generateMap(data.getWidth(), data.getHeight(), seed));
 
         // JPA guarda los jugadores porque GameState ya tiene CascadeType.ALL.
         return new GameDTO(gameRepository.save(game));
