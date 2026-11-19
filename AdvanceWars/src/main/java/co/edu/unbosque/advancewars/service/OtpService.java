@@ -100,6 +100,17 @@ public class OtpService {
         return CheckResult.success(challenge.getUser());
     }
 
+    /** Invalida todos los desafíos sin consumir de un usuario y propósito. */
+    @Transactional
+    public void invalidateActiveForUser(User user, OtpPurpose purpose) {
+        List<OtpChallenge> active = repository
+                .findAllByUserAndPurposeAndConsumedAtIsNullOrderByCreatedAtDesc(user, purpose);
+        for (OtpChallenge challenge : active) {
+            challenge.consume();
+        }
+        repository.saveAll(active);
+    }
+
     /**
      * Busca un desafío existente por su identificador.
      */

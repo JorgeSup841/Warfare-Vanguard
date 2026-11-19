@@ -4,32 +4,32 @@ import co.edu.unbosque.advancewars.service.PdfReportService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Expone la descarga de reportes de partidas para administradores.
- */
+/** Expone el reporte PDF de partidas propias o de administración. */
 @RestController
-@RequestMapping("/api/admin/games")
 public class ReportController {
     private final PdfReportService reports;
 
-    /**
-     * Inyecta el servicio de generación de reportes.
-     */
-    public ReportController(PdfReportService reports) { this.reports = reports; }
+    /** Inyecta el servicio de reportes. */
+    public ReportController(PdfReportService reports) {
+        this.reports = reports;
+    }
 
-    /**
-     * Genera una descarga PDF para la partida solicitada.
-     */
-    @GetMapping(value = "/{gameId}/report.pdf", produces = MediaType.APPLICATION_PDF_VALUE)
-    public ResponseEntity<byte[]> report(@PathVariable Long gameId) {
+    /** Devuelve el PDF comprobando la propiedad de la partida en el servicio. */
+    @GetMapping(value = {"/api/games/{gameId}/report.pdf", "/api/admin/games/{gameId}/report.pdf"},
+            produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> report(@PathVariable Long gameId, Authentication authentication) {
+        boolean administrator = authentication.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+        byte[] pdf = reports.create(gameId, authentication.getName(), administrator);
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=advancewars-" + gameId + ".pdf")
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=advancewars-" + gameId + ".pdf")
                 .contentType(MediaType.APPLICATION_PDF)
-                .body(reports.create(gameId));
+                .body(pdf);
     }
 }

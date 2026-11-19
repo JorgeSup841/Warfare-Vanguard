@@ -34,7 +34,12 @@ public class LoginRateLimiter {
      */
     public boolean allowed(String username) {
         Window window = failures.get(username);
-        if (window == null) return true;
+        if (window == null) {
+            if (failures.size() < maxEntries) return true;
+            Instant now = Instant.now();
+            failures.entrySet().removeIf(entry -> !now.isBefore(entry.getValue().startedAt.plusSeconds(windowSeconds)));
+            return failures.size() < maxEntries;
+        }
         if (Instant.now().isAfter(window.startedAt.plusSeconds(windowSeconds))) {
             failures.remove(username, window);
             return true;
