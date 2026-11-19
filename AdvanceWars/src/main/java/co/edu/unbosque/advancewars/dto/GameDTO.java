@@ -6,57 +6,44 @@ import java.util.List;
 import co.edu.unbosque.advancewars.model.GameState;
 import co.edu.unbosque.advancewars.model.Player;
 
-/** Datos seguros y sencillos de una partida para enviar a Angular. */
+/** Datos de una partida para mostrar en Angular y Swagger. */
 public class GameDTO {
 
-	private Long id;
-	private String status;
-	private int playerCount;
-	private int width;
-	private int height;
-	private Long seed;
-	private List<String> playerNames;
+    private Long id;
+    private String status;
+    private int playerCount;
+    private int width;
+    private int height;
+    private Long seed;
+    private int currentRound;
+    private int currentPlayerOrder;
+    private List<String> playerNames = new ArrayList<>();
+    private List<PlayerStateDTO> players = new ArrayList<>();
 
-	/** Convierte la partida guardada en un objeto facil de enviar como JSON. */
-	public GameDTO(GameState game) {
-		this.id = game.getId();
-		this.status = game.getStatus().name();
-		this.playerCount = game.getConfiguration().getPlayerCount();
-		this.width = game.getConfiguration().getWidth();
-		this.height = game.getConfiguration().getHeight();
-		this.seed = game.getSeed();
-		this.playerNames = new ArrayList<>();
+    public GameDTO(GameState game) {
+        id = game.getId();
+        status = game.getStatus().name();
+        playerCount = game.getConfiguration().getPlayerCount();
+        width = game.getConfiguration().getWidth();
+        height = game.getConfiguration().getHeight();
+        seed = game.getSeed();
+        currentRound = game.getCurrentRound();
+        currentPlayerOrder = game.getCurrentPlayerOrder();
 
-		for (Player player : game.getPlayers()) {
-			playerNames.add(player.getName());
-		}
-	}
+        for (Player player : game.getPlayers()) {
+            playerNames.add(player.getName());
+            players.add(new PlayerStateDTO(player));
+        }
+    }
 
-	public Long getId() {
-		return id;
-	}
-
-	public String getStatus() {
-		return status;
-	}
-
-	public int getPlayerCount() {
-		return playerCount;
-	}
-
-	public int getWidth() {
-		return width;
-	}
-
-	public int getHeight() {
-		return height;
-	}
-
-	public Long getSeed() {
-		return seed;
-	}
-
-	public List<String> getPlayerNames() {
-		return playerNames;
-	}
+    public Long getId() { return id; }
+    public String getStatus() { return status; }
+    public int getPlayerCount() { return playerCount; }
+    public int getWidth() { return width; }
+    public int getHeight() { return height; }
+    public Long getSeed() { return seed; }
+    public int getCurrentRound() { return currentRound; }
+    public int getCurrentPlayerOrder() { return currentPlayerOrder; }
+    public List<String> getPlayerNames() { return playerNames; }
+    public List<PlayerStateDTO> getPlayers() { return players; }
 }
