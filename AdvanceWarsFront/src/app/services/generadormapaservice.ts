@@ -7,8 +7,13 @@ import { mapa, casilla, tipoterreno, configuracionmapa } from '../models/mapa';
 })
 export class generadormapaservice {
 
+  private readonly habilitado = true;
+
   /** Genera un mapa completo garantizando que todas las bases estén conectadas. */
   generar(config: configuracionmapa, semilla: number, jugadores: number): mapa {
+    if (!this.habilitado) {
+      return { width: 0, height: 0, tiles: [] };
+    }
     return generadormapaservice.generarMapa(config, semilla, jugadores);
   }
 

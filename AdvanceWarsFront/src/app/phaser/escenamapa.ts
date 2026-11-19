@@ -1,4 +1,4 @@
-import * as Phaser from 'phaser';
+import Phaser from 'phaser';
 import { mapa, casilla, terreno, tipoterreno } from '../models/mapa';
 
 /** Tamaño en píxeles de cada casilla del tablero. */
@@ -49,19 +49,20 @@ export class EscenaMapa extends Phaser.Scene {
   /**
    * Dibuja cada casilla del mapa con el color de su terreno y un pequeño dibujo encima.
    */
+  /**
+   * Dibuja cada casilla del mapa con el color de su terreno y un pequeño dibujo encima.
+   */
   private dibujarTerreno(): void {
-    const g = this.add.graphics();
+    const graficos = this.add.graphics();
 
-    for (const c of this.datos.mapa.tiles) {
-      const px = c.x * TAM_CASILLA;
-      const py = c.y * TAM_CASILLA;
-
-      g.fillStyle(this.colorDe(c.terrainType), 1);
-      g.fillRect(px, py, TAM_CASILLA, TAM_CASILLA);
-      this.decorar(g, c.terrainType, px, py);
-
-      g.lineStyle(1, 0x000000, 0.15);
-      g.strokeRect(px, py, TAM_CASILLA, TAM_CASILLA);
+    for (const casillaActual of this.datos.mapa.tiles) {
+      const px = casillaActual.x * TAM_CASILLA;
+      const py = casillaActual.y * TAM_CASILLA;
+      graficos.fillStyle(this.colorDe(casillaActual.terrainType), 1);
+      graficos.fillRect(px, py, TAM_CASILLA, TAM_CASILLA);
+      graficos.lineStyle(1, 0x000000, 0.25);
+      graficos.strokeRect(px, py, TAM_CASILLA, TAM_CASILLA);
+      EscenaMapa.decorar(graficos, casillaActual.terrainType, px, py);
     }
   }
 
@@ -71,8 +72,8 @@ export class EscenaMapa extends Phaser.Scene {
    * @returns color en formato numérico que entiende Phaser
    */
   private colorDe(tipo: tipoterreno): number {
-    const t = this.datos.terrenos.find(x => x.terrainType === tipo);
-    return t ? Phaser.Display.Color.HexStringToColor(t.color).color : 0xffffff;
+    const terrenoEncontrado = this.datos.terrenos.find(item => item.terrainType === tipo);
+    return terrenoEncontrado ? Phaser.Display.Color.HexStringToColor(terrenoEncontrado.color).color : 0xffffff;
   }
 
   /**
@@ -82,41 +83,45 @@ export class EscenaMapa extends Phaser.Scene {
    * @param px posición x en píxeles
    * @param py posición y en píxeles
    */
-  private decorar(g: Phaser.GameObjects.Graphics, tipo: tipoterreno, px: number, py: number): void {
+  private static decorar(graficos: Phaser.GameObjects.Graphics, tipo: tipoterreno, px: number, py: number): void {
     if (tipo === 'FOREST') {
-      g.fillStyle(0x2b6b28, 1);
-      g.fillCircle(px + 13, py + 24, 9);
-      g.fillCircle(px + 27, py + 18, 9);
-      g.fillCircle(px + 22, py + 29, 8);
+      graficos.fillStyle(0x2b6b28, 1);
+      graficos.fillCircle(px + 13, py + 24, 9);
+      graficos.fillCircle(px + 27, py + 18, 9);
+      graficos.fillCircle(px + 22, py + 29, 8);
     } else if (tipo === 'MOUNTAIN') {
-      g.fillStyle(0x6e4f38, 1);
-      g.fillTriangle(px + 4, py + 35, px + 20, py + 6, px + 36, py + 35);
-      g.fillStyle(0xffffff, 1);
-      g.fillTriangle(px + 14, py + 18, px + 20, py + 6, px + 26, py + 18);
+      graficos.fillStyle(0x6e4f38, 1);
+      graficos.fillTriangle(px + 4, py + 35, px + 20, py + 6, px + 36, py + 35);
+      graficos.fillStyle(0xffffff, 1);
+      graficos.fillTriangle(px + 14, py + 18, px + 20, py + 6, px + 26, py + 18);
     } else if (tipo === 'WATER') {
-      g.lineStyle(2, 0xffffff, 0.35);
-      g.lineBetween(px + 6, py + 14, px + 20, py + 14);
-      g.lineBetween(px + 16, py + 27, px + 34, py + 27);
+      graficos.lineStyle(2, 0xffffff, 0.35);
+      graficos.lineBetween(px + 6, py + 14, px + 20, py + 14);
+      graficos.lineBetween(px + 16, py + 27, px + 34, py + 27);
     }
   }
 
   /**
    * Dibuja un cuadro del color del jugador con su número sobre cada base.
    */
+  /**
+   * Dibuja un cuadro del color del jugador con su número sobre cada base.
+   */
   private dibujarBases(): void {
-    const g = this.add.graphics();
+    const graficos = this.add.graphics();
 
-    this.datos.bases.forEach((base, i) => {
+    this.datos.bases.forEach((base, indice) => {
       const px = base.x * TAM_CASILLA;
+      // ... reemplaza el resto de g. por graficos. e i por indice dentro de este método
       const py = base.y * TAM_CASILLA;
 
-      g.fillStyle(COLORES_JUGADOR[i], 1);
-      g.fillRect(px + 4, py + 4, TAM_CASILLA - 8, TAM_CASILLA - 8);
-      g.lineStyle(3, 0x14201a, 1);
-      g.strokeRect(px + 4, py + 4, TAM_CASILLA - 8, TAM_CASILLA - 8);
+      graficos.fillStyle(COLORES_JUGADOR[indice], 1);
+      graficos.fillRect(px + 4, py + 4, TAM_CASILLA - 8, TAM_CASILLA - 8);
+      graficos.lineStyle(3, 0x14201a, 1);
+      graficos.strokeRect(px + 4, py + 4, TAM_CASILLA - 8, TAM_CASILLA - 8);
 
       this.add
-        .text(px + TAM_CASILLA / 2, py + TAM_CASILLA / 2, String(i + 1), {
+        .text(px + TAM_CASILLA / 2, py + TAM_CASILLA / 2, String(indice + 1), {
           fontFamily: 'Courier New',
           fontSize: '22px',
           fontStyle: 'bold',
@@ -133,17 +138,17 @@ export class EscenaMapa extends Phaser.Scene {
     this.input.on('pointermove', (puntero: Phaser.Input.Pointer) => {
       const cx = Math.floor(puntero.worldX / TAM_CASILLA);
       const cy = Math.floor(puntero.worldY / TAM_CASILLA);
-      const m = this.datos.mapa;
+      const mapaActual = this.datos.mapa;
 
       this.resaltado.clear();
-      if (cx < 0 || cy < 0 || cx >= m.width || cy >= m.height) {
+      if (cx < 0 || cy < 0 || cx >= mapaActual.width || cy >= mapaActual.height) {
         this.datos.alPasarSobre(null);
         return;
       }
 
       this.resaltado.lineStyle(3, 0xffd84d, 1);
       this.resaltado.strokeRect(cx * TAM_CASILLA, cy * TAM_CASILLA, TAM_CASILLA, TAM_CASILLA);
-      this.datos.alPasarSobre(m.tiles[cy * m.width + cx]);
+      this.datos.alPasarSobre(mapaActual.tiles[cy * mapaActual.width + cx]);
     });
 
     this.input.on('gameout', () => {

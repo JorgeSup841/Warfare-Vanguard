@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
-import * as Phaser from 'phaser';
+import Phaser from 'phaser';
 import { juegoservice } from '../../services/juegoservice';
 import { generadormapaservice } from '../../services/generadormapaservice';
 import { EscenaMapa, DatosEscena, TAM_CASILLA } from '../../phaser/escenamapa';
@@ -20,6 +20,7 @@ export class Juegocomponent implements OnInit, OnDestroy {
 
   private juegoPhaser?: Phaser.Game;
   private config?: configuracionmapa;
+  readonly obtenerCosto = Juegocomponent.costoDe;
 
   // Variables normales: cambian solo cuando el usuario hace clic o escribe.
   semilla = 12345;
@@ -152,7 +153,8 @@ export class Juegocomponent implements OnInit, OnDestroy {
    * @param tipo código del tipo de movimiento
    * @returns el costo, o "No pasa" si es 0
    */
-  costoDe(t: terreno, tipo: string): string {
+
+  static costoDe(t: terreno, tipo: string): string {
     const costo = t.movementCost[tipo];
     return costo === 0 ? 'No pasa' : String(costo);
   }
