@@ -1,0 +1,3092 @@
+{
+  "project": "AURA WARS / Warfare-Vanguard",
+  "baseUrl": "assets/sprites/",
+  "tileSize": 40,
+  "unitCount": 16,
+  "factions": {
+    "RED": {
+      "name": "Ejército Carmesí",
+      "color": "#d63031"
+    },
+    "BLUE": {
+      "name": "Legión Azur",
+      "color": "#0984e3"
+    },
+    "GREEN": {
+      "name": "Frente Esmeralda",
+      "color": "#00b894"
+    },
+    "YELLOW": {
+      "name": "Guardia Ámbar",
+      "color": "#fdcb6e"
+    }
+  },
+  "unitTypes": [
+    "INFANTRY",
+    "MECH",
+    "RECON",
+    "TANK",
+    "MEDIUM_TANK",
+    "ARTILLERY",
+    "ANTI_AIR",
+    "ROCKET",
+    "MISSILE",
+    "FIGHTER",
+    "BOMBER",
+    "BATTLE_COPTER",
+    "TRANSPORT_COPTER",
+    "BATTLESHIP",
+    "CRUISER",
+    "SUBMARINE"
+  ],
+  "terrainTypes": [
+    "PLAIN",
+    "FOREST",
+    "MOUNTAIN",
+    "WATER",
+    "ROAD"
+  ],
+  "propertyTypes": [
+    "HEADQUARTERS",
+    "CITY",
+    "FACTORY",
+    "AIRPORT",
+    "PORT"
+  ],
+  "artStyle": "Retro pixel art; PNG RGBA separated by unit / faction / animation frame",
+  "units": {
+    "RED": {
+      "INFANTRY": "assets/sprites/unidades/RED/INFANTRY.png",
+      "MECH": "assets/sprites/unidades/RED/MECH.png",
+      "RECON": "assets/sprites/unidades/RED/RECON.png",
+      "TANK": "assets/sprites/unidades/RED/TANK.png",
+      "MEDIUM_TANK": "assets/sprites/unidades/RED/MEDIUM_TANK.png",
+      "ARTILLERY": "assets/sprites/unidades/RED/ARTILLERY.png",
+      "ANTI_AIR": "assets/sprites/unidades/RED/ANTI_AIR.png",
+      "ROCKET": "assets/sprites/unidades/RED/ROCKET.png",
+      "MISSILE": "assets/sprites/unidades/RED/MISSILE.png",
+      "FIGHTER": "assets/sprites/unidades/RED/FIGHTER.png",
+      "BOMBER": "assets/sprites/unidades/RED/BOMBER.png",
+      "BATTLE_COPTER": "assets/sprites/unidades/RED/BATTLE_COPTER.png",
+      "TRANSPORT_COPTER": "assets/sprites/unidades/RED/TRANSPORT_COPTER.png",
+      "BATTLESHIP": "assets/sprites/unidades/RED/BATTLESHIP.png",
+      "CRUISER": "assets/sprites/unidades/RED/CRUISER.png",
+      "SUBMARINE": "assets/sprites/unidades/RED/SUBMARINE.png"
+    },
+    "BLUE": {
+      "INFANTRY": "assets/sprites/unidades/BLUE/INFANTRY.png",
+      "MECH": "assets/sprites/unidades/BLUE/MECH.png",
+      "RECON": "assets/sprites/unidades/BLUE/RECON.png",
+      "TANK": "assets/sprites/unidades/BLUE/TANK.png",
+      "MEDIUM_TANK": "assets/sprites/unidades/BLUE/MEDIUM_TANK.png",
+      "ARTILLERY": "assets/sprites/unidades/BLUE/ARTILLERY.png",
+      "ANTI_AIR": "assets/sprites/unidades/BLUE/ANTI_AIR.png",
+      "ROCKET": "assets/sprites/unidades/BLUE/ROCKET.png",
+      "MISSILE": "assets/sprites/unidades/BLUE/MISSILE.png",
+      "FIGHTER": "assets/sprites/unidades/BLUE/FIGHTER.png",
+      "BOMBER": "assets/sprites/unidades/BLUE/BOMBER.png",
+      "BATTLE_COPTER": "assets/sprites/unidades/BLUE/BATTLE_COPTER.png",
+      "TRANSPORT_COPTER": "assets/sprites/unidades/BLUE/TRANSPORT_COPTER.png",
+      "BATTLESHIP": "assets/sprites/unidades/BLUE/BATTLESHIP.png",
+      "CRUISER": "assets/sprites/unidades/BLUE/CRUISER.png",
+      "SUBMARINE": "assets/sprites/unidades/BLUE/SUBMARINE.png"
+    },
+    "GREEN": {
+      "INFANTRY": "assets/sprites/unidades/GREEN/INFANTRY.png",
+      "MECH": "assets/sprites/unidades/GREEN/MECH.png",
+      "RECON": "assets/sprites/unidades/GREEN/RECON.png",
+      "TANK": "assets/sprites/unidades/GREEN/TANK.png",
+      "MEDIUM_TANK": "assets/sprites/unidades/GREEN/MEDIUM_TANK.png",
+      "ARTILLERY": "assets/sprites/unidades/GREEN/ARTILLERY.png",
+      "ANTI_AIR": "assets/sprites/unidades/GREEN/ANTI_AIR.png",
+      "ROCKET": "assets/sprites/unidades/GREEN/ROCKET.png",
+      "MISSILE": "assets/sprites/unidades/GREEN/MISSILE.png",
+      "FIGHTER": "assets/sprites/unidades/GREEN/FIGHTER.png",
+      "BOMBER": "assets/sprites/unidades/GREEN/BOMBER.png",
+      "BATTLE_COPTER": "assets/sprites/unidades/GREEN/BATTLE_COPTER.png",
+      "TRANSPORT_COPTER": "assets/sprites/unidades/GREEN/TRANSPORT_COPTER.png",
+      "BATTLESHIP": "assets/sprites/unidades/GREEN/BATTLESHIP.png",
+      "CRUISER": "assets/sprites/unidades/GREEN/CRUISER.png",
+      "SUBMARINE": "assets/sprites/unidades/GREEN/SUBMARINE.png"
+    },
+    "YELLOW": {
+      "INFANTRY": "assets/sprites/unidades/YELLOW/INFANTRY.png",
+      "MECH": "assets/sprites/unidades/YELLOW/MECH.png",
+      "RECON": "assets/sprites/unidades/YELLOW/RECON.png",
+      "TANK": "assets/sprites/unidades/YELLOW/TANK.png",
+      "MEDIUM_TANK": "assets/sprites/unidades/YELLOW/MEDIUM_TANK.png",
+      "ARTILLERY": "assets/sprites/unidades/YELLOW/ARTILLERY.png",
+      "ANTI_AIR": "assets/sprites/unidades/YELLOW/ANTI_AIR.png",
+      "ROCKET": "assets/sprites/unidades/YELLOW/ROCKET.png",
+      "MISSILE": "assets/sprites/unidades/YELLOW/MISSILE.png",
+      "FIGHTER": "assets/sprites/unidades/YELLOW/FIGHTER.png",
+      "BOMBER": "assets/sprites/unidades/YELLOW/BOMBER.png",
+      "BATTLE_COPTER": "assets/sprites/unidades/YELLOW/BATTLE_COPTER.png",
+      "TRANSPORT_COPTER": "assets/sprites/unidades/YELLOW/TRANSPORT_COPTER.png",
+      "BATTLESHIP": "assets/sprites/unidades/YELLOW/BATTLESHIP.png",
+      "CRUISER": "assets/sprites/unidades/YELLOW/CRUISER.png",
+      "SUBMARINE": "assets/sprites/unidades/YELLOW/SUBMARINE.png"
+    }
+  },
+  "buildings": {
+    "RED": {
+      "HEADQUARTERS": "assets/sprites/edificios/RED/HEADQUARTERS.png",
+      "CITY": "assets/sprites/edificios/RED/CITY.png",
+      "FACTORY": "assets/sprites/edificios/RED/FACTORY.png",
+      "AIRPORT": "assets/sprites/edificios/RED/AIRPORT.png",
+      "PORT": "assets/sprites/edificios/RED/PORT.png"
+    },
+    "BLUE": {
+      "HEADQUARTERS": "assets/sprites/edificios/BLUE/HEADQUARTERS.png",
+      "CITY": "assets/sprites/edificios/BLUE/CITY.png",
+      "FACTORY": "assets/sprites/edificios/BLUE/FACTORY.png",
+      "AIRPORT": "assets/sprites/edificios/BLUE/AIRPORT.png",
+      "PORT": "assets/sprites/edificios/BLUE/PORT.png"
+    },
+    "GREEN": {
+      "HEADQUARTERS": "assets/sprites/edificios/GREEN/HEADQUARTERS.png",
+      "CITY": "assets/sprites/edificios/GREEN/CITY.png",
+      "FACTORY": "assets/sprites/edificios/GREEN/FACTORY.png",
+      "AIRPORT": "assets/sprites/edificios/GREEN/AIRPORT.png",
+      "PORT": "assets/sprites/edificios/GREEN/PORT.png"
+    },
+    "YELLOW": {
+      "HEADQUARTERS": "assets/sprites/edificios/YELLOW/HEADQUARTERS.png",
+      "CITY": "assets/sprites/edificios/YELLOW/CITY.png",
+      "FACTORY": "assets/sprites/edificios/YELLOW/FACTORY.png",
+      "AIRPORT": "assets/sprites/edificios/YELLOW/AIRPORT.png",
+      "PORT": "assets/sprites/edificios/YELLOW/PORT.png"
+    }
+  },
+  "terrains": {
+    "PLAIN": "assets/sprites/terrenos/PLAIN.png",
+    "FOREST": "assets/sprites/terrenos/FOREST.png",
+    "MOUNTAIN": "assets/sprites/terrenos/MOUNTAIN.png",
+    "WATER": "assets/sprites/terrenos/WATER.png",
+    "ROAD": "assets/sprites/terrenos/ROAD.png"
+  },
+  "animations": {
+    "unitFramePath": "assets/sprites/animaciones/unidades/{FACTION}/{UNIT}/{ACTION}_{FRAME2}.png",
+    "actions": {
+      "idle": 2,
+      "move": 4,
+      "attack": 4,
+      "hit": 2,
+      "destroy": 6
+    },
+    "illustratedInfantry": [
+      "walk",
+      "fire",
+      "capture"
+    ],
+    "illustratedInfantryFrames": 6,
+    "frameRateSuggestion": {
+      "idle": 2,
+      "move": 7,
+      "attack": 8,
+      "hit": 5,
+      "destroy": 10
+    }
+  },
+  "ui": {
+    "move": "assets/sprites/ui/move.png",
+    "attack": "assets/sprites/ui/attack.png",
+    "capture": "assets/sprites/ui/capture.png",
+    "end_turn": "assets/sprites/ui/end_turn.png",
+    "health": "assets/sprites/ui/health.png",
+    "fuel": "assets/sprites/ui/fuel.png",
+    "ammo": "assets/sprites/ui/ammo.png",
+    "money": "assets/sprites/ui/money.png",
+    "cursor": "assets/sprites/ui/cursor.png",
+    "selection": "assets/sprites/ui/selection.png"
+  },
+  "examples": [
+    {
+      "terrain": "PLAIN",
+      "faction": "RED",
+      "unitType": "INFANTRY",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/RED/INFANTRY.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "RED",
+      "unitType": "MECH",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/RED/MECH.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "RED",
+      "unitType": "RECON",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/RED/RECON.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "RED",
+      "unitType": "TANK",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/RED/TANK.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "RED",
+      "unitType": "MEDIUM_TANK",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/RED/MEDIUM_TANK.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "RED",
+      "unitType": "ARTILLERY",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/RED/ARTILLERY.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "RED",
+      "unitType": "ANTI_AIR",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/RED/ANTI_AIR.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "RED",
+      "unitType": "ROCKET",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/RED/ROCKET.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "RED",
+      "unitType": "MISSILE",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/RED/MISSILE.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "RED",
+      "unitType": "FIGHTER",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/RED/FIGHTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "RED",
+      "unitType": "BOMBER",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/RED/BOMBER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "RED",
+      "unitType": "BATTLE_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/RED/BATTLE_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "RED",
+      "unitType": "TRANSPORT_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/RED/TRANSPORT_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "RED",
+      "unitType": "BATTLESHIP",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/RED/BATTLESHIP.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "RED",
+      "unitType": "CRUISER",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/RED/CRUISER.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "RED",
+      "unitType": "SUBMARINE",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/RED/SUBMARINE.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "BLUE",
+      "unitType": "INFANTRY",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/BLUE/INFANTRY.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "BLUE",
+      "unitType": "MECH",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/BLUE/MECH.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "BLUE",
+      "unitType": "RECON",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/BLUE/RECON.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "BLUE",
+      "unitType": "TANK",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/BLUE/TANK.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "BLUE",
+      "unitType": "MEDIUM_TANK",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/BLUE/MEDIUM_TANK.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "BLUE",
+      "unitType": "ARTILLERY",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/BLUE/ARTILLERY.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "BLUE",
+      "unitType": "ANTI_AIR",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/BLUE/ANTI_AIR.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "BLUE",
+      "unitType": "ROCKET",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/BLUE/ROCKET.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "BLUE",
+      "unitType": "MISSILE",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/BLUE/MISSILE.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "BLUE",
+      "unitType": "FIGHTER",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/BLUE/FIGHTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "BLUE",
+      "unitType": "BOMBER",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/BLUE/BOMBER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "BLUE",
+      "unitType": "BATTLE_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/BLUE/BATTLE_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "BLUE",
+      "unitType": "TRANSPORT_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/BLUE/TRANSPORT_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "BLUE",
+      "unitType": "BATTLESHIP",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/BLUE/BATTLESHIP.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "BLUE",
+      "unitType": "CRUISER",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/BLUE/CRUISER.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "BLUE",
+      "unitType": "SUBMARINE",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/BLUE/SUBMARINE.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "GREEN",
+      "unitType": "INFANTRY",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/GREEN/INFANTRY.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "GREEN",
+      "unitType": "MECH",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/GREEN/MECH.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "GREEN",
+      "unitType": "RECON",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/GREEN/RECON.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "GREEN",
+      "unitType": "TANK",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/GREEN/TANK.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "GREEN",
+      "unitType": "MEDIUM_TANK",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/GREEN/MEDIUM_TANK.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "GREEN",
+      "unitType": "ARTILLERY",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/GREEN/ARTILLERY.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "GREEN",
+      "unitType": "ANTI_AIR",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/GREEN/ANTI_AIR.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "GREEN",
+      "unitType": "ROCKET",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/GREEN/ROCKET.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "GREEN",
+      "unitType": "MISSILE",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/GREEN/MISSILE.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "GREEN",
+      "unitType": "FIGHTER",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/GREEN/FIGHTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "GREEN",
+      "unitType": "BOMBER",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/GREEN/BOMBER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "GREEN",
+      "unitType": "BATTLE_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/GREEN/BATTLE_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "GREEN",
+      "unitType": "TRANSPORT_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/GREEN/TRANSPORT_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "GREEN",
+      "unitType": "BATTLESHIP",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/GREEN/BATTLESHIP.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "GREEN",
+      "unitType": "CRUISER",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/GREEN/CRUISER.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "GREEN",
+      "unitType": "SUBMARINE",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/GREEN/SUBMARINE.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "YELLOW",
+      "unitType": "INFANTRY",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/YELLOW/INFANTRY.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "YELLOW",
+      "unitType": "MECH",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/YELLOW/MECH.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "YELLOW",
+      "unitType": "RECON",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/YELLOW/RECON.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "YELLOW",
+      "unitType": "TANK",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/YELLOW/TANK.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "YELLOW",
+      "unitType": "MEDIUM_TANK",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/YELLOW/MEDIUM_TANK.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "YELLOW",
+      "unitType": "ARTILLERY",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/YELLOW/ARTILLERY.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "YELLOW",
+      "unitType": "ANTI_AIR",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/YELLOW/ANTI_AIR.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "YELLOW",
+      "unitType": "ROCKET",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/YELLOW/ROCKET.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "YELLOW",
+      "unitType": "MISSILE",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/YELLOW/MISSILE.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "YELLOW",
+      "unitType": "FIGHTER",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/YELLOW/FIGHTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "YELLOW",
+      "unitType": "BOMBER",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/YELLOW/BOMBER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "YELLOW",
+      "unitType": "BATTLE_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/YELLOW/BATTLE_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "YELLOW",
+      "unitType": "TRANSPORT_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/YELLOW/TRANSPORT_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "YELLOW",
+      "unitType": "BATTLESHIP",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/YELLOW/BATTLESHIP.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "YELLOW",
+      "unitType": "CRUISER",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/YELLOW/CRUISER.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "PLAIN",
+      "faction": "YELLOW",
+      "unitType": "SUBMARINE",
+      "path": "assets/sprites/ejemplos_terreno/PLAIN/YELLOW/SUBMARINE.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "RED",
+      "unitType": "INFANTRY",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/RED/INFANTRY.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "RED",
+      "unitType": "MECH",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/RED/MECH.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "RED",
+      "unitType": "RECON",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/RED/RECON.png",
+      "movementCostFromCatalog": 3,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "RED",
+      "unitType": "TANK",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/RED/TANK.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "RED",
+      "unitType": "MEDIUM_TANK",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/RED/MEDIUM_TANK.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "RED",
+      "unitType": "ARTILLERY",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/RED/ARTILLERY.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "RED",
+      "unitType": "ANTI_AIR",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/RED/ANTI_AIR.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "RED",
+      "unitType": "ROCKET",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/RED/ROCKET.png",
+      "movementCostFromCatalog": 3,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "RED",
+      "unitType": "MISSILE",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/RED/MISSILE.png",
+      "movementCostFromCatalog": 3,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "RED",
+      "unitType": "FIGHTER",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/RED/FIGHTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "RED",
+      "unitType": "BOMBER",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/RED/BOMBER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "RED",
+      "unitType": "BATTLE_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/RED/BATTLE_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "RED",
+      "unitType": "TRANSPORT_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/RED/TRANSPORT_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "RED",
+      "unitType": "BATTLESHIP",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/RED/BATTLESHIP.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "RED",
+      "unitType": "CRUISER",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/RED/CRUISER.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "RED",
+      "unitType": "SUBMARINE",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/RED/SUBMARINE.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "BLUE",
+      "unitType": "INFANTRY",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/BLUE/INFANTRY.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "BLUE",
+      "unitType": "MECH",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/BLUE/MECH.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "BLUE",
+      "unitType": "RECON",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/BLUE/RECON.png",
+      "movementCostFromCatalog": 3,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "BLUE",
+      "unitType": "TANK",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/BLUE/TANK.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "BLUE",
+      "unitType": "MEDIUM_TANK",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/BLUE/MEDIUM_TANK.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "BLUE",
+      "unitType": "ARTILLERY",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/BLUE/ARTILLERY.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "BLUE",
+      "unitType": "ANTI_AIR",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/BLUE/ANTI_AIR.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "BLUE",
+      "unitType": "ROCKET",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/BLUE/ROCKET.png",
+      "movementCostFromCatalog": 3,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "BLUE",
+      "unitType": "MISSILE",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/BLUE/MISSILE.png",
+      "movementCostFromCatalog": 3,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "BLUE",
+      "unitType": "FIGHTER",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/BLUE/FIGHTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "BLUE",
+      "unitType": "BOMBER",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/BLUE/BOMBER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "BLUE",
+      "unitType": "BATTLE_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/BLUE/BATTLE_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "BLUE",
+      "unitType": "TRANSPORT_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/BLUE/TRANSPORT_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "BLUE",
+      "unitType": "BATTLESHIP",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/BLUE/BATTLESHIP.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "BLUE",
+      "unitType": "CRUISER",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/BLUE/CRUISER.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "BLUE",
+      "unitType": "SUBMARINE",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/BLUE/SUBMARINE.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "GREEN",
+      "unitType": "INFANTRY",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/GREEN/INFANTRY.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "GREEN",
+      "unitType": "MECH",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/GREEN/MECH.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "GREEN",
+      "unitType": "RECON",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/GREEN/RECON.png",
+      "movementCostFromCatalog": 3,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "GREEN",
+      "unitType": "TANK",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/GREEN/TANK.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "GREEN",
+      "unitType": "MEDIUM_TANK",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/GREEN/MEDIUM_TANK.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "GREEN",
+      "unitType": "ARTILLERY",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/GREEN/ARTILLERY.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "GREEN",
+      "unitType": "ANTI_AIR",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/GREEN/ANTI_AIR.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "GREEN",
+      "unitType": "ROCKET",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/GREEN/ROCKET.png",
+      "movementCostFromCatalog": 3,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "GREEN",
+      "unitType": "MISSILE",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/GREEN/MISSILE.png",
+      "movementCostFromCatalog": 3,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "GREEN",
+      "unitType": "FIGHTER",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/GREEN/FIGHTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "GREEN",
+      "unitType": "BOMBER",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/GREEN/BOMBER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "GREEN",
+      "unitType": "BATTLE_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/GREEN/BATTLE_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "GREEN",
+      "unitType": "TRANSPORT_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/GREEN/TRANSPORT_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "GREEN",
+      "unitType": "BATTLESHIP",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/GREEN/BATTLESHIP.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "GREEN",
+      "unitType": "CRUISER",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/GREEN/CRUISER.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "GREEN",
+      "unitType": "SUBMARINE",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/GREEN/SUBMARINE.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "YELLOW",
+      "unitType": "INFANTRY",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/YELLOW/INFANTRY.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "YELLOW",
+      "unitType": "MECH",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/YELLOW/MECH.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "YELLOW",
+      "unitType": "RECON",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/YELLOW/RECON.png",
+      "movementCostFromCatalog": 3,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "YELLOW",
+      "unitType": "TANK",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/YELLOW/TANK.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "YELLOW",
+      "unitType": "MEDIUM_TANK",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/YELLOW/MEDIUM_TANK.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "YELLOW",
+      "unitType": "ARTILLERY",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/YELLOW/ARTILLERY.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "YELLOW",
+      "unitType": "ANTI_AIR",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/YELLOW/ANTI_AIR.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "YELLOW",
+      "unitType": "ROCKET",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/YELLOW/ROCKET.png",
+      "movementCostFromCatalog": 3,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "YELLOW",
+      "unitType": "MISSILE",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/YELLOW/MISSILE.png",
+      "movementCostFromCatalog": 3,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "YELLOW",
+      "unitType": "FIGHTER",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/YELLOW/FIGHTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "YELLOW",
+      "unitType": "BOMBER",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/YELLOW/BOMBER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "YELLOW",
+      "unitType": "BATTLE_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/YELLOW/BATTLE_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "YELLOW",
+      "unitType": "TRANSPORT_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/YELLOW/TRANSPORT_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "YELLOW",
+      "unitType": "BATTLESHIP",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/YELLOW/BATTLESHIP.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "YELLOW",
+      "unitType": "CRUISER",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/YELLOW/CRUISER.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "FOREST",
+      "faction": "YELLOW",
+      "unitType": "SUBMARINE",
+      "path": "assets/sprites/ejemplos_terreno/FOREST/YELLOW/SUBMARINE.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "RED",
+      "unitType": "INFANTRY",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/RED/INFANTRY.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "RED",
+      "unitType": "MECH",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/RED/MECH.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "RED",
+      "unitType": "RECON",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/RED/RECON.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "RED",
+      "unitType": "TANK",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/RED/TANK.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "RED",
+      "unitType": "MEDIUM_TANK",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/RED/MEDIUM_TANK.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "RED",
+      "unitType": "ARTILLERY",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/RED/ARTILLERY.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "RED",
+      "unitType": "ANTI_AIR",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/RED/ANTI_AIR.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "RED",
+      "unitType": "ROCKET",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/RED/ROCKET.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "RED",
+      "unitType": "MISSILE",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/RED/MISSILE.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "RED",
+      "unitType": "FIGHTER",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/RED/FIGHTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "RED",
+      "unitType": "BOMBER",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/RED/BOMBER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "RED",
+      "unitType": "BATTLE_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/RED/BATTLE_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "RED",
+      "unitType": "TRANSPORT_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/RED/TRANSPORT_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "RED",
+      "unitType": "BATTLESHIP",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/RED/BATTLESHIP.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "RED",
+      "unitType": "CRUISER",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/RED/CRUISER.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "RED",
+      "unitType": "SUBMARINE",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/RED/SUBMARINE.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "BLUE",
+      "unitType": "INFANTRY",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/BLUE/INFANTRY.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "BLUE",
+      "unitType": "MECH",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/BLUE/MECH.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "BLUE",
+      "unitType": "RECON",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/BLUE/RECON.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "BLUE",
+      "unitType": "TANK",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/BLUE/TANK.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "BLUE",
+      "unitType": "MEDIUM_TANK",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/BLUE/MEDIUM_TANK.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "BLUE",
+      "unitType": "ARTILLERY",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/BLUE/ARTILLERY.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "BLUE",
+      "unitType": "ANTI_AIR",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/BLUE/ANTI_AIR.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "BLUE",
+      "unitType": "ROCKET",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/BLUE/ROCKET.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "BLUE",
+      "unitType": "MISSILE",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/BLUE/MISSILE.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "BLUE",
+      "unitType": "FIGHTER",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/BLUE/FIGHTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "BLUE",
+      "unitType": "BOMBER",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/BLUE/BOMBER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "BLUE",
+      "unitType": "BATTLE_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/BLUE/BATTLE_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "BLUE",
+      "unitType": "TRANSPORT_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/BLUE/TRANSPORT_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "BLUE",
+      "unitType": "BATTLESHIP",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/BLUE/BATTLESHIP.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "BLUE",
+      "unitType": "CRUISER",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/BLUE/CRUISER.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "BLUE",
+      "unitType": "SUBMARINE",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/BLUE/SUBMARINE.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "GREEN",
+      "unitType": "INFANTRY",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/GREEN/INFANTRY.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "GREEN",
+      "unitType": "MECH",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/GREEN/MECH.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "GREEN",
+      "unitType": "RECON",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/GREEN/RECON.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "GREEN",
+      "unitType": "TANK",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/GREEN/TANK.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "GREEN",
+      "unitType": "MEDIUM_TANK",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/GREEN/MEDIUM_TANK.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "GREEN",
+      "unitType": "ARTILLERY",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/GREEN/ARTILLERY.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "GREEN",
+      "unitType": "ANTI_AIR",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/GREEN/ANTI_AIR.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "GREEN",
+      "unitType": "ROCKET",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/GREEN/ROCKET.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "GREEN",
+      "unitType": "MISSILE",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/GREEN/MISSILE.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "GREEN",
+      "unitType": "FIGHTER",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/GREEN/FIGHTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "GREEN",
+      "unitType": "BOMBER",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/GREEN/BOMBER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "GREEN",
+      "unitType": "BATTLE_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/GREEN/BATTLE_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "GREEN",
+      "unitType": "TRANSPORT_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/GREEN/TRANSPORT_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "GREEN",
+      "unitType": "BATTLESHIP",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/GREEN/BATTLESHIP.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "GREEN",
+      "unitType": "CRUISER",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/GREEN/CRUISER.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "GREEN",
+      "unitType": "SUBMARINE",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/GREEN/SUBMARINE.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "YELLOW",
+      "unitType": "INFANTRY",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/YELLOW/INFANTRY.png",
+      "movementCostFromCatalog": 2,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "YELLOW",
+      "unitType": "MECH",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/YELLOW/MECH.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "YELLOW",
+      "unitType": "RECON",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/YELLOW/RECON.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "YELLOW",
+      "unitType": "TANK",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/YELLOW/TANK.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "YELLOW",
+      "unitType": "MEDIUM_TANK",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/YELLOW/MEDIUM_TANK.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "YELLOW",
+      "unitType": "ARTILLERY",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/YELLOW/ARTILLERY.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "YELLOW",
+      "unitType": "ANTI_AIR",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/YELLOW/ANTI_AIR.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "YELLOW",
+      "unitType": "ROCKET",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/YELLOW/ROCKET.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "YELLOW",
+      "unitType": "MISSILE",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/YELLOW/MISSILE.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "YELLOW",
+      "unitType": "FIGHTER",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/YELLOW/FIGHTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "YELLOW",
+      "unitType": "BOMBER",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/YELLOW/BOMBER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "YELLOW",
+      "unitType": "BATTLE_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/YELLOW/BATTLE_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "YELLOW",
+      "unitType": "TRANSPORT_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/YELLOW/TRANSPORT_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "YELLOW",
+      "unitType": "BATTLESHIP",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/YELLOW/BATTLESHIP.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "YELLOW",
+      "unitType": "CRUISER",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/YELLOW/CRUISER.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "MOUNTAIN",
+      "faction": "YELLOW",
+      "unitType": "SUBMARINE",
+      "path": "assets/sprites/ejemplos_terreno/MOUNTAIN/YELLOW/SUBMARINE.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "RED",
+      "unitType": "INFANTRY",
+      "path": "assets/sprites/ejemplos_terreno/WATER/RED/INFANTRY.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "RED",
+      "unitType": "MECH",
+      "path": "assets/sprites/ejemplos_terreno/WATER/RED/MECH.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "RED",
+      "unitType": "RECON",
+      "path": "assets/sprites/ejemplos_terreno/WATER/RED/RECON.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "RED",
+      "unitType": "TANK",
+      "path": "assets/sprites/ejemplos_terreno/WATER/RED/TANK.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "RED",
+      "unitType": "MEDIUM_TANK",
+      "path": "assets/sprites/ejemplos_terreno/WATER/RED/MEDIUM_TANK.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "RED",
+      "unitType": "ARTILLERY",
+      "path": "assets/sprites/ejemplos_terreno/WATER/RED/ARTILLERY.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "RED",
+      "unitType": "ANTI_AIR",
+      "path": "assets/sprites/ejemplos_terreno/WATER/RED/ANTI_AIR.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "RED",
+      "unitType": "ROCKET",
+      "path": "assets/sprites/ejemplos_terreno/WATER/RED/ROCKET.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "RED",
+      "unitType": "MISSILE",
+      "path": "assets/sprites/ejemplos_terreno/WATER/RED/MISSILE.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "RED",
+      "unitType": "FIGHTER",
+      "path": "assets/sprites/ejemplos_terreno/WATER/RED/FIGHTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "RED",
+      "unitType": "BOMBER",
+      "path": "assets/sprites/ejemplos_terreno/WATER/RED/BOMBER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "RED",
+      "unitType": "BATTLE_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/WATER/RED/BATTLE_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "RED",
+      "unitType": "TRANSPORT_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/WATER/RED/TRANSPORT_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "RED",
+      "unitType": "BATTLESHIP",
+      "path": "assets/sprites/ejemplos_terreno/WATER/RED/BATTLESHIP.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "RED",
+      "unitType": "CRUISER",
+      "path": "assets/sprites/ejemplos_terreno/WATER/RED/CRUISER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "RED",
+      "unitType": "SUBMARINE",
+      "path": "assets/sprites/ejemplos_terreno/WATER/RED/SUBMARINE.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "BLUE",
+      "unitType": "INFANTRY",
+      "path": "assets/sprites/ejemplos_terreno/WATER/BLUE/INFANTRY.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "BLUE",
+      "unitType": "MECH",
+      "path": "assets/sprites/ejemplos_terreno/WATER/BLUE/MECH.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "BLUE",
+      "unitType": "RECON",
+      "path": "assets/sprites/ejemplos_terreno/WATER/BLUE/RECON.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "BLUE",
+      "unitType": "TANK",
+      "path": "assets/sprites/ejemplos_terreno/WATER/BLUE/TANK.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "BLUE",
+      "unitType": "MEDIUM_TANK",
+      "path": "assets/sprites/ejemplos_terreno/WATER/BLUE/MEDIUM_TANK.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "BLUE",
+      "unitType": "ARTILLERY",
+      "path": "assets/sprites/ejemplos_terreno/WATER/BLUE/ARTILLERY.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "BLUE",
+      "unitType": "ANTI_AIR",
+      "path": "assets/sprites/ejemplos_terreno/WATER/BLUE/ANTI_AIR.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "BLUE",
+      "unitType": "ROCKET",
+      "path": "assets/sprites/ejemplos_terreno/WATER/BLUE/ROCKET.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "BLUE",
+      "unitType": "MISSILE",
+      "path": "assets/sprites/ejemplos_terreno/WATER/BLUE/MISSILE.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "BLUE",
+      "unitType": "FIGHTER",
+      "path": "assets/sprites/ejemplos_terreno/WATER/BLUE/FIGHTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "BLUE",
+      "unitType": "BOMBER",
+      "path": "assets/sprites/ejemplos_terreno/WATER/BLUE/BOMBER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "BLUE",
+      "unitType": "BATTLE_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/WATER/BLUE/BATTLE_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "BLUE",
+      "unitType": "TRANSPORT_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/WATER/BLUE/TRANSPORT_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "BLUE",
+      "unitType": "BATTLESHIP",
+      "path": "assets/sprites/ejemplos_terreno/WATER/BLUE/BATTLESHIP.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "BLUE",
+      "unitType": "CRUISER",
+      "path": "assets/sprites/ejemplos_terreno/WATER/BLUE/CRUISER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "BLUE",
+      "unitType": "SUBMARINE",
+      "path": "assets/sprites/ejemplos_terreno/WATER/BLUE/SUBMARINE.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "GREEN",
+      "unitType": "INFANTRY",
+      "path": "assets/sprites/ejemplos_terreno/WATER/GREEN/INFANTRY.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "GREEN",
+      "unitType": "MECH",
+      "path": "assets/sprites/ejemplos_terreno/WATER/GREEN/MECH.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "GREEN",
+      "unitType": "RECON",
+      "path": "assets/sprites/ejemplos_terreno/WATER/GREEN/RECON.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "GREEN",
+      "unitType": "TANK",
+      "path": "assets/sprites/ejemplos_terreno/WATER/GREEN/TANK.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "GREEN",
+      "unitType": "MEDIUM_TANK",
+      "path": "assets/sprites/ejemplos_terreno/WATER/GREEN/MEDIUM_TANK.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "GREEN",
+      "unitType": "ARTILLERY",
+      "path": "assets/sprites/ejemplos_terreno/WATER/GREEN/ARTILLERY.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "GREEN",
+      "unitType": "ANTI_AIR",
+      "path": "assets/sprites/ejemplos_terreno/WATER/GREEN/ANTI_AIR.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "GREEN",
+      "unitType": "ROCKET",
+      "path": "assets/sprites/ejemplos_terreno/WATER/GREEN/ROCKET.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "GREEN",
+      "unitType": "MISSILE",
+      "path": "assets/sprites/ejemplos_terreno/WATER/GREEN/MISSILE.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "GREEN",
+      "unitType": "FIGHTER",
+      "path": "assets/sprites/ejemplos_terreno/WATER/GREEN/FIGHTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "GREEN",
+      "unitType": "BOMBER",
+      "path": "assets/sprites/ejemplos_terreno/WATER/GREEN/BOMBER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "GREEN",
+      "unitType": "BATTLE_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/WATER/GREEN/BATTLE_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "GREEN",
+      "unitType": "TRANSPORT_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/WATER/GREEN/TRANSPORT_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "GREEN",
+      "unitType": "BATTLESHIP",
+      "path": "assets/sprites/ejemplos_terreno/WATER/GREEN/BATTLESHIP.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "GREEN",
+      "unitType": "CRUISER",
+      "path": "assets/sprites/ejemplos_terreno/WATER/GREEN/CRUISER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "GREEN",
+      "unitType": "SUBMARINE",
+      "path": "assets/sprites/ejemplos_terreno/WATER/GREEN/SUBMARINE.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "YELLOW",
+      "unitType": "INFANTRY",
+      "path": "assets/sprites/ejemplos_terreno/WATER/YELLOW/INFANTRY.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "YELLOW",
+      "unitType": "MECH",
+      "path": "assets/sprites/ejemplos_terreno/WATER/YELLOW/MECH.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "YELLOW",
+      "unitType": "RECON",
+      "path": "assets/sprites/ejemplos_terreno/WATER/YELLOW/RECON.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "YELLOW",
+      "unitType": "TANK",
+      "path": "assets/sprites/ejemplos_terreno/WATER/YELLOW/TANK.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "YELLOW",
+      "unitType": "MEDIUM_TANK",
+      "path": "assets/sprites/ejemplos_terreno/WATER/YELLOW/MEDIUM_TANK.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "YELLOW",
+      "unitType": "ARTILLERY",
+      "path": "assets/sprites/ejemplos_terreno/WATER/YELLOW/ARTILLERY.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "YELLOW",
+      "unitType": "ANTI_AIR",
+      "path": "assets/sprites/ejemplos_terreno/WATER/YELLOW/ANTI_AIR.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "YELLOW",
+      "unitType": "ROCKET",
+      "path": "assets/sprites/ejemplos_terreno/WATER/YELLOW/ROCKET.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "YELLOW",
+      "unitType": "MISSILE",
+      "path": "assets/sprites/ejemplos_terreno/WATER/YELLOW/MISSILE.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "YELLOW",
+      "unitType": "FIGHTER",
+      "path": "assets/sprites/ejemplos_terreno/WATER/YELLOW/FIGHTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "YELLOW",
+      "unitType": "BOMBER",
+      "path": "assets/sprites/ejemplos_terreno/WATER/YELLOW/BOMBER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "YELLOW",
+      "unitType": "BATTLE_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/WATER/YELLOW/BATTLE_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "YELLOW",
+      "unitType": "TRANSPORT_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/WATER/YELLOW/TRANSPORT_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "YELLOW",
+      "unitType": "BATTLESHIP",
+      "path": "assets/sprites/ejemplos_terreno/WATER/YELLOW/BATTLESHIP.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "YELLOW",
+      "unitType": "CRUISER",
+      "path": "assets/sprites/ejemplos_terreno/WATER/YELLOW/CRUISER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "WATER",
+      "faction": "YELLOW",
+      "unitType": "SUBMARINE",
+      "path": "assets/sprites/ejemplos_terreno/WATER/YELLOW/SUBMARINE.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "RED",
+      "unitType": "INFANTRY",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/RED/INFANTRY.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "RED",
+      "unitType": "MECH",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/RED/MECH.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "RED",
+      "unitType": "RECON",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/RED/RECON.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "RED",
+      "unitType": "TANK",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/RED/TANK.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "RED",
+      "unitType": "MEDIUM_TANK",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/RED/MEDIUM_TANK.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "RED",
+      "unitType": "ARTILLERY",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/RED/ARTILLERY.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "RED",
+      "unitType": "ANTI_AIR",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/RED/ANTI_AIR.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "RED",
+      "unitType": "ROCKET",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/RED/ROCKET.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "RED",
+      "unitType": "MISSILE",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/RED/MISSILE.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "RED",
+      "unitType": "FIGHTER",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/RED/FIGHTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "RED",
+      "unitType": "BOMBER",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/RED/BOMBER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "RED",
+      "unitType": "BATTLE_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/RED/BATTLE_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "RED",
+      "unitType": "TRANSPORT_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/RED/TRANSPORT_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "RED",
+      "unitType": "BATTLESHIP",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/RED/BATTLESHIP.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "RED",
+      "unitType": "CRUISER",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/RED/CRUISER.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "RED",
+      "unitType": "SUBMARINE",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/RED/SUBMARINE.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "BLUE",
+      "unitType": "INFANTRY",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/BLUE/INFANTRY.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "BLUE",
+      "unitType": "MECH",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/BLUE/MECH.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "BLUE",
+      "unitType": "RECON",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/BLUE/RECON.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "BLUE",
+      "unitType": "TANK",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/BLUE/TANK.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "BLUE",
+      "unitType": "MEDIUM_TANK",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/BLUE/MEDIUM_TANK.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "BLUE",
+      "unitType": "ARTILLERY",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/BLUE/ARTILLERY.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "BLUE",
+      "unitType": "ANTI_AIR",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/BLUE/ANTI_AIR.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "BLUE",
+      "unitType": "ROCKET",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/BLUE/ROCKET.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "BLUE",
+      "unitType": "MISSILE",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/BLUE/MISSILE.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "BLUE",
+      "unitType": "FIGHTER",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/BLUE/FIGHTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "BLUE",
+      "unitType": "BOMBER",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/BLUE/BOMBER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "BLUE",
+      "unitType": "BATTLE_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/BLUE/BATTLE_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "BLUE",
+      "unitType": "TRANSPORT_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/BLUE/TRANSPORT_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "BLUE",
+      "unitType": "BATTLESHIP",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/BLUE/BATTLESHIP.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "BLUE",
+      "unitType": "CRUISER",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/BLUE/CRUISER.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "BLUE",
+      "unitType": "SUBMARINE",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/BLUE/SUBMARINE.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "GREEN",
+      "unitType": "INFANTRY",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/GREEN/INFANTRY.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "GREEN",
+      "unitType": "MECH",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/GREEN/MECH.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "GREEN",
+      "unitType": "RECON",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/GREEN/RECON.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "GREEN",
+      "unitType": "TANK",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/GREEN/TANK.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "GREEN",
+      "unitType": "MEDIUM_TANK",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/GREEN/MEDIUM_TANK.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "GREEN",
+      "unitType": "ARTILLERY",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/GREEN/ARTILLERY.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "GREEN",
+      "unitType": "ANTI_AIR",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/GREEN/ANTI_AIR.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "GREEN",
+      "unitType": "ROCKET",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/GREEN/ROCKET.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "GREEN",
+      "unitType": "MISSILE",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/GREEN/MISSILE.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "GREEN",
+      "unitType": "FIGHTER",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/GREEN/FIGHTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "GREEN",
+      "unitType": "BOMBER",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/GREEN/BOMBER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "GREEN",
+      "unitType": "BATTLE_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/GREEN/BATTLE_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "GREEN",
+      "unitType": "TRANSPORT_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/GREEN/TRANSPORT_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "GREEN",
+      "unitType": "BATTLESHIP",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/GREEN/BATTLESHIP.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "GREEN",
+      "unitType": "CRUISER",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/GREEN/CRUISER.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "GREEN",
+      "unitType": "SUBMARINE",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/GREEN/SUBMARINE.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "YELLOW",
+      "unitType": "INFANTRY",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/YELLOW/INFANTRY.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "YELLOW",
+      "unitType": "MECH",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/YELLOW/MECH.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "YELLOW",
+      "unitType": "RECON",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/YELLOW/RECON.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "YELLOW",
+      "unitType": "TANK",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/YELLOW/TANK.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "YELLOW",
+      "unitType": "MEDIUM_TANK",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/YELLOW/MEDIUM_TANK.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "YELLOW",
+      "unitType": "ARTILLERY",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/YELLOW/ARTILLERY.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "YELLOW",
+      "unitType": "ANTI_AIR",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/YELLOW/ANTI_AIR.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "YELLOW",
+      "unitType": "ROCKET",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/YELLOW/ROCKET.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "YELLOW",
+      "unitType": "MISSILE",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/YELLOW/MISSILE.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "YELLOW",
+      "unitType": "FIGHTER",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/YELLOW/FIGHTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "YELLOW",
+      "unitType": "BOMBER",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/YELLOW/BOMBER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "YELLOW",
+      "unitType": "BATTLE_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/YELLOW/BATTLE_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "YELLOW",
+      "unitType": "TRANSPORT_COPTER",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/YELLOW/TRANSPORT_COPTER.png",
+      "movementCostFromCatalog": 1,
+      "catalogSaysPassable": true,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "YELLOW",
+      "unitType": "BATTLESHIP",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/YELLOW/BATTLESHIP.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "YELLOW",
+      "unitType": "CRUISER",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/YELLOW/CRUISER.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    },
+    {
+      "terrain": "ROAD",
+      "faction": "YELLOW",
+      "unitType": "SUBMARINE",
+      "path": "assets/sprites/ejemplos_terreno/ROAD/YELLOW/SUBMARINE.png",
+      "movementCostFromCatalog": 0,
+      "catalogSaysPassable": false,
+      "note": "Previsualización; las reglas reales siempre las decide Spring Boot"
+    }
+  ],
+  "warnings": [
+    "Las composiciones unidad-terreno son muestras de diseño; no ejecutan ni validan movimientos.",
+    "BRIDGE, REEF, LABORATORY, APC y LANDER son arte opcional, fuera de los catálogos del ZIP.",
+    "Animaciones genéricas de vehículos derivadas programáticamente de sprites estáticos (desplazamiento, destello, daño y explosión).",
+    "El retrato amarillo reutiliza una ilustración base distinta a la facción azul/verde, editada con acentos; puede rediseñarse después.",
+    "La escena actual dibuja Graphics: hay que agregar precarga de PNG y crear imágenes para que aparezcan."
+  ]
+}
