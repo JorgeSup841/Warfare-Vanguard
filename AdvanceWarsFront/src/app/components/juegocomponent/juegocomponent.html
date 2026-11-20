@@ -119,6 +119,38 @@
           {{ mensaje }}
         </p>
 
+
+        <!-- HUD -->
+        <div class="hud" *ngIf="partida">
+          <div class="hud__turno">
+            RONDA {{ partida.currentRound }} · TURNO DE {{ jugadorEnTurno }}
+          </div>
+
+          <div class="hud__jugadores">
+            <div
+              *ngFor="let j of partida.players"
+              class="hud__jugador"
+              [style.border-left-color]="colores[j.turnOrder - 1]"
+              [class.hud__jugador--activo]="j.turnOrder === partida.currentPlayerOrder"
+              [class.hud__jugador--fuera]="j.status === 'ELIMINATED'">
+              <strong [style.color]="colores[j.turnOrder - 1]">J{{ j.turnOrder }} {{ j.name }}</strong>
+              <span>$ {{ j.money }}</span>
+              <span class="hud__ganancia" *ngIf="ganancias[j.turnOrder]">+$ {{ ganancias[j.turnOrder] }}</span>
+              <span *ngIf="j.status === 'WINNER'">GANADOR</span>
+              <span *ngIf="j.status === 'ELIMINATED'">ELIMINADO</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="btn"
+            (click)="terminarTurno()"
+            [disabled]="terminando || partida.status !== 'IN_PROGRESS'">
+            {{ terminando ? 'TERMINANDO...' : 'TERMINAR TURNO' }}
+          </button>
+        </div>
+        <!-- /HUD -->
+
         <p *ngIf="recargandoUnidades">
           Actualizando unidades desde Spring Boot...
         </p>
@@ -139,6 +171,7 @@
         </p>
         <!-- FIN HUD -->
 
+
         <!-- TABLERO Y PANEL LATERAL -->
         <div class="game-layout">
 
@@ -146,6 +179,10 @@
           <div class="map-col">
 
             <div class="marco juego__marco">
+
+              <div class="aviso-turno" *ngIf="avisoTurno">{{ avisoTurno }}</div>
+
+
 
               <div
                 id="contenedor-juego"
@@ -503,6 +540,8 @@
           de la partida, el mapa y las unidades.
         </p>
 
+
+
         <p>
           Los movimientos y ataques se solicitan al servidor.
           Spring Boot comprueba si cada acción es válida
@@ -513,6 +552,7 @@
           Capturar propiedades, producir unidades y utilizar
           poderes de comandante son funcionalidades pendientes.
         </p>
+
 
         <a
           class="btn secondary"

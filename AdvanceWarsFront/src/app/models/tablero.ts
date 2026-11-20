@@ -11,7 +11,7 @@ export interface nuevapartida {
   playerNames: string[];
   width: number;
   height: number;
-  seed: number;
+  seed?: number | null;
 }
 
 /**
@@ -98,4 +98,8 @@ export interface eventojuego {
   eventType?: string;
   description?: string;
   occurredAt?: string;
+}
+export interface turnoactual {
+  currentRound: number;
+  currentPlayerOrder: number;
 }

@@ -1,49 +1,63 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { tableroservice } from '../../services/tableroservice';
 import { partidaresumen } from '../../models/tablero';
-/** Consulta y presenta las partidas registradas. */
+
+/** Muestra la lista de partidas del usuario. */
 @Component({
   selector: 'app-partidascomponent',
   standalone: false,
   templateUrl: './partidascomponent.html',
   styleUrl: './partidascomponent.css',
 })
-export class Partidascomponent implements OnInit, OnDestroy {
+export class Partidascomponent implements OnInit {
+  private servicio = inject(tableroservice);
+  private cdr = inject(ChangeDetectorRef);
+
   partidas: partidaresumen[] = [];
   cargando = false;
-  error = '';
-  private sub = new Subscription();
-  constructor(
-    private service: tableroservice,
-    private cdr: ChangeDetectorRef,
-  ) {}
-  /** Inicializa y carga los datos de la pantalla. */
+  mensaje = '';
+
+  estados: Record<string, string> = {
+    SETUP: 'EN PREPARACIÓN',
+    IN_PROGRESS: 'EN CURSO',
+    FINISHED: 'TERMINADA',
+  };
+
+  filtro = 'TODAS';
+  opciones = ['TODAS', 'SETUP', 'IN_PROGRESS', 'FINISHED'];
+
+  /** Carga las partidas al abrir la pantalla. */
   ngOnInit(): void {
     this.cargar();
   }
-  /** Consulta los datos necesarios para presentar la pantalla. */
+
+  /** Pide al back la lista de mis partidas. */
   cargar(): void {
     this.cargando = true;
-    this.error = '';
-    this.cdr.markForCheck();
-    this.sub.add(
-      this.service.listarPartidas().subscribe({
-        next: (datos) => {
-          this.partidas = Array.isArray(datos) ? datos : [];
-          this.cargando = false;
-          this.cdr.markForCheck();
-        },
-        error: (e) => {
-          this.cargando = false;
-          this.error = `No se pudo listar las partidas (HTTP ${e.status || 0}). GET /api/games debe estar disponible.`;
-          this.cdr.markForCheck();
-        },
-      }),
-    );
+    this.mensaje = '';
+    this.servicio.listarPartidas().subscribe({
+      next: (datos) => {
+        this.partidas = datos;
+        this.cargando = false;
+        this.cdr.detectChanges();
+      },
+      error: (e) => {
+        this.cargando = false;
+        this.mensaje = e.error?.message || 'No se pudieron cargar las partidas';
+        this.cdr.detectChanges();
+      },
+    });
   }
-  /** Libera los recursos y suscripciones del componente. */
-  ngOnDestroy(): void {
-    this.sub.unsubscribe();
+
+  /** Partidas que coinciden con el filtro elegido. */
+  get partidasFiltradas(): partidaresumen[] {
+    if (this.filtro === 'TODAS') return this.partidas;
+    return this.partidas.filter((p) => p.status === this.filtro);
+  }
+
+  /** Cuántas partidas hay en un estado. */
+  contar(estado: string): number {
+    if (estado === 'TODAS') return this.partidas.length;
+    return this.partidas.filter((p) => p.status === estado).length;
   }
 }

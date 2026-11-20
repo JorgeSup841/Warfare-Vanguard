@@ -1,30 +1,48 @@
 <section class="screen">
-  <div class="wrap"><h1>PREPARAR PARTIDA #{{ id }}</h1>
+  <div class="wrap">
+    <h1>PREPARAR PARTIDA #{{ id }}</h1>
+
     <div class="panel">
-      <div class="panel-head azul">PARTIDA DEL SERVIDOR</div>
+      <div class="panel-head azul">DATOS DE LA PARTIDA</div>
       <div class="panel-body">
-        <p *ngIf="resumen">ESTADO: {{ resumen.status }} · {{ resumen.playerCount }} JUGADORES · {{ resumen.width }}
-          × {{ resumen.height }}</p>
-        <h2>JUGADORES</h2>
-        <p *ngFor="let jugador of resumen?.players">{{ jugador.turnOrder }}. {{ jugador.name }} — {{ jugador.money }}
-          CRÉDITOS ({{ jugador.status }})</p>
-        <p>Spring Boot asigna automáticamente los jugadores cuando se crea la partida. La selección persistente de
-          facción y comandante todavía no tiene endpoint en este backend.</p>
-        <div class="flex">
-          <button type="button" [disabled]="ocupado || confirmacionInicio || !resumen || resumen.status !== 'SETUP'"
-                  (click)="iniciar()">INICIAR PARTIDA ▸
-          </button>
-          <a class="btn secondary" [routerLink]="['/partidas',id,'jugar']">VER MAPA</a>
-          <a class="btn secondary" routerLink="/partidas">MIS PARTIDAS</a></div>
-        <div *ngIf="confirmacionInicio" class="message" role="group" aria-label="Confirmación de inicio">
-          <p>¿Iniciar la partida? Esta acción no se puede repetir.</p>
-          <div class="flex">
-            <button type="button" (click)="confirmarInicio()" [disabled]="ocupado">CONFIRMAR INICIO</button>
-            <button type="button" class="secondary" (click)="cancelarInicio()" [disabled]="ocupado">CANCELAR</button>
+
+        <p *ngIf="!partida && !mensaje">Cargando partida...</p>
+
+        <div *ngIf="partida">
+          <p>MAPA: {{ partida.width }} × {{ partida.height }} · SEMILLA: {{ partida.seed }}</p>
+
+          <h2>JUGADORES</h2>
+          <p *ngFor="let j of partida.players">
+            {{ j.turnOrder }}. {{ j.name }} · $ {{ j.money }}
+          </p>
+
+          <div class="field">
+            <label>COMANDANTE Y FACCIÓN</label>
+            <button type="button" class="secondary" disabled>PRÓXIMAMENTE</button>
           </div>
+
+          <div class="flex" *ngIf="partida.status === 'SETUP' && !confirmar">
+            <button type="button" (click)="confirmar = true" [disabled]="iniciando">
+              {{ iniciando ? 'INICIANDO...' : 'INICIAR PARTIDA ▸' }}
+            </button>
+          </div>
+
+          <div class="message" *ngIf="confirmar">
+            <p>¿Iniciar la partida? Después ya no se puede configurar.</p>
+            <div class="flex">
+              <button type="button" (click)="iniciar()">SÍ, INICIAR</button>
+              <button type="button" class="secondary" (click)="confirmar = false">CANCELAR</button>
+            </div>
+          </div>
+
+          <a *ngIf="partida.status !== 'SETUP'" class="btn" [routerLink]="['/partidas', id, 'jugar']">
+            IR AL TABLERO ▸
+          </a>
         </div>
-        <p class="message error" *ngIf="error" role="alert">{{ error }}</p>
-        <p class="message" *ngIf="mensaje">{{ mensaje }}</p>
+
+        <p class="message error" *ngIf="mensaje">{{ mensaje }}</p>
+
+        <a routerLink="/partidas">‹ MIS PARTIDAS</a>
       </div>
     </div>
   </div>

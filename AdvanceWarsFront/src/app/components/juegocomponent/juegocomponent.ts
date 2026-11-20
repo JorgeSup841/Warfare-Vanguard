@@ -1,3 +1,7 @@
+
+import { Component, AfterViewInit, ChangeDetectorRef, OnDestroy, OnInit, inject } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+
 import {
   Component,
   AfterViewInit,
@@ -8,6 +12,7 @@ import {
 } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
+
 import Phaser from 'phaser';
 import { forkJoin, Subscription } from 'rxjs';
 
@@ -74,9 +79,27 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     { codigo: 'SHIP', nombre: 'Barco' },
   ];
 
+  seleccion: { x: number; y: number; terreno?: terreno } | null = null;
+  private router = inject(Router);
+  avisoTurno = '';
+  terminando = false;
+  colores = ['#e74b40', '#366cb1', '#3f9e4d', '#e0b020'];
+  ganancias: Record<number, number> = {};
+  constructor(
+    private ruta: ActivatedRoute,
+    private catalogos: juegoservice,
+    private api: tableroservice,
+    private pdf: ReporteService,
+    private cdr: ChangeDetectorRef,
+  ) {
+    this.modoDemo = Boolean(this.ruta.snapshot.data['demo']);
+    this.id = Number(this.ruta.snapshot.paramMap.get('id')) || 0;
+
+
   /** Impide acciones simultáneas mientras se espera una respuesta del servidor. */
   get accionEnCurso(): boolean {
     return this.movimientoEnCurso || this.ataqueEnCurso || this.recargandoUnidades;
+
   }
 
   /** Carga los catálogos JSON y prepara el tablero. */
@@ -746,7 +769,71 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
+
+  /** Nombre del jugador que tiene el turno ahora. */
+  get jugadorEnTurno(): string {
+    if (!this.partida) return '';
+    const actual = this.partida.players.find((j) => j.turnOrder === this.partida?.currentPlayerOrder);
+    return actual ? actual.name : '';
+  }
+
+  /** Le pide al back terminar el turno actual. */
+  terminarTurno(): void {
+    if (!this.partida) return;
+    this.terminando = true;
+    this.error = '';
+
+    const dineroAntes: Record<number, number> = {};
+    for (const j of this.partida.players) {
+      dineroAntes[j.turnOrder] = j.money;
+    }
+
+    const turno = {
+      currentRound: this.partida.currentRound,
+      currentPlayerOrder: this.partida.currentPlayerOrder,
+    };
+    this.api.finTurno(this.id, turno).subscribe({
+      next: (p) => {
+        this.partida = p;
+        this.terminando = false;
+        if (p.status === 'FINISHED') {
+          this.router.navigate(['/partidas', this.id, 'resultados']);
+          return;
+        }
+        this.ganancias = {};
+        for (const j of p.players) {
+          const diferencia = j.money - (dineroAntes[j.turnOrder] ?? j.money);
+          if (diferencia > 0) {
+            this.ganancias[j.turnOrder] = diferencia;
+          }
+        }
+        this.mostrarAviso();
+        this.cargarDatos();
+        this.cdr.detectChanges();
+      },
+      error: (e) => {
+        this.terminando = false;
+        this.error = e.error?.message || 'No se pudo terminar el turno';
+        this.cargarDatos();
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  /** Muestra "Turno de X" y lo que ganó durante 2 segundos. */
+  private mostrarAviso(): void {
+    this.avisoTurno = `TURNO DE ${this.jugadorEnTurno}`;
+    setTimeout(() => {
+      this.avisoTurno = '';
+      this.ganancias = {};
+      this.cdr.detectChanges();
+    }, 2000);
+  }
+
+  /** Libera los recursos y suscripciones del componente. */
+
   /** Libera peticiones, suscripciones y recursos gráficos al salir. */
+
   ngOnDestroy(): void {
     this.destruido = true;
     this.suscripcionRecargaUnidades?.unsubscribe();

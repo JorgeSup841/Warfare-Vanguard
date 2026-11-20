@@ -1,5 +1,10 @@
 
 import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+
+
+import { Injectable, inject } from '@angular/core';
 
 import {
   HttpClient,
@@ -10,6 +15,7 @@ import {
   Observable,
   throwError
 } from 'rxjs';
+
 
 import { API_BASE_URL } from './api-config';
 import { usuarioservice } from './usuarioservice';
@@ -22,7 +28,11 @@ import {
   estadojuego,
   eventojuego,
   seleccionjugador,
+  registrarasiento,
+  turnoactual,
+
   registrarasiento
+
 } from '../models/tablero';
 
 import {
@@ -53,6 +63,12 @@ type turnoactual = Pick<
 })
 export class tableroservice {
 
+  private http = inject(HttpClient);
+  private auth = inject(usuarioservice);
+  private readonly api = `${API_BASE_URL}/games`;
+  /** Construye las cabeceras HTTP de la sesión JWT. */
+
+
   private readonly http = inject(HttpClient);
 
   private readonly auth = inject(usuarioservice);
@@ -64,6 +80,7 @@ export class tableroservice {
    *
    * @returns Cabeceras HTTP con autenticación.
    */
+
   private headers(): HttpHeaders {
     return this.auth.getHeaders();
   }
@@ -405,6 +422,13 @@ export class tableroservice {
     );
   }
 
+
+  /** Termina el turno del jugador actual y devuelve la partida actualizada. */
+  finTurno(id: number, turno: turnoactual): Observable<partidaresumen> {
+    return this.http.post<partidaresumen>(`${this.api}/${id}/end-turn`, turno, {
+      headers: this.headers(),
+    });
+
   /**
    * Reserva la finalización del turno.
    *
@@ -423,6 +447,7 @@ export class tableroservice {
       'Finalizar turno',
       { id }
     );
+
   }
 
   /**
