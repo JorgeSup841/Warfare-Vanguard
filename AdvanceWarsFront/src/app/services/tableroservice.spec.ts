@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
-import { Generadormapaservice } from './generadormapaservice';
+import { Tableroservice } from './tableroservice';
 
-describe('Generadormapaservice', () => {
-  let service: Generadormapaservice;
+describe('Tableroservice', () => {
+  let service: Tableroservice;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(Generadormapaservice);
+    service = TestBed.inject(Tableroservice);
   });
 
   it('should be created', () => {

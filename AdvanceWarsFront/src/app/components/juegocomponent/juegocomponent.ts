@@ -1,9 +1,10 @@
-import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import Phaser from 'phaser';
 import { juegoservice } from '../../services/juegoservice';
-import { generadormapaservice } from '../../services/generadormapaservice';
+import { tableroservice } from '../../services/tableroservice';
 import { EscenaMapa, DatosEscena, TAM_CASILLA } from '../../phaser/escenamapa';
-import { casilla, configuracionmapa, terreno } from '../../models/mapa';
+import { casilla, configuracionmapa, terreno, mapa, tipoterreno } from '../../models/mapa';
+import { tablero } from '../../models/tablero';
 
 @Component({
   selector: 'app-juegocomponent',
@@ -12,24 +13,25 @@ import { casilla, configuracionmapa, terreno } from '../../models/mapa';
   templateUrl: './juegocomponent.html',
 })
 /**
- * Pantalla del juego: genera un mapa aleatorio y lo dibuja con Phaser.
+ * Pantalla del juego: le pide al back un mapa aleatorio y lo dibuja con Phaser.
  */
 export class Juegocomponent implements OnInit, OnDestroy {
   private juego = inject(juegoservice);
-  private generador = inject(generadormapaservice);
+  private tableroService = inject(tableroservice);
+  private cd = inject(ChangeDetectorRef);
 
   private juegoPhaser?: Phaser.Game;
   private config?: configuracionmapa;
   readonly obtenerCosto = Juegocomponent.costoDe;
 
-  // Variables normales: cambian solo cuando el usuario hace clic o escribe.
   semilla = 12345;
   jugadores = 4;
+  terrenos: terreno[] = [];
+  proporcion = '4 / 3';
+  mensaje = '';
 
-  // Signals: cambian cuando llegan los datos o cuando Phaser avisa.
-  terrenos = signal<terreno[]>([]);
-  proporcion = signal('4 / 3');
-  seleccion = signal<{ x: number; y: number; terreno?: terreno } | null>(null);
+  // Casilla que está bajo el mouse (null si el mouse está fuera del mapa).
+  seleccion: { x: number; y: number; terreno?: terreno } | null = null;
 
   // Tipos de movimiento para mostrar cuánto le cuesta a cada uno pasar por un terreno.
   tiposMovimiento = [
@@ -47,9 +49,9 @@ export class Juegocomponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.juego.getTerrenos().subscribe(terrenos => {
       this.juego.getConfiguracionMapa().subscribe(config => {
-        this.terrenos.set(terrenos);
+        this.terrenos = terrenos;
         this.config = config;
-        this.crearJuego();
+        this.pedirMapa();
       });
     });
   }
@@ -62,47 +64,74 @@ export class Juegocomponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Crea el juego de Phaser y arranca la escena que dibuja el mapa.
+   * Le pide al back una partida con la semilla y los jugadores actuales,
+   * trae su mapa y lo dibuja.
    */
-  private crearJuego() {
-    const datos = this.armarDatos();
-    this.proporcion.set(`${datos.mapa.width} / ${datos.mapa.height}`);
+  private pedirMapa() {
+    const config = this.config as configuracionmapa;
 
-    this.juegoPhaser = new Phaser.Game({
-      type: Phaser.AUTO,
-      parent: 'contenedor-juego',
-      width: datos.mapa.width * TAM_CASILLA,
-      height: datos.mapa.height * TAM_CASILLA,
-      backgroundColor: '#14201a',
-      scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.NO_CENTER },
-      scene: []
+    const nombres = [];
+    for (let i = 1; i <= this.jugadores; i++) {
+      nombres.push('Jugador ' + i);
+    }
+    const datos = { playerNames: nombres, width: config.width, height: config.height, seed: this.semilla };
+
+    this.mensaje = '';
+    this.tableroService.crearPartida(datos).subscribe({
+      next: partida => {
+        this.tableroService.getTablero(partida.id).subscribe(t => this.dibujar(t));
+      },
+      error: () => {
+        this.mensaje = 'No se pudo generar el mapa. Inicia sesión y revisa que el back esté encendido.';
+        this.cd.detectChanges();
+      }
     });
-    this.juegoPhaser.scene.add('EscenaMapa', EscenaMapa, true, datos);
   }
 
   /**
-   * Genera el mapa con la semilla actual y junta todo lo que necesita la escena.
-   * @returns los datos para la escena de Phaser
+   * Convierte el mapa del back al formato que usa la escena y lo dibuja.
+   * La primera vez crea el juego de Phaser; después solo reinicia la escena.
+   * @param t mapa que llegó del back
    */
-  private armarDatos(): DatosEscena {
-    const config = this.config as configuracionmapa;
-    const mapa = this.generador.generar(config, this.semilla, this.jugadores);
+  private dibujar(t: tablero) {
+    // El back llama "terrain" a lo que la escena llama "terrainType".
+    const mapaEscena: mapa = {
+      width: t.width,
+      height: t.height,
+      tiles: t.tiles.map(c => ({ x: c.x, y: c.y, terrainType: c.terrain as tipoterreno }))
+    };
 
-    return {
-      mapa,
-      terrenos: this.terrenos(),
-      bases: generadormapaservice.calcularPosicionesBase(mapa.width, mapa.height, this.jugadores),
+    // Las bases son las casillas con cuartel general, ordenadas por jugador.
+    const bases = t.tiles
+      .filter(c => c.propertyType === 'HEADQUARTERS')
+      .sort((a, b) => (a.ownerOrder ?? 0) - (b.ownerOrder ?? 0))
+      .map(c => ({ x: c.x, y: c.y }));
+
+    const datos: DatosEscena = {
+      mapa: mapaEscena,
+      terrenos: this.terrenos,
+      bases,
       alPasarSobre: (c: casilla | null) => this.alPasarSobre(c)
     };
-  }
 
-  /**
-   * Vuelve a dibujar el mapa con la semilla y los jugadores actuales.
-   */
-  private redibujar() {
-    const escena = this.juegoPhaser?.scene.getScene('EscenaMapa');
-    escena?.scene.restart(this.armarDatos());
-    this.seleccion.set(null);
+    this.proporcion = t.width + ' / ' + t.height;
+    this.seleccion = null;
+    this.cd.detectChanges();
+
+    if (!this.juegoPhaser) {
+      this.juegoPhaser = new Phaser.Game({
+        type: Phaser.AUTO,
+        parent: 'contenedor-juego',
+        width: t.width * TAM_CASILLA,
+        height: t.height * TAM_CASILLA,
+        backgroundColor: '#14201a',
+        scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.NO_CENTER },
+        scene: []
+      });
+      this.juegoPhaser.scene.add('EscenaMapa', EscenaMapa, true, datos);
+    } else {
+      this.juegoPhaser.scene.getScene('EscenaMapa')?.scene.restart(datos);
+    }
   }
 
   /**
@@ -111,11 +140,12 @@ export class Juegocomponent implements OnInit, OnDestroy {
    */
   private alPasarSobre(c: casilla | null) {
     if (!c) {
-      this.seleccion.set(null);
-      return;
+      this.seleccion = null;
+    } else {
+      const terreno = this.terrenos.find(t => t.terrainType === c.terrainType);
+      this.seleccion = { x: c.x, y: c.y, terreno };
     }
-    const terreno = this.terrenos().find(t => t.terrainType === c.terrainType);
-    this.seleccion.set({ x: c.x, y: c.y, terreno });
+    this.cd.detectChanges();
   }
 
   /**
@@ -123,7 +153,7 @@ export class Juegocomponent implements OnInit, OnDestroy {
    */
   nuevoMapa() {
     this.semilla = Math.floor(Math.random() * 1000000);
-    this.redibujar();
+    this.pedirMapa();
   }
 
   /**
@@ -135,7 +165,7 @@ export class Juegocomponent implements OnInit, OnDestroy {
       return;
     }
     this.semilla = Math.floor(numero);
-    this.redibujar();
+    this.pedirMapa();
   }
 
   /**
@@ -144,7 +174,7 @@ export class Juegocomponent implements OnInit, OnDestroy {
    */
   fijarJugadores(n: number) {
     this.jugadores = n;
-    this.redibujar();
+    this.pedirMapa();
   }
 
   /**
@@ -153,7 +183,6 @@ export class Juegocomponent implements OnInit, OnDestroy {
    * @param tipo código del tipo de movimiento
    * @returns el costo, o "No pasa" si es 0
    */
-
   static costoDe(t: terreno, tipo: string): string {
     const costo = t.movementCost[tipo];
     return costo === 0 ? 'No pasa' : String(costo);

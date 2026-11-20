@@ -29,3 +29,33 @@ export interface historial {
   losses: number;
   opponents: string[];
 }
+
+export interface registro {
+  username: string;
+  email: string;
+  password: string;
+}
+
+
+export interface respuestapendiente {
+  status: string;
+  challengeId: string;
+  expiresAt: string;
+}
+
+
+export interface verificacion {
+  challengeId: string;
+  code: string;
+}
+
+export interface respuestalogin {
+  accessToken: string;
+  tokenType: string;
+  user: {
+    id: number;
+    username: string;
+    email: string;
+    role: string;
+  };
+}

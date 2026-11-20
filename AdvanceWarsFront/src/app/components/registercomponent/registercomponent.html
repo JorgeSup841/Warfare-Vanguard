@@ -33,7 +33,7 @@
       <div class="form-group">
         <label class="form-label" for="usuario">Usuario</label>
         <div class="input-wrapper">
-          <input type="text" id="usuario" class="form-input" placeholder="Tu nombre de comandante">
+          <input type="text" id="usuario" #usuario class="form-input" placeholder="Tu nombre de comandante">
         </div>
       </div>
 
@@ -62,25 +62,25 @@
         <div class="form-group">
           <label class="form-label" for="correo">Correo Electrónico</label>
           <div class="input-wrapper">
-            <input type="email" id="correo" class="form-input" placeholder="correo@ejemplo.com">
+            <input type="email" id="correo" #correo class="form-input" placeholder="correo@ejemplo.com">
           </div>
         </div>
       </div>
 
       <div class="terms-container">
-        <input type="checkbox" id="terms">
+        <input type="checkbox" id="terms" #terms>
         <label for="terms">Acepto los <a href="#">términos de la misión</a> y la política de privacidad.</label>
       </div>
 
       <p class="form-error">{{ error }}</p>
 
-      <button type="button" class="btn-submit" (click)="registrar(password.value, confirm.value)">
+      <button type="button" class="btn-submit" (click)="registrar(usuario.value, correo.value, password.value, confirm.value, terms.checked)">
         PULSA START →
       </button>
     </div>
 
     <div class="login-link">
-      ¿Ya tienes una cuenta? <a href="#">Inicia sesión</a>
+      ¿Ya tienes una cuenta? <a routerLink="/">Inicia sesión</a>
     </div>
   </div>
 </div>

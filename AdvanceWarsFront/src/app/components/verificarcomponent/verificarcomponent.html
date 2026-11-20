@@ -1,0 +1,36 @@
+<div class="verificar">
+  <div class="tarjeta">
+
+    <!-- ANTES DE VERIFICAR -->
+    <div *ngIf="!verificado">
+      <span class="badge">VERIFICACIÓN</span>
+      <h2>Revisa tu correo</h2>
+      <p class="texto" *ngIf="tipo === 'correo'">
+        Enviamos un código de 6 dígitos a <strong>{{ correo }}</strong>.
+        Escríbelo aquí para activar tu cuenta.
+      </p>
+      <p class="texto" *ngIf="tipo === 'login'">
+        Enviamos un código de 6 dígitos a tu correo.
+        Escríbelo aquí para entrar a la base.
+      </p>
+
+      <label class="etiqueta" for="codigo">Código</label>
+      <input type="text" id="codigo" #codigo class="campo" maxlength="6" placeholder="000000">
+
+      <p class="error" *ngIf="error">{{ error }}</p>
+      <p class="aviso" *ngIf="mensaje">{{ mensaje }}</p>
+
+      <button type="button" class="boton" (click)="verificar(codigo.value)">VERIFICAR →</button>
+      <button type="button" class="enlace" (click)="reenviar()">¿No te llegó? Enviar otro código</button>
+    </div>
+
+    <!-- YA VERIFICADO -->
+    <div *ngIf="verificado">
+      <span class="badge">LISTO</span>
+      <h2>¡Cuenta activada!</h2>
+      <p class="texto">Tu correo quedó verificado. Ya puedes iniciar sesión.</p>
+      <a routerLink="/" class="boton">INICIAR SESIÓN →</a>
+    </div>
+
+  </div>
+</div>

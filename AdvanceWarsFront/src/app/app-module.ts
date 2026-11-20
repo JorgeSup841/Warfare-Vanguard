@@ -8,11 +8,20 @@ import { Navbarcomponent } from './components/navbarcomponent/navbarcomponent';
 import { Footercomponent } from './components/footercomponent/footercomponent';
 import { Iniciosesioncomponent } from './components/iniciosesioncomponent/iniciosesioncomponent';
 import { Juegocomponent } from './components/juegocomponent/juegocomponent';
-import { FormsModule} from '@angular/forms';
+import { FormsModule } from '@angular/forms';
+import { Verificarcomponent } from './components/verificarcomponent/verificarcomponent';
 
 @NgModule({
-  declarations: [App, Registercomponent, Navbarcomponent, Footercomponent, Iniciosesioncomponent, Juegocomponent],
-  imports: [BrowserModule, AppRoutingModule,HttpClientModule, FormsModule],
+  declarations: [
+    App,
+    Registercomponent,
+    Navbarcomponent,
+    Footercomponent,
+    Iniciosesioncomponent,
+    Juegocomponent,
+    Verificarcomponent,
+  ],
+  imports: [BrowserModule, AppRoutingModule, HttpClientModule, FormsModule],
   providers: [provideBrowserGlobalErrorListeners()],
   bootstrap: [App],
 })

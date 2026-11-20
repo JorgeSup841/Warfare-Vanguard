@@ -102,6 +102,13 @@
   background: #ffd84d;
 }
 
+/* Mensaje de error */
+.juego__mensaje {
+  text-align: center;
+  margin: 0 0 20px;
+  color: #ffd84d;
+}
+
 /* Tablero y panel */
 .juego__tablero {
   display: flex;
