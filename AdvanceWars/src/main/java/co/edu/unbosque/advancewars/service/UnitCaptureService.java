@@ -1,5 +1,7 @@
 package co.edu.unbosque.advancewars.service;
 
+import java.util.Optional;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import co.edu.unbosque.advancewars.dto.CaptureResultDTO;
 import co.edu.unbosque.advancewars.dto.EndTurnRequestDTO;
 import co.edu.unbosque.advancewars.enums.GameStatus;
+import co.edu.unbosque.advancewars.enums.PropertyType;
 import co.edu.unbosque.advancewars.enums.UnitType;
 import co.edu.unbosque.advancewars.model.GameState;
 import co.edu.unbosque.advancewars.model.Player;
@@ -28,12 +31,14 @@ public class UnitCaptureService {
 	private final GameStateRepository gameRepository;
 	private final UnitRepository unitRepository;
 	private final PropertyRepository propertyRepository;
+	private final GameVictoryService victoryService;
 
 	public UnitCaptureService(GameStateRepository gameRepository, UnitRepository unitRepository,
-			PropertyRepository propertyRepository) {
+			PropertyRepository propertyRepository, GameVictoryService victoryService) {
 		this.gameRepository = gameRepository;
 		this.unitRepository = unitRepository;
 		this.propertyRepository = propertyRepository;
+		this.victoryService = victoryService;
 	}
 
 	@Transactional
@@ -47,8 +52,11 @@ public class UnitCaptureService {
 		}
 
 		// Bloquea la partida para que turnos, movimientos y capturas no se crucen.
-		GameState game = gameRepository.findWithLockByIdAndCreatedBy_Id(gameId, creator.getId())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida no encontrada"));
+		Optional<GameState> foundGame = gameRepository.findWithLockByIdAndCreatedBy_Id(gameId, creator.getId());
+		if (foundGame.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida no encontrada");
+		}
+		GameState game = foundGame.get();
 
 		if (game.getStatus() != GameStatus.IN_PROGRESS) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "La partida no esta en curso");
@@ -58,8 +66,11 @@ public class UnitCaptureService {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "El turno cambio; consulta la partida");
 		}
 
-		Unit unit = unitRepository.findById(unitId)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Unidad no encontrada"));
+		Optional<Unit> foundUnit = unitRepository.findById(unitId);
+		if (foundUnit.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unidad no encontrada");
+		}
+		Unit unit = foundUnit.get();
 		Player player = unit.getOwner();
 		if (player == null || player.getGameState() == null || !gameId.equals(player.getGameState().getId())) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unidad no encontrada en esta partida");
@@ -74,9 +85,11 @@ public class UnitCaptureService {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "Solo la infanteria puede capturar por ahora");
 		}
 
-		Property property = propertyRepository.findByTile_Id(unit.getTile().getId())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT,
-						"No hay una propiedad en la casilla de esta unidad"));
+		Optional<Property> foundProperty = propertyRepository.findByTile_Id(unit.getTile().getId());
+		if (foundProperty.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "No hay una propiedad en la casilla de esta unidad");
+		}
+		Property property = foundProperty.get();
 		if (!property.isOperational()) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "La propiedad no esta operativa");
 		}
@@ -98,6 +111,9 @@ public class UnitCaptureService {
 		}
 		propertyRepository.save(property);
 		unitRepository.save(unit);
+		if (completed && property.getDefinition().getType() == PropertyType.HEADQUARTERS) {
+			victoryService.checkHeadquartersCapture(game, property, player);
+		}
 		return new CaptureResultDTO(unit, property, completed);
 	}
 }

@@ -1,5 +1,7 @@
 package co.edu.unbosque.advancewars.service;
 
+import java.util.Optional;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,6 +12,8 @@ import co.edu.unbosque.advancewars.dto.AttackUnitRequestDTO;
 import co.edu.unbosque.advancewars.enums.GameStatus;
 import co.edu.unbosque.advancewars.enums.UnitType;
 import co.edu.unbosque.advancewars.model.GameState;
+import co.edu.unbosque.advancewars.model.Player;
+import co.edu.unbosque.advancewars.model.Property;
 import co.edu.unbosque.advancewars.model.Unit;
 import co.edu.unbosque.advancewars.model.User;
 import co.edu.unbosque.advancewars.repository.GameStateRepository;
@@ -23,12 +27,14 @@ public class UnitCombatService {
 	private final GameStateRepository gameRepository;
 	private final UnitRepository unitRepository;
 	private final PropertyRepository propertyRepository;
+	private final GameVictoryService victoryService;
 
 	public UnitCombatService(GameStateRepository gameRepository, UnitRepository unitRepository,
-			PropertyRepository propertyRepository) {
+			PropertyRepository propertyRepository, GameVictoryService victoryService) {
 		this.gameRepository = gameRepository;
 		this.unitRepository = unitRepository;
 		this.propertyRepository = propertyRepository;
+		this.victoryService = victoryService;
 	}
 
 	@Transactional
@@ -47,8 +53,11 @@ public class UnitCombatService {
 
 		// El mismo bloqueo usado por los turnos y movimientos evita ataques
 		// simultaneos.
-		GameState game = gameRepository.findWithLockByIdAndCreatedBy_Id(gameId, creator.getId())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida no encontrada"));
+		Optional<GameState> foundGame = gameRepository.findWithLockByIdAndCreatedBy_Id(gameId, creator.getId());
+		if (foundGame.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida no encontrada");
+		}
+		GameState game = foundGame.get();
 
 		if (game.getStatus() != GameStatus.IN_PROGRESS) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "La partida no esta en curso");
@@ -58,10 +67,16 @@ public class UnitCombatService {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "El turno cambio; consulta la partida");
 		}
 
-		Unit attacker = unitRepository.findById(unitId)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Atacante no encontrado"));
-		Unit target = unitRepository.findById(request.getTargetUnitId())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Objetivo no encontrado"));
+		Optional<Unit> foundAttacker = unitRepository.findById(unitId);
+		if (foundAttacker.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Atacante no encontrado");
+		}
+		Unit attacker = foundAttacker.get();
+		Optional<Unit> foundTarget = unitRepository.findById(request.getTargetUnitId());
+		if (foundTarget.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Objetivo no encontrado");
+		}
+		Unit target = foundTarget.get();
 
 		// Ambos deben pertenecer a esta partida, nunca a otra partida del sistema.
 		if (!belongsToGame(attacker, gameId) || !belongsToGame(target, gameId)) {
@@ -105,6 +120,10 @@ public class UnitCombatService {
 			attacker.receiveDamage(counterDamage);
 		}
 
+		// Conservamos los dueños para evaluar derrota despues de borrar las tropas.
+		Player attackerOwner = attacker.getOwner();
+		Player targetOwner = target.getOwner();
+
 		// La transaccion guarda la vida y libera la casilla de las tropas destruidas.
 		if (target.isDestroyed()) {
 			cancelCapture(target);
@@ -119,19 +138,33 @@ public class UnitCombatService {
 			unitRepository.save(attacker);
 		}
 
+		if (target.isDestroyed() || attacker.isDestroyed()) {
+			// Forzamos el DELETE antes de contar las tropas que quedan en MySQL.
+			unitRepository.flush();
+			if (target.isDestroyed()) {
+				victoryService.checkArmyDefeat(game, targetOwner);
+			}
+			if (attacker.isDestroyed()) {
+				victoryService.checkArmyDefeat(game, attackerOwner);
+			}
+		}
+
 		return new AttackResultDTO(attacker.getId(), target.getId(), damage, counterDamage, attacker.getCurrentHealth(),
 				target.getCurrentHealth());
 	}
 
 	// Una tropa destruida no puede dejar una captura pendiente.
 	private void cancelCapture(Unit unit) {
-		propertyRepository.findByTile_Id(unit.getTile().getId()).ifPresent(property -> {
+		Optional<Property> found =
+				propertyRepository.findByTile_Id(unit.getTile().getId());
+		if (found.isPresent()) {
+			Property property = found.get();
 			if (property.getCapturingPlayer() != null
 					&& property.getCapturingPlayer().getId().equals(unit.getOwner().getId())) {
 				property.resetCaptureProgress();
 				propertyRepository.save(property);
 			}
-		});
+		}
 	}
 
 	private boolean belongsToGame(Unit unit, Long gameId) {

@@ -34,12 +34,14 @@ import co.edu.unbosque.advancewars.repository.GameStateRepository;
 import co.edu.unbosque.advancewars.repository.PropertyRepository;
 import co.edu.unbosque.advancewars.repository.UnitRepository;
 import co.edu.unbosque.advancewars.service.UnitCaptureService;
+import co.edu.unbosque.advancewars.service.GameVictoryService;
 
 class UnitCaptureServiceTest {
     private GameStateRepository games;
     private UnitRepository units;
     private PropertyRepository properties;
     private UnitCaptureService service;
+    private GameVictoryService victoryService;
     private GameState game;
     private Player first;
     private Player second;
@@ -53,7 +55,8 @@ class UnitCaptureServiceTest {
         games = mock(GameStateRepository.class);
         units = mock(UnitRepository.class);
         properties = mock(PropertyRepository.class);
-        service = new UnitCaptureService(games, units, properties);
+        victoryService = mock(GameVictoryService.class);
+        service = new UnitCaptureService(games, units, properties, victoryService);
 
         creator = new User("tester", "pass", "test@example.com");
         ReflectionTestUtils.setField(creator, "id", 4L);
@@ -230,4 +233,22 @@ class UnitCaptureServiceTest {
         assertEquals(1, result.getCapturingPlayerOrder());
         assertNull(result.getOwnerOrder());
     }
+    @Test
+    void completedHeadquartersCaptureChecksDefeat() {
+        PropertyDefinition hqDefinition = new PropertyDefinition(PropertyType.HEADQUARTERS,
+                "HEADQUARTERS", 0, 4, 20, Set.of());
+        property.setDefinition(hqDefinition);
+        property.assignOwner(second);
+        property.updateCaptureState(first, 10);
+        capture();
+        verify(victoryService).checkHeadquartersCapture(game, property, first);
+    }
+
+    @Test
+    void completedCityCaptureDoesNotCheckVictory() {
+        property.updateCaptureState(first, 10);
+        capture();
+        verify(victoryService, never()).checkHeadquartersCapture(game, property, first);
+    }
+
 }
