@@ -186,4 +186,32 @@ button:disabled {
   button, .btn {
     font-size: 8px;
   }
+  .ganador {
+    margin-bottom: 14px;
+    padding: 12px;
+    background: #ffd44f;
+    color: #1b292e;
+    border: 3px solid #1b292e;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .tabla {
+    width: 100%;
+    margin-bottom: 16px;
+    border-collapse: collapse;
+  }
+
+  .tabla th,
+  .tabla td {
+    padding: 6px 8px;
+    border: 2px solid #1b292e;
+    text-align: left;
+  }
+
+  .tabla th {
+    background: #1b292e;
+    color: #fff0c4;
+  }
 }
