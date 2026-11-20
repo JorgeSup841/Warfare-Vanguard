@@ -11,13 +11,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import co.edu.unbosque.advancewars.dto.CreateGameDTO;
+import co.edu.unbosque.advancewars.dto.AttackUnitRequestDTO;
+import co.edu.unbosque.advancewars.dto.AttackResultDTO;
 import co.edu.unbosque.advancewars.dto.EndTurnRequestDTO;
 import co.edu.unbosque.advancewars.dto.GameDTO;
 import co.edu.unbosque.advancewars.dto.MapDTO;
+import co.edu.unbosque.advancewars.dto.MoveUnitRequestDTO;
 import co.edu.unbosque.advancewars.dto.UnitDTO;
 import co.edu.unbosque.advancewars.model.User;
 import co.edu.unbosque.advancewars.repository.UserRepository; // Ajusta el nombre si tu repositorio se llama distinto
 import co.edu.unbosque.advancewars.service.GameService;
+import co.edu.unbosque.advancewars.service.UnitCombatService;
+import co.edu.unbosque.advancewars.service.UnitMovementService;
 
 /** Rutas REST para crear partidas y consultar las propias. */
 @RestController
@@ -25,10 +30,15 @@ import co.edu.unbosque.advancewars.service.GameService;
 public class GameController {
 
     private final GameService gameService;
+    private final UnitMovementService unitMovementService;
+    private final UnitCombatService unitCombatService;
     private final UserRepository userRepository; // Temporal para pruebas
 
-    public GameController(GameService gameService, UserRepository userRepository) {
+    public GameController(GameService gameService, UserRepository userRepository,
+            UnitMovementService unitMovementService, UnitCombatService unitCombatService) {
         this.gameService = gameService;
+        this.unitMovementService = unitMovementService;
+        this.unitCombatService = unitCombatService;
         this.userRepository = userRepository;
     }
 
@@ -73,6 +83,20 @@ public class GameController {
     @GetMapping("/{id}/units")
     public List<UnitDTO> getMyUnits(@PathVariable Long id, @AuthenticationPrincipal User creator) {
         return gameService.getMyUnits(id, resolveUser(creator));
+    }
+
+    /** Mueve una tropa una sola vez por turno a una casilla alcanzable. */
+    @PostMapping("/{id}/units/{unitId}/move")
+    public UnitDTO moveUnit(@PathVariable Long id, @PathVariable Long unitId,
+            @RequestBody MoveUnitRequestDTO request, @AuthenticationPrincipal User creator) {
+        return unitMovementService.move(id, unitId, request, resolveUser(creator));
+    }
+
+    /** Una infanteria ataca a otra infanteria enemiga adyacente. */
+    @PostMapping("/{id}/units/{unitId}/attack")
+    public AttackResultDTO attackUnit(@PathVariable Long id, @PathVariable Long unitId,
+            @RequestBody AttackUnitRequestDTO request, @AuthenticationPrincipal User creator) {
+        return unitCombatService.attack(id, unitId, request, resolveUser(creator));
     }
 
     /** Temporal: devuelve un usuario de la BD si la peticion no trae JWT. */
