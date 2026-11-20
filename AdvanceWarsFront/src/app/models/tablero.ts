@@ -4,7 +4,7 @@ export interface nuevapartida {
   playerNames: string[];
   width: number;
   height: number;
-  seed: number;
+  seed?: number | null;
 }
 
 export interface jugadorservidor {

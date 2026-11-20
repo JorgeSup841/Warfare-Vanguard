@@ -1,100 +1,62 @@
-import { Component, ChangeDetectorRef, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { tableroservice } from '../../services/tableroservice';
 import { partidaresumen } from '../../models/tablero';
-/** Configura e inicia partidas registradas en Spring Boot. */
+
+/** Muestra los datos de una partida nueva y permite iniciarla. */
 @Component({
   selector: 'app-configurarpartidacomponent',
   standalone: false,
   templateUrl: './configurarpartidacomponent.html',
   styleUrl: './configurarpartidacomponent.css',
 })
-export class Configurarpartidacomponent implements OnInit, OnDestroy {
+export class Configurarpartidacomponent implements OnInit {
+  private ruta = inject(ActivatedRoute);
+  private router = inject(Router);
+  private servicio = inject(tableroservice);
+  private cdr = inject(ChangeDetectorRef);
+
   id = 0;
-  resumen: partidaresumen | null = null;
-  ocupado = false;
-  confirmacionInicio = false;
-  error = '';
+  partida: partidaresumen | null = null;
+  iniciando = false;
+  confirmar = false;
   mensaje = '';
-  private sub = new Subscription();
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private api: tableroservice,
-    private cdr: ChangeDetectorRef,
-  ) {}
-  /** Inicializa y carga los datos de la pantalla. */
+
+  /** Lee el id de la ruta y carga la partida. */
   ngOnInit(): void {
-    this.id = Number(this.route.snapshot.paramMap.get('id'));
+    this.id = Number(this.ruta.snapshot.paramMap.get('id'));
     this.cargar();
   }
 
-  /** Consulta los datos necesarios para presentar la pantalla. */
+  /** Pide al back los datos de la partida. */
   cargar(): void {
-    this.sub.add(
-      this.api.getPartida(this.id).subscribe({
-        next: (r) => {
-          this.resumen = r;
-          this.error = '';
-          this.cdr.markForCheck();
-        },
-        error: (e) => {
-          this.error = `No se encontró la partida (HTTP ${e.status || 0}).`;
-          this.cdr.markForCheck();
-        },
-      }),
-    );
+    this.servicio.getPartida(this.id).subscribe({
+      next: (p) => {
+        this.partida = p;
+        this.cdr.detectChanges();
+      },
+      error: (e) => {
+        this.mensaje = e.error?.message || 'No se encontró la partida';
+        this.cdr.detectChanges();
+      },
+    });
   }
 
-  /** Solicita confirmación para iniciar la partida. */
+  /** Pide al back iniciar la partida y abre el tablero. */
   iniciar(): void {
-    if (this.ocupado || !this.resumen || this.resumen.status !== 'SETUP') return;
-    this.confirmacionInicio = true;
-    this.cdr.markForCheck();
-  }
-
-  /** Cancela la confirmación para iniciar la partida. */
-  cancelarInicio(): void {
-    this.confirmacionInicio = false;
-    this.cdr.markForCheck();
-  }
-
-  /** Solicita el inicio de la partida al servidor después de confirmarlo. */
-  confirmarInicio(): void {
-    if (
-      !this.confirmacionInicio ||
-      this.ocupado ||
-      !this.resumen ||
-      this.resumen.status !== 'SETUP'
-    )
-      return;
-    this.confirmacionInicio = false;
-    this.ocupado = true;
-    this.error = '';
-    this.cdr.markForCheck();
-    this.sub.add(
-      this.api.iniciarPartida(this.id).subscribe({
-        next: (r) => {
-          this.resumen = r;
-          this.ocupado = false;
-          this.cdr.markForCheck();
-          this.router.navigate(['/partidas', this.id, 'jugar']).catch(() => {
-            this.error = 'No se pudo abrir la pantalla solicitada.';
-            this.cdr.markForCheck();
-          });
-        },
-        error: (e) => {
-          this.ocupado = false;
-          this.error = `No se pudo iniciar la partida (HTTP ${e.status || 0}).`;
-          this.cdr.markForCheck();
-        },
-      }),
-    );
-  }
-
-  /** Libera los recursos y suscripciones del componente. */
-  ngOnDestroy(): void {
-    this.sub.unsubscribe();
+    this.iniciando = true;
+    this.confirmar = false;
+    this.mensaje = '';
+    this.servicio.iniciarPartida(this.id).subscribe({
+      next: () => {
+        this.iniciando = false;
+        this.router.navigate(['/partidas', this.id, 'jugar']);
+      },
+      error: (e) => {
+        this.iniciando = false;
+        this.mensaje = e.error?.message || 'No se pudo iniciar la partida';
+        this.cdr.detectChanges();
+      },
+    });
   }
 }
