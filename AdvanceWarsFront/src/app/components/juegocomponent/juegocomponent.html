@@ -145,7 +145,7 @@
             type="button"
             class="btn"
             (click)="terminarTurno()"
-            [disabled]="terminando || partida.status !== 'IN_PROGRESS'">
+            [disabled]="accionEnCurso || partida.status !== 'IN_PROGRESS'">
             {{ terminando ? 'TERMINANDO...' : 'TERMINAR TURNO' }}
           </button>
         </div>
@@ -171,6 +171,16 @@
         </p>
         <!-- FIN HUD -->
 
+
+        <!-- Indicadores de alcance: solo casillas aprobadas por Spring Boot. -->
+        <div class="alcance-leyenda" *ngIf="!modoDemo && unidadActiva" role="status">
+          <span class="alcance-leyenda__muestra" aria-hidden="true"></span>
+          <span *ngIf="consultandoMovimientos">Consultando destinos posibles...</span>
+          <span *ngIf="!consultandoMovimientos">
+            {{ movimientosDisponibles.length }} casillas disponibles (verde).
+            Clic en una casilla verde para mover.
+          </span>
+        </div>
 
         <!-- TABLERO Y PANEL LATERAL -->
         <div class="game-layout">
@@ -294,9 +304,12 @@
 
                 </div>
 
+                <button type="button" class="btn" *ngIf="puedeCapturar"
+                  [disabled]="accionEnCurso" (click)="capturarPropiedad()">
+                  CAPTURAR PROPIEDAD
+                </button>
                 <p class="muted">
-                  La disponibilidad final de cada acción
-                  la determina Spring Boot.
+                  La disponibilidad final de cada acción la determina Spring Boot.
                 </p>
 
               </ng-container>
@@ -404,6 +417,18 @@
 
               </ng-container>
 
+            </div>
+
+            <div class="caja" *ngIf="fabricaActiva as fabrica">
+              <h2>FÁBRICA DEL JUGADOR</h2>
+              <p>POSICIÓN: {{ fabrica.x }}, {{ fabrica.y }}</p>
+              <p>El servidor comprueba el costo, el turno y el espacio libre.</p>
+              <div class="grid">
+                <button type="button" [disabled]="accionEnCurso"
+                  (click)="producirUnidad('INFANTRY')">PRODUCIR INFANTERÍA</button>
+                <button type="button" [disabled]="accionEnCurso"
+                  (click)="producirUnidad('TANK')">PRODUCIR TANQUE</button>
+              </div>
             </div>
 
             <!-- RESULTADO DEL ÚLTIMO COMBATE -->
@@ -549,8 +574,9 @@
         </p>
 
         <p>
-          Capturar propiedades, producir unidades y utilizar
-          poderes de comandante son funcionalidades pendientes.
+          La captura de propiedades y la producción limitada de infantería y tanques
+          están disponibles cuando el backend lo permite. Los poderes de comandante
+          siguen pendientes.
         </p>
 
 

@@ -22,7 +22,7 @@ public class ReportController {
     /** Devuelve el PDF comprobando la propiedad de la partida en el servicio. */
     @GetMapping(value = {"/api/games/{gameId}/report.pdf", "/api/admin/games/{gameId}/report.pdf"},
             produces = MediaType.APPLICATION_PDF_VALUE)
-    public ResponseEntity<byte[]> report(@PathVariable Long gameId, Authentication authentication) {
+    public ResponseEntity<byte[]> report(@PathVariable("gameId") Long gameId, Authentication authentication) {
         boolean administrator = authentication.getAuthorities().stream()
                 .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
         byte[] pdf = reports.create(gameId, authentication.getName(), administrator);

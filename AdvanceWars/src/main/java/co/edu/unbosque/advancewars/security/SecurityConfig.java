@@ -1,7 +1,6 @@
 package co.edu.unbosque.advancewars.security;
 
 import jakarta.servlet.DispatcherType;
-import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -115,7 +114,6 @@ public class SecurityConfig {
 	 * @return cadena de filtros de seguridad
 	 * @throws Exception si no se puede construir la configuración
 	 */
-
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationProvider authenticationProvider,
 			@Value("${app.openapi.public}") boolean openApiPublic) throws Exception {
@@ -145,9 +143,7 @@ public class SecurityConfig {
 					auth.requestMatchers("/api/admin/**").hasRole("ADMIN");
 					auth.requestMatchers("/api/users/**").hasRole("ADMIN");
 
-					auth.requestMatchers("/api/auth/me", "/api/users/me", "/api/games/**").authenticated();
-
-					auth.requestMatchers("/api/auth/me", "/api/users/me", "/api/games/**").authenticated();
+					auth.requestMatchers("/api/auth/me", "/api/users/me", "/api/games", "/api/games/**").authenticated();
 
 					auth.anyRequest().authenticated();
 				});

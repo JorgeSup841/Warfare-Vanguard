@@ -10,6 +10,7 @@ public class TileDTO {
 	private int y;
 	private String terrain;
 	private String propertyType;
+	private Long propertyId;
 	private Integer ownerOrder;
 	private int captureProgress;
 	private Integer capturingPlayerOrder;
@@ -21,6 +22,7 @@ public class TileDTO {
 
 		if (property != null) {
 			this.propertyType = property.getDefinition().getType().name();
+			this.propertyId = property.getId();
 			this.captureProgress = property.getCaptureProgress();
 			if (property.getCapturingPlayer() != null) {
 				this.capturingPlayerOrder = property.getCapturingPlayer().getTurnOrder();
@@ -41,6 +43,10 @@ public class TileDTO {
 
 	public String getTerrain() {
 		return terrain;
+	}
+
+	public Long getPropertyId() {
+		return propertyId;
 	}
 
 	public String getPropertyType() {
