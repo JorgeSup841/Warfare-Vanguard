@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import co.edu.unbosque.advancewars.dto.CreateGameDTO;
+import co.edu.unbosque.advancewars.dto.EndTurnRequestDTO;
 import co.edu.unbosque.advancewars.dto.GameDTO;
 import co.edu.unbosque.advancewars.dto.MapDTO;
 import co.edu.unbosque.advancewars.dto.UnitDTO;
@@ -59,6 +60,13 @@ public class GameController {
     @PostMapping("/{id}/start")
     public GameDTO startGame(@PathVariable Long id, @AuthenticationPrincipal User creator) {
         return gameService.startGame(id, resolveUser(creator));
+    }
+
+    /** Cambia al siguiente jugador y, cuando corresponde, inicia otra ronda. */
+    @PostMapping("/{id}/end-turn")
+    public GameDTO endTurn(@PathVariable Long id, @RequestBody EndTurnRequestDTO expected,
+            @AuthenticationPrincipal User creator) {
+        return gameService.endTurn(id, expected, resolveUser(creator));
     }
 
     /** Lista las unidades que hay sobre el tablero. */
