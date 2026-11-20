@@ -1,31 +1,54 @@
 <section class="screen">
-  <div class="wrap narrow"><h1>NUEVA CAMPAÑA</h1>
+  <div class="wrap narrow">
+    <h1>NUEVA CAMPAÑA</h1>
+
     <div class="panel">
       <div class="panel-head azul">CONFIGURAR PARTIDA ■</div>
       <div class="panel-body">
-        <form (ngSubmit)="crear()" novalidate>
-          <div class="field"><label for="cantidad">NÚMERO DE JUGADORES</label><select id="cantidad" name="cantidad"
-                                                                                      [(ngModel)]="cantidad"
-                                                                                      (ngModelChange)="cambiarCantidad()">
-            <option [ngValue]="2">2</option>
-            <option [ngValue]="3">3</option>
-            <option [ngValue]="4">4</option>
-          </select></div>
-          <div *ngFor="let nombre of nombres; let i=index" class="field"><label
-            [for]="'nombre'+i">JUGADOR {{ i + 1 }}</label><input [id]="'nombre'+i" [name]="'nombre'+i"
-                                                                 [(ngModel)]="nombres[i]" required></div>
-          <div class="flex">
-            <div class="field"><label for="ancho">ANCHO</label><input id="ancho" type="number" name="ancho"
-                                                                      [(ngModel)]="ancho" min="8" required></div>
-            <div class="field"><label for="alto">ALTO</label><input id="alto" type="number" name="alto"
-                                                                    [(ngModel)]="alto" min="8" required></div>
+        <form (ngSubmit)="crear()">
+
+          <div class="field">
+            <label for="cantidad">NÚMERO DE JUGADORES</label>
+            <select id="cantidad" name="cantidad" [(ngModel)]="cantidad" (ngModelChange)="cambiarCantidad()">
+              <option [ngValue]="2">2</option>
+              <option [ngValue]="3">3</option>
+              <option [ngValue]="4">4</option>
+            </select>
           </div>
-          <div class="field"><label for="semilla">SEMILLA</label><input id="semilla" type="number" name="semilla"
-                                                                        [(ngModel)]="semilla" required></div>
+
+          <div class="field" *ngFor="let n of nombres; let i = index; trackBy: porIndice">
+            <label [for]="'nombre' + i">JUGADOR {{ i + 1 }}</label>
+            <input [id]="'nombre' + i" [name]="'nombre' + i" [(ngModel)]="nombres[i]">
+          </div>
+
+          <div class="flex">
+            <div class="field">
+              <label for="ancho">ANCHO (5 a 50)</label>
+              <input id="ancho" type="number" name="ancho" [(ngModel)]="ancho">
+            </div>
+            <div class="field">
+              <label for="alto">ALTO (5 a 50)</label>
+              <input id="alto" type="number" name="alto" [(ngModel)]="alto">
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="semilla">SEMILLA (opcional)</label>
+            <div class="flex">
+              <input id="semilla" type="number" name="semilla" [(ngModel)]="semilla" placeholder="Vacío = al azar">
+              <button type="button" class="secondary" (click)="semillaAlAzar()">🎲 AL AZAR</button>
+            </div>
+          </div>
+
           <p>Rellena todos los espacios.</p>
-          <p *ngIf="error" class="message error" role="alert">{{ error }}</p>
-          <button type="submit" [disabled]="ocupado">{{ ocupado ? 'CREANDO...' : 'CREAR PARTIDA' }} ▸</button>
+
+          <p *ngIf="error || mensaje" class="message error" role="alert">{{ error || mensaje }}</p>
+
+          <button type="submit" [disabled]="ocupado || creando">
+            {{ (ocupado || creando) ? 'CREANDO...' : 'CREAR PARTIDA ▸' }}
+          </button>
         </form>
+
         <a routerLink="/partidas">‹ MIS PARTIDAS</a>
       </div>
     </div>

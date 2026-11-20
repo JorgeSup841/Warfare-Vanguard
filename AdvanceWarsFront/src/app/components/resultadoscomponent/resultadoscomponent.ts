@@ -1,102 +1,87 @@
-import { Component, ChangeDetectorRef, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription, forkJoin } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { tableroservice } from '../../services/tableroservice';
 import { ReporteService } from '../../services/reporte.service';
-import { partidaresumen, unidadservidor } from '../../models/tablero'; // <-- Import cerrado correctamente
+import { partidaresumen, unidadservidor } from '../../models/tablero';
 
-/** Presenta los resultados y permite descargar el informe PDF. */
+/** Muestra el resultado de una partida y permite descargar el PDF. */
 @Component({
   selector: 'app-resultadoscomponent',
   standalone: false,
   templateUrl: './resultadoscomponent.html',
   styleUrl: './resultadoscomponent.css',
 })
-export class Resultadoscomponent implements OnInit, OnDestroy {
+export class Resultadoscomponent implements OnInit {
+  private ruta = inject(ActivatedRoute);
+  private servicio = inject(tableroservice);
+  private pdf = inject(ReporteService);
+  private cdr = inject(ChangeDetectorRef);
+
   id = 0;
   partida: partidaresumen | null = null;
   unidades: unidadservidor[] = [];
-  error = '';
-  mensaje = '';
   cargando = false;
+  descargando = false;
+  mensaje = '';
+  error = '';
 
-  private subs = new Subscription();
-
-  constructor(
-    private ruta: ActivatedRoute,
-    private api: tableroservice,
-    private pdf: ReporteService,
-    private cdr: ChangeDetectorRef,
-  ) {}
-
-  /** Inicializa y carga los datos de la pantalla. */
+  /** Lee el id de la ruta y carga los resultados. */
   ngOnInit(): void {
-    const idParam = Number(this.ruta.snapshot.paramMap.get('id'));
-
-    // Evita llamadas HTTP con NaN si la URL es inválida
-    if (isNaN(idParam) || idParam <= 0) {
-      this.error = 'El identificador de la partida no es válido.';
-      return;
-    }
-
-    this.id = idParam;
+    this.id = Number(this.ruta.snapshot.paramMap.get('id'));
     this.cargar();
   }
 
-  /** Consulta los datos necesarios para presentar la pantalla. */
+  /** Pide al back la partida y sus unidades. */
   cargar(): void {
     this.cargando = true;
-    this.error = '';
-    this.cdr.markForCheck();
-
-    this.subs.add(
-      forkJoin({
-        partida: this.api.getPartida(this.id),
-        unidades: this.api.getUnidades(this.id),
-      }).subscribe({
-        next: (r) => {
-          this.partida = r.partida;
-          this.unidades = r.unidades;
-          this.cargando = false;
-          this.cdr.markForCheck();
-        },
-        error: (e) => {
-          this.cargando = false;
-          this.error = `No se pudo consultar el resumen (HTTP ${e.status || 0}).`;
-          this.cdr.markForCheck();
-        },
-      }),
-    );
+    forkJoin({
+      partida: this.servicio.getPartida(this.id),
+      unidades: this.servicio.getUnidades(this.id),
+    }).subscribe({
+      next: (r) => {
+        this.partida = r.partida;
+        this.unidades = r.unidades;
+        this.cargando = false;
+        this.cdr.detectChanges();
+      },
+      error: (e) => {
+        this.cargando = false;
+        this.error = e.error?.message || 'No se pudieron cargar los resultados';
+        this.cdr.detectChanges();
+      },
+    });
   }
 
-  /** Descarga el informe PDF asociado a los resultados. */
+  /** Nombre del ganador, si ya lo hay. */
+  get ganador(): string {
+    if (!this.partida) return '';
+    const g = this.partida.players.find((j) => j.status === 'WINNER');
+    return g ? g.name : '';
+  }
+
+  /** Cuántas unidades le quedan a un jugador. */
+  unidadesDe(orden: number): number {
+    return this.unidades.filter((u) => u.ownerOrder === orden).length;
+  }
+
+  /** Descarga el informe PDF que genera el back. */
   descargar(): void {
-    // Limpia estados previos antes de iniciar la descarga
-    this.error = '';
+    this.descargando = true;
     this.mensaje = '';
-    this.cdr.markForCheck();
-
-    this.subs.add(
-      this.pdf.obtener(this.id).subscribe({
-        next: (blob) => {
-          try {
-            this.pdf.guardarArchivo(blob, this.id);
-            this.mensaje = 'PDF descargado.';
-          } catch (e) {
-            this.error = e instanceof Error ? e.message : 'PDF inválido.';
-          }
-          this.cdr.markForCheck();
-        },
-        error: (e) => {
-          this.error = `No se pudo descargar el PDF (HTTP ${e.status || 0}).`;
-          this.cdr.markForCheck();
-        },
-      }),
-    );
-  }
-
-  /** Libera los recursos y suscripciones del componente. */
-  ngOnDestroy(): void {
-    this.subs.unsubscribe();
+    this.error = '';
+    this.pdf.obtener(this.id).subscribe({
+      next: (archivo) => {
+        this.pdf.guardarArchivo(archivo, this.id);
+        this.descargando = false;
+        this.mensaje = 'PDF descargado';
+        this.cdr.detectChanges();
+      },
+      error: (e) => {
+        this.descargando = false;
+        this.error = `No se pudo descargar el PDF (error ${e.status || 0})`;
+        this.cdr.detectChanges();
+      },
+    });
   }
 }

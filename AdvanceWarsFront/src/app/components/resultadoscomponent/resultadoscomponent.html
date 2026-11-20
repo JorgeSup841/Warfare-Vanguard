@@ -1,24 +1,51 @@
 <section class="screen">
-  <div class="wrap"><h1>INFORME DE PARTIDA #{{ id }}</h1>
+  <div class="wrap">
+    <h1>RESULTADOS PARTIDA #{{ id }}</h1>
+
     <div class="panel">
-      <div class="panel-head">INFORMACIÓN DESDE SPRING BOOT</div>
+      <div class="panel-head">INFORME DE BATALLA</div>
       <div class="panel-body">
-        <p *ngIf="cargando">Consultando...</p>
-        <ng-container *ngIf="partida as p"><p>ESTADO: {{ p.status }} · RONDA: {{ p.currentRound }} ·
-          TURNO: {{ p.currentPlayerOrder }}</p>
-          <p>JUGADORES: {{ p.playerCount }} · MAPA: {{ p.width }} × {{ p.height }}</p>
-          <h2>PARTICIPANTES</h2>
-          <p *ngFor="let j of p.players">{{ j.turnOrder }}. {{ j.name }} — {{ j.money }} CRÉDITOS</p>
-          <h2>UNIDADES REGISTRADAS</h2>
-          <p>TOTAL: {{ unidades.length }}</p>
-        </ng-container>
-        <p>El backend aún no expone un historial de eventos ni un resultado final detallado. El PDF disponible lo genera
-          Spring Boot.</p>
-        <p *ngIf="error" class="message error" role="alert">{{ error }}</p>
-        <p *ngIf="mensaje" class="message">{{ mensaje }}</p>
+
+        <p *ngIf="cargando">Cargando resultados...</p>
+
+        <div *ngIf="partida">
+          <div class="ganador" *ngIf="ganador">🏆 GANADOR: {{ ganador }}</div>
+          <p *ngIf="!ganador">La partida todavía no tiene ganador.</p>
+
+          <p>RONDAS JUGADAS: {{ partida.currentRound }} · MAPA: {{ partida.width }} × {{ partida.height }}</p>
+
+          <h2>JUGADORES</h2>
+          <table class="tabla">
+            <thead>
+            <tr>
+              <th>#</th>
+              <th>NOMBRE</th>
+              <th>DINERO</th>
+              <th>UNIDADES</th>
+              <th>ESTADO</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let j of partida.players">
+              <td>{{ j.turnOrder }}</td>
+              <td>{{ j.name }}</td>
+              <td>$ {{ j.money }}</td>
+              <td>{{ unidadesDe(j.turnOrder) }}</td>
+              <td>{{ j.status === 'WINNER' ? 'GANADOR' : j.status === 'ELIMINATED' ? 'ELIMINADO' : 'ACTIVO' }}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="message error" *ngIf="error">{{ error }}</p>
+        <p class="message" *ngIf="mensaje">{{ mensaje }}</p>
+
         <div class="flex">
-          <button (click)="descargar()">DESCARGAR PDF</button>
-          <a class="btn secondary" [routerLink]="['/partidas',id,'jugar']">VOLVER AL TABLERO</a></div>
+          <button type="button" (click)="descargar()" [disabled]="descargando">
+            {{ descargando ? 'DESCARGANDO...' : 'DESCARGAR PDF' }}
+          </button>
+          <a class="btn secondary" routerLink="/partidas">‹ MIS PARTIDAS</a>
+        </div>
       </div>
     </div>
   </div>
