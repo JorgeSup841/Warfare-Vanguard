@@ -28,6 +28,7 @@ import co.edu.unbosque.advancewars.model.UnitDefinition;
 import co.edu.unbosque.advancewars.model.User;
 import co.edu.unbosque.advancewars.repository.GameStateRepository;
 import co.edu.unbosque.advancewars.repository.UnitRepository;
+import co.edu.unbosque.advancewars.repository.PropertyRepository;
 import co.edu.unbosque.advancewars.service.UnitCombatService;
 
 class UnitCombatServiceTest {
@@ -47,7 +48,7 @@ class UnitCombatServiceTest {
     void setUp() {
         games = mock(GameStateRepository.class);
         units = mock(UnitRepository.class);
-        service = new UnitCombatService(games, units);
+        service = new UnitCombatService(games, units, mock(PropertyRepository.class));
 
         creator = new User("tester", "pass", "test@example.com");
         ReflectionTestUtils.setField(creator, "id", 4L);

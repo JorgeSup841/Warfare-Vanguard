@@ -13,6 +13,7 @@ import co.edu.unbosque.advancewars.model.GameState;
 import co.edu.unbosque.advancewars.model.Unit;
 import co.edu.unbosque.advancewars.model.User;
 import co.edu.unbosque.advancewars.repository.GameStateRepository;
+import co.edu.unbosque.advancewars.repository.PropertyRepository;
 import co.edu.unbosque.advancewars.repository.UnitRepository;
 
 /** Combate basico: infanteria vs infanteria, con contraataque. */
@@ -21,10 +22,13 @@ public class UnitCombatService {
 
 	private final GameStateRepository gameRepository;
 	private final UnitRepository unitRepository;
+	private final PropertyRepository propertyRepository;
 
-	public UnitCombatService(GameStateRepository gameRepository, UnitRepository unitRepository) {
+	public UnitCombatService(GameStateRepository gameRepository, UnitRepository unitRepository,
+			PropertyRepository propertyRepository) {
 		this.gameRepository = gameRepository;
 		this.unitRepository = unitRepository;
+		this.propertyRepository = propertyRepository;
 	}
 
 	@Transactional
@@ -103,11 +107,13 @@ public class UnitCombatService {
 
 		// La transaccion guarda la vida y libera la casilla de las tropas destruidas.
 		if (target.isDestroyed()) {
+			cancelCapture(target);
 			unitRepository.delete(target);
 		} else {
 			unitRepository.save(target);
 		}
 		if (attacker.isDestroyed()) {
+			cancelCapture(attacker);
 			unitRepository.delete(attacker);
 		} else {
 			unitRepository.save(attacker);
@@ -115,6 +121,17 @@ public class UnitCombatService {
 
 		return new AttackResultDTO(attacker.getId(), target.getId(), damage, counterDamage, attacker.getCurrentHealth(),
 				target.getCurrentHealth());
+	}
+
+	// Una tropa destruida no puede dejar una captura pendiente.
+	private void cancelCapture(Unit unit) {
+		propertyRepository.findByTile_Id(unit.getTile().getId()).ifPresent(property -> {
+			if (property.getCapturingPlayer() != null
+					&& property.getCapturingPlayer().getId().equals(unit.getOwner().getId())) {
+				property.resetCaptureProgress();
+				propertyRepository.save(property);
+			}
+		});
 	}
 
 	private boolean belongsToGame(Unit unit, Long gameId) {
