@@ -1,19 +1,29 @@
 <section class="screen">
   <div class="wrap">
-    <div class="flex head"><h1>MIS PARTIDAS</h1><a class="btn" routerLink="/partidas/nueva">+ NUEVA PARTIDA</a></div>
+    <div class="flex head">
+      <h1>MIS PARTIDAS</h1>
+      <a class="btn" routerLink="/partidas/nueva">+ NUEVA PARTIDA</a>
+    </div>
+
     <div class="panel">
       <div class="panel-head">ARCHIVO DE CAMPAÑAS ■</div>
       <div class="panel-body">
         <button type="button" class="secondary" (click)="cargar()" [disabled]="cargando">ACTUALIZAR</button>
-        <p *ngIf="cargando">Consultando partidas...</p>
-        <p class="message error" *ngIf="error">{{ error }}</p>
-        <p *ngIf="!cargando && !error && partidas.length===0">Todavía no tienes partidas.</p>
+
+        <p *ngIf="cargando">Cargando partidas...</p>
+        <p class="message error" *ngIf="mensaje">{{ mensaje }}</p>
+        <p *ngIf="!cargando && !mensaje && partidas.length === 0">Todavía no tienes partidas.</p>
+
         <div *ngFor="let p of partidas" class="fila">
-          <div><strong>PARTIDA #{{ p.id }}</strong><br><span>ESTADO: {{ p.status }} · {{ p.playerCount || '?' }}
-            JUGADORES</span></div>
-          <div class="flex"><a class="btn secondary" [routerLink]="['/partidas',p.id,'configurar']">CONFIGURAR</a><a
-            class="btn" [routerLink]="['/partidas',p.id,'jugar']">TABLERO</a><a class="btn secondary"
-                                                                                [routerLink]="['/partidas',p.id,'resultados']">RESULTADOS</a>
+          <div>
+            <strong>PARTIDA #{{ p.id }}</strong><br>
+            <span>{{ estados[p.status] || p.status }} · {{ p.playerCount }} JUGADORES · RONDA {{ p.currentRound }}</span>
+          </div>
+
+          <div class="flex">
+            <a *ngIf="p.status === 'SETUP'" class="btn secondary" [routerLink]="['/partidas', p.id, 'configurar']">CONFIGURAR</a>
+            <a *ngIf="p.status === 'IN_PROGRESS'" class="btn" [routerLink]="['/partidas', p.id, 'jugar']">JUGAR</a>
+            <a *ngIf="p.status === 'FINISHED'" class="btn secondary" [routerLink]="['/partidas', p.id, 'resultados']">RESULTADOS</a>
           </div>
         </div>
       </div>

@@ -72,3 +72,7 @@ export interface eventojuego {
   description?: string;
   occurredAt?: string;
 }
+export interface turnoactual {
+  currentRound: number;
+  currentPlayerOrder: number;
+}

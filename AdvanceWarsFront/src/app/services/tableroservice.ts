@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 
@@ -14,6 +14,7 @@ import {
   eventojuego,
   seleccionjugador,
   registrarasiento,
+  turnoactual,
 } from '../models/tablero';
 
 /** Accede a los endpoints disponibles de partidas y señala los que todavía no están implementados. */
@@ -21,12 +22,9 @@ import {
   providedIn: 'root',
 })
 export class tableroservice {
+  private http = inject(HttpClient);
+  private auth = inject(usuarioservice);
   private readonly api = `${API_BASE_URL}/games`;
-
-  constructor(
-    private http: HttpClient,
-    private auth: usuarioservice,
-  ) {}
   /** Construye las cabeceras HTTP de la sesión JWT. */
   private headers(): HttpHeaders {
     return this.auth.getHeaders();
@@ -129,9 +127,11 @@ export class tableroservice {
     return this.pendiente('Producir unidad', { id, propertyId, unitDefinitionId, spawnX, spawnY });
   }
 
-  /** Reserva la finalización del turno activo. */
-  finTurno(id: number): Observable<unknown> {
-    return this.pendiente('Finalizar turno', { id });
+  /** Termina el turno del jugador actual y devuelve la partida actualizada. */
+  finTurno(id: number, turno: turnoactual): Observable<partidaresumen> {
+    return this.http.post<partidaresumen>(`${this.api}/${id}/end-turn`, turno, {
+      headers: this.headers(),
+    });
   }
 
   /** Reserva la activación de un poder de comandante. */
