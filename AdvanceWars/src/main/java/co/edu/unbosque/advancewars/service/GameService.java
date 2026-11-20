@@ -1,7 +1,6 @@
 package co.edu.unbosque.advancewars.service;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -112,8 +111,11 @@ public class GameService {
 
 		checkUser(creator);
 
-		GameState game = gameRepository.findByIdAndCreatedBy_Id(gameId, creator.getId())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida no encontrada"));
+		Optional<GameState> foundGame = gameRepository.findByIdAndCreatedBy_Id(gameId, creator.getId());
+		if (foundGame.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida no encontrada");
+		}
+		GameState game = foundGame.get();
 
 		return new GameDTO(game);
 	}
@@ -122,8 +124,11 @@ public class GameService {
 	@Transactional(readOnly = true)
 	public MapDTO getMyMap(Long gameId, User creator) {
 		checkUser(creator);
-		GameState game = gameRepository.findByIdAndCreatedBy_Id(gameId, creator.getId())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida no encontrada"));
+		Optional<GameState> foundGame = gameRepository.findByIdAndCreatedBy_Id(gameId, creator.getId());
+		if (foundGame.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida no encontrada");
+		}
+		GameState game = foundGame.get();
 		return new MapDTO(game, propertyRepository.findAllByTile_GameMap_Id(game.getGameMap().getId()));
 	}
 
@@ -131,8 +136,11 @@ public class GameService {
 	@Transactional
 	public GameDTO startGame(Long gameId, User creator) {
 		checkUser(creator);
-		GameState game = gameRepository.findByIdAndCreatedBy_Id(gameId, creator.getId())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida no encontrada"));
+		Optional<GameState> foundGame = gameRepository.findByIdAndCreatedBy_Id(gameId, creator.getId());
+		if (foundGame.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida no encontrada");
+		}
+		GameState game = foundGame.get();
 
 		if (game.getStatus() != GameStatus.SETUP) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "La partida ya fue iniciada o finalizada");
@@ -194,23 +202,34 @@ public class GameService {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "La partida tiene un turno actual invalido");
 		}
 
-		// Solo participan los jugadores activos. No dependemos del orden de la lista
-		// JPA.
-		List<Player> activePlayers = game.getPlayers().stream().filter(Player::isActive)
-				.sorted(Comparator.comparingInt(Player::getTurnOrder)).toList();
+		// Buscamos el siguiente jugador activo sin streams ni ordenar listas.
+		Player next = null;
+		Player firstActive = null;
+		int activeCount = 0;
+		for (Player player : game.getPlayers()) {
+			if (!player.isActive()) {
+				continue;
+			}
+			activeCount++;
+			if (firstActive == null || player.getTurnOrder() < firstActive.getTurnOrder()) {
+				firstActive = player;
+			}
+			if (player.getTurnOrder() > game.getCurrentPlayerOrder()
+					&& (next == null || player.getTurnOrder() < next.getTurnOrder())) {
+				next = player;
+			}
+		}
 
-		if (activePlayers.isEmpty()) {
+		if (activeCount == 0) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "No hay jugadores activos en la partida");
 		}
-
-		// Cuando solo queda un jugador, la partida termina.
-		if (activePlayers.size() == 1) {
-			game.finishGame(activePlayers.get(0).getTurnOrder());
+		if (activeCount == 1) {
+			game.finishGame(firstActive.getTurnOrder());
 			return new GameDTO(game);
 		}
-
-		Player next = activePlayers.stream().filter(p -> p.getTurnOrder() > game.getCurrentPlayerOrder()).findFirst()
-				.orElse(activePlayers.get(0));
+		if (next == null) {
+			next = firstActive;
+		}
 
 		// Al volver al primer jugador disponible empieza una nueva ronda.
 		if (next.getTurnOrder() <= game.getCurrentPlayerOrder()) {
@@ -239,8 +258,9 @@ public class GameService {
 	@Transactional(readOnly = true)
 	public List<UnitDTO> getMyUnits(Long gameId, User creator) {
 		checkUser(creator);
-		gameRepository.findByIdAndCreatedBy_Id(gameId, creator.getId())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida no encontrada"));
+		if (gameRepository.findByIdAndCreatedBy_Id(gameId, creator.getId()).isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida no encontrada");
+		}
 
 		List<UnitDTO> result = new ArrayList<>();
 		for (Unit unit : unitRepository.findAllByOwner_GameState_Id(gameId)) {
