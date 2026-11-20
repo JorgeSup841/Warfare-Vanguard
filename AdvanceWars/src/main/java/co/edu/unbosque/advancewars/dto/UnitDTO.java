@@ -14,6 +14,7 @@ public class UnitDTO {
 	private int fuel;
 	private boolean movedThisTurn;
 	private boolean attackedThisTurn;
+	private boolean capturedThisTurn;
 
 	public UnitDTO(Unit unit) {
 		id = unit.getId();
@@ -25,6 +26,7 @@ public class UnitDTO {
 		fuel = unit.getCurrentFuel();
 		movedThisTurn = unit.isMovedThisTurn();
 		attackedThisTurn = unit.isAttackedThisTurn();
+		capturedThisTurn = unit.isCapturedThisTurn();
 	}
 
 	public Long getId() {
@@ -61,5 +63,9 @@ public class UnitDTO {
 
 	public boolean isAttackedThisTurn() {
 		return attackedThisTurn;
+	}
+
+	public boolean isCapturedThisTurn() {
+		return capturedThisTurn;
 	}
 }
