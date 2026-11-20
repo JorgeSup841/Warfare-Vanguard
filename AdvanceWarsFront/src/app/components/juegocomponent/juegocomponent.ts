@@ -79,6 +79,11 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
   terminando = false;
   colores = ['#e74b40', '#366cb1', '#3f9e4d', '#e0b020'];
   ganancias: Record<number, number> = {};
+  tiendaAbierta = false;
+  readonly tienda = [
+    { tipo: 'INFANTRY' as const, nombre: 'Infantería', costo: 1000, detalle: 'Barata. Puede capturar edificios.' },
+    { tipo: 'TANK' as const, nombre: 'Tanque', costo: 7000, detalle: 'Fuerte y rápido. No captura.' },
+  ];
 
   /** Impide acciones simultáneas mientras se espera una respuesta del servidor. */
   get accionEnCurso(): boolean {
@@ -718,8 +723,9 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
         tile.x === x && tile.y === y && tile.propertyType === 'FACTORY' &&
         tile.ownerOrder === this.partida?.currentPlayerOrder && tile.propertyId != null);
       this.fabricaActiva = fabrica ?? null;
+      this.tiendaAbierta = Boolean(fabrica);
       this.mensaje = fabrica
-        ? `Fábrica propia en (${x}, ${y}). Selecciona una unidad para producir.`
+        ? `Fábrica propia en (${x}, ${y}). Elige qué comprar en la tienda.`
         : `Casilla (${x}, ${y}) sin unidad.`;
       this.cdr.detectChanges();
       return;
@@ -747,6 +753,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.establecerUnidadActiva(encontrada);
     this.fabricaActiva = null;
+    this.tiendaAbierta = false;
     this.error = '';
     this.resultadoCombate = null;
     this.mensaje =
@@ -918,7 +925,52 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     }));
   }
 
-  /** Compra INFANTRY o TANK únicamente en una fábrica que devolvió MapDTO. */
+  /** Dinero del jugador que tiene el turno. */
+  get dineroActual(): number {
+    const actual = this.partida?.players.find((j) => j.turnOrder === this.partida?.currentPlayerOrder);
+    return actual ? actual.money : 0;
+  }
+
+  /** Imagen de la unidad con el color del jugador en turno. */
+  imagenTienda(tipo: string): string {
+    const facciones = ['RED', 'BLUE', 'GREEN', 'YELLOW'];
+    const faccion = facciones[(this.partida?.currentPlayerOrder ?? 1) - 1] ?? 'RED';
+    return `/assets/sprites/unidades/${faccion}/${tipo}.png`;
+  }
+
+  /** Indica si hay una tropa encima de la fábrica elegida. */
+  get fabricaOcupada(): boolean {
+    const fabrica = this.fabricaActiva;
+    if (!fabrica) return false;
+    return this.unidades.some((u) => u.x === fabrica.x && u.y === fabrica.y && u.health > 0);
+  }
+
+  /** Abre la tienda en la primera fábrica propia que esté libre. */
+  abrirTienda(): void {
+    if (!this.partida || !this.tableroActual) return;
+    const propias = this.tableroActual.tiles.filter((t) =>
+      t.propertyType === 'FACTORY' && t.ownerOrder === this.partida?.currentPlayerOrder && t.propertyId != null);
+    if (propias.length === 0) {
+      this.error = 'No tienes fábricas. Captura una con tu infantería.';
+      this.cdr.detectChanges();
+      return;
+    }
+    const libre = propias.find((t) => !this.unidades.some((u) => u.x === t.x && u.y === t.y && u.health > 0));
+    this.establecerUnidadActiva(null);
+    this.fabricaActiva = libre ?? propias[0];
+    this.tiendaAbierta = true;
+    this.error = '';
+    this.cdr.detectChanges();
+  }
+
+  /** Cierra la tienda. */
+  cerrarTienda(): void {
+    this.tiendaAbierta = false;
+    this.fabricaActiva = null;
+    this.cdr.detectChanges();
+  }
+
+  /** Compra una tropa en la fábrica elegida. El back valida el costo y el turno. */
   producirUnidad(tipo: 'INFANTRY' | 'TANK'): void {
     const turno = this.turnoActual();
     const propiedad = this.fabricaActiva;
@@ -931,7 +983,8 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.destruido) return;
         this.produciendo = false;
         this.fabricaActiva = null;
-        this.mensaje = `${this.nombreUnidad(unidad.unitType)} producida por el servidor.`;
+        this.tiendaAbierta = false;
+        this.mensaje = `${this.nombreUnidad(unidad.unitType)} comprada. Podrá moverse en tu próximo turno.`;
         this.cargarDatos();
         this.cdr.detectChanges();
       },

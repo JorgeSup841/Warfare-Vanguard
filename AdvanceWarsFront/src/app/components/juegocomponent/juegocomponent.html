@@ -1,8 +1,6 @@
-
 <section class="screen juego">
   <div class="wrap">
 
-    <!-- CABECERA DEL JUEGO -->
     <header class="flex header">
 
       <div>
@@ -24,7 +22,7 @@
 
     </header>
 
-    <!-- CONTROLES DEL MODO DEMOSTRACIÓN -->
+
     <div
       *ngIf="modoDemo"
       class="juego__controles">
@@ -90,7 +88,7 @@
 
     </div>
 
-    <!-- PANEL PRINCIPAL -->
+
     <div class="panel">
 
       <div class="panel-head azul">
@@ -100,7 +98,7 @@
 
       <div class="panel-body">
 
-        <!-- MENSAJES -->
+
         <p *ngIf="cargando">
           Cargando mapa y terrenos...
         </p>
@@ -120,7 +118,7 @@
         </p>
 
 
-        <!-- HUD -->
+
         <div class="hud" *ngIf="partida">
           <div class="hud__turno">
             RONDA {{ partida.currentRound }} · TURNO DE {{ jugadorEnTurno }}
@@ -140,6 +138,14 @@
               <span *ngIf="j.status === 'ELIMINATED'">ELIMINADO</span>
             </div>
           </div>
+
+          <button
+            type="button"
+            class="btn secondary"
+            (click)="abrirTienda()"
+            [disabled]="accionEnCurso || partida.status !== 'IN_PROGRESS'">
+            🛒 TIENDA
+          </button>
 
           <button
             type="button"
@@ -163,16 +169,13 @@
           Procesando ataque...
         </p>
 
-        <!-- HUD: ZONA RESERVADA PARA PERSONA 2 -->
+
         <p *ngIf="partida">
           ESTADO: {{ partida.status }}
           · RONDA: {{ partida.currentRound }}
           · TURNO: {{ partida.currentPlayerOrder }}
         </p>
-        <!-- FIN HUD -->
 
-
-        <!-- Indicadores de alcance: solo casillas aprobadas por Spring Boot. -->
         <div class="alcance-leyenda" *ngIf="!modoDemo && unidadActiva" role="status">
           <span class="alcance-leyenda__muestra" aria-hidden="true"></span>
           <span *ngIf="consultandoMovimientos">Consultando destinos posibles...</span>
@@ -182,10 +185,10 @@
           </span>
         </div>
 
-        <!-- TABLERO Y PANEL LATERAL -->
+
         <div class="game-layout">
 
-          <!-- COLUMNA DEL MAPA -->
+
           <div class="map-col">
 
             <div class="marco juego__marco">
@@ -214,10 +217,10 @@
 
           </div>
 
-          <!-- PANEL LATERAL -->
+
           <aside class="sidebar juego__panel">
 
-            <!-- TAREA 3.9: UNIDAD SELECCIONADA -->
+
             <div class="caja unidad-ficha">
 
               <h2>UNIDAD SELECCIONADA</h2>
@@ -305,7 +308,7 @@
                 </div>
 
                 <button type="button" class="btn" *ngIf="puedeCapturar"
-                  [disabled]="accionEnCurso" (click)="capturarPropiedad()">
+                        [disabled]="accionEnCurso" (click)="capturarPropiedad()">
                   CAPTURAR PROPIEDAD
                 </button>
                 <p class="muted">
@@ -329,7 +332,7 @@
 
             </div>
 
-            <!-- INSPECTOR ORIGINAL DE CASILLAS -->
+
             <div class="caja">
 
               <h2>INSPECTOR DE CASILLA</h2>
@@ -419,19 +422,40 @@
 
             </div>
 
-            <div class="caja" *ngIf="fabricaActiva as fabrica">
-              <h2>FÁBRICA DEL JUGADOR</h2>
-              <p>POSICIÓN: {{ fabrica.x }}, {{ fabrica.y }}</p>
-              <p>El servidor comprueba el costo, el turno y el espacio libre.</p>
-              <div class="grid">
-                <button type="button" [disabled]="accionEnCurso"
-                  (click)="producirUnidad('INFANTRY')">PRODUCIR INFANTERÍA</button>
-                <button type="button" [disabled]="accionEnCurso"
-                  (click)="producirUnidad('TANK')">PRODUCIR TANQUE</button>
+            <!-- TIENDA -->
+            <div class="caja tienda" *ngIf="tiendaAbierta && fabricaActiva as fabrica">
+              <div class="tienda__cabecera">
+                <h2>🛒 TIENDA</h2>
+                <button type="button" class="tienda__cerrar" (click)="cerrarTienda()">✕</button>
               </div>
+
+              <p>FÁBRICA EN ({{ fabrica.x }}, {{ fabrica.y }})</p>
+              <p class="tienda__dinero">TU DINERO: $ {{ dineroActual }}</p>
+
+              <p class="message error" *ngIf="fabricaOcupada">
+                Hay una tropa encima de la fábrica. Muévela para poder comprar.
+              </p>
+
+              <div class="tienda__item" *ngFor="let item of tienda">
+                <img class="tienda__imagen" [src]="imagenTienda(item.tipo)" [alt]="item.nombre">
+                <div class="tienda__info">
+                  <strong>{{ item.nombre }}</strong>
+                  <span>{{ item.detalle }}</span>
+                  <span class="tienda__precio" [class.tienda__precio--falta]="dineroActual < item.costo">
+                    $ {{ item.costo }}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  [disabled]="accionEnCurso || fabricaOcupada || dineroActual < item.costo"
+                  (click)="producirUnidad(item.tipo)">
+                  {{ produciendo ? '...' : 'COMPRAR' }}
+                </button>
+              </div>
+
+              <p class="tienda__nota">La tropa nueva aparece en la fábrica y se mueve en tu próximo turno.</p>
             </div>
 
-            <!-- RESULTADO DEL ÚLTIMO COMBATE -->
             <div
               class="caja unidad-ficha__combate"
               *ngIf="resultadoCombate as combate">
@@ -478,7 +502,7 @@
 
             </div>
 
-            <!-- LEYENDA DEL TABLERO -->
+
             <div class="caja">
 
               <h2>LEYENDA</h2>
@@ -507,7 +531,7 @@
 
             </div>
 
-            <!-- CONTROLES EXISTENTES -->
+
             <div
               class="caja"
               *ngIf="!modoDemo">
@@ -549,7 +573,7 @@
 
     </div>
 
-    <!-- INFORMACIÓN GENERAL -->
+
     <div
       *ngIf="!modoDemo"
       class="panel extra">
