@@ -1,7 +1,10 @@
+
 <section class="screen juego">
   <div class="wrap">
 
+    <!-- CABECERA DEL JUEGO -->
     <header class="flex header">
+
       <div>
         <span class="badge">
           {{ modoDemo ? 'MODO DEMOSTRACIÓN' : 'PARTIDA EN CURSO' }}
@@ -18,12 +21,19 @@
         routerLink="/partidas">
         VOLVER
       </a>
+
     </header>
 
-    <div *ngIf="modoDemo" class="juego__controles">
+    <!-- CONTROLES DEL MODO DEMOSTRACIÓN -->
+    <div
+      *ngIf="modoDemo"
+      class="juego__controles">
 
       <div class="control">
-        <label for="semilla">SEMILLA</label>
+
+        <label for="semilla">
+          SEMILLA
+        </label>
 
         <input
           id="semilla"
@@ -36,10 +46,14 @@
           (click)="usarSemilla()">
           USAR
         </button>
+
       </div>
 
       <div class="control">
-        <span class="control__titulo">JUGADORES</span>
+
+        <span class="control__titulo">
+          JUGADORES
+        </span>
 
         <button
           type="button"
@@ -64,6 +78,7 @@
           (click)="fijarJugadores(4)">
           4
         </button>
+
       </div>
 
       <button
@@ -75,6 +90,7 @@
 
     </div>
 
+    <!-- PANEL PRINCIPAL -->
     <div class="panel">
 
       <div class="panel-head azul">
@@ -84,6 +100,7 @@
 
       <div class="panel-body">
 
+        <!-- MENSAJES -->
         <p *ngIf="cargando">
           Cargando mapa y terrenos...
         </p>
@@ -97,9 +114,11 @@
 
         <p
           *ngIf="mensaje"
-          class="message">
+          class="message"
+          role="status">
           {{ mensaje }}
         </p>
+
 
         <!-- HUD -->
         <div class="hud" *ngIf="partida">
@@ -132,34 +151,180 @@
         </div>
         <!-- /HUD -->
 
+        <p *ngIf="recargandoUnidades">
+          Actualizando unidades desde Spring Boot...
+        </p>
+
+        <p *ngIf="movimientoEnCurso">
+          Procesando movimiento...
+        </p>
+
+        <p *ngIf="ataqueEnCurso">
+          Procesando ataque...
+        </p>
+
+        <!-- HUD: ZONA RESERVADA PARA PERSONA 2 -->
+        <p *ngIf="partida">
+          ESTADO: {{ partida.status }}
+          · RONDA: {{ partida.currentRound }}
+          · TURNO: {{ partida.currentPlayerOrder }}
+        </p>
+        <!-- FIN HUD -->
+
+
+        <!-- TABLERO Y PANEL LATERAL -->
         <div class="game-layout">
 
+          <!-- COLUMNA DEL MAPA -->
           <div class="map-col">
 
             <div class="marco juego__marco">
+
               <div class="aviso-turno" *ngIf="avisoTurno">{{ avisoTurno }}</div>
+
+
+
               <div
                 id="contenedor-juego"
                 class="lienzo juego__lienzo"
                 [style.aspect-ratio]="proporcion">
               </div>
+
             </div>
 
             <p class="muted">
-              Pasa el cursor sobre una casilla para consultar
-              su información.
+              Haz clic en una unidad propia para seleccionarla.
+              Después, selecciona una casilla vacía para intentar
+              moverla o una unidad enemiga para intentar atacarla.
+            </p>
+
+            <p class="muted">
+              Spring Boot valida todas las acciones del juego.
             </p>
 
           </div>
 
+          <!-- PANEL LATERAL -->
           <aside class="sidebar juego__panel">
 
+            <!-- TAREA 3.9: UNIDAD SELECCIONADA -->
+            <div class="caja unidad-ficha">
+
+              <h2>UNIDAD SELECCIONADA</h2>
+
+              <ng-container
+                *ngIf="unidadActiva as u; else sinUnidadActiva">
+
+                <div class="unidad-ficha__encabezado">
+
+                  <h3>
+                    {{ nombreUnidad(u.unitType) }}
+                  </h3>
+
+                  <p class="muted">
+                    TIPO: {{ u.unitType }}
+                  </p>
+
+                  <p>
+                    ID: #{{ u.id }}
+                  </p>
+
+                </div>
+
+                <div class="unidad-ficha__datos">
+
+                  <p>
+                    <strong>PROPIETARIO:</strong>
+                    JUGADOR {{ u.ownerOrder }}
+                  </p>
+
+                  <p>
+                    <strong>POSICIÓN:</strong>
+                    {{ u.x }}, {{ u.y }}
+                  </p>
+
+                  <p>
+                    <strong>VIDA:</strong>
+                    {{ u.health }}
+                  </p>
+
+                  <p>
+                    <strong>COMBUSTIBLE:</strong>
+                    {{ u.fuel }}
+                  </p>
+
+                </div>
+
+                <div class="unidad-ficha__estado">
+
+                  <h3>ESTADO DE LA UNIDAD</h3>
+
+                  <p>
+                    <strong>MOVIMIENTO:</strong>
+                    <span
+                      [class.unidad-ficha__agotada]="u.movedThisTurn">
+                      {{
+                        u.movedThisTurn
+                          ? 'YA SE MOVIÓ'
+                          : 'DISPONIBLE'
+                      }}
+                    </span>
+                  </p>
+
+                  <p>
+                    <strong>ATAQUE:</strong>
+                    <span
+                      [class.unidad-ficha__agotada]="u.attackedThisTurn">
+                      {{
+                        u.attackedThisTurn
+                          ? 'YA ATACÓ'
+                          : 'DISPONIBLE'
+                      }}
+                    </span>
+                  </p>
+
+                  <p>
+                    <strong>CAPTURA:</strong>
+                    {{
+                      u.capturedThisTurn
+                        ? 'YA CAPTURÓ'
+                        : 'SIN CAPTURAR'
+                    }}
+                  </p>
+
+                </div>
+
+                <p class="muted">
+                  La disponibilidad final de cada acción
+                  la determina Spring Boot.
+                </p>
+
+              </ng-container>
+
+              <ng-template #sinUnidadActiva>
+
+                <p class="caja__vacio">
+                  NO HAY NINGUNA UNIDAD SELECCIONADA.
+                </p>
+
+                <p class="muted">
+                  Haz clic sobre una unidad propia que
+                  esté disponible para seleccionarla.
+                </p>
+
+              </ng-template>
+
+            </div>
+
+            <!-- INSPECTOR ORIGINAL DE CASILLAS -->
             <div class="caja">
 
               <h2>INSPECTOR DE CASILLA</h2>
 
-              <p *ngIf="!seleccion" class="caja__vacio">
-                Selecciona una casilla del mapa.
+              <p
+                *ngIf="!seleccion"
+                class="caja__vacio">
+                Pasa el cursor sobre una casilla del mapa.
               </p>
 
               <ng-container *ngIf="seleccion as c">
@@ -173,12 +338,15 @@
                 </p>
 
                 <p>
-                  DEFENSA: {{ c.terreno?.defenseStars ?? 0 }}
+                  DEFENSA:
+                  {{ c.terreno?.defenseStars ?? 0 }}
                 </p>
 
-                <ng-container *ngIf="c.terreno as terrenoActual">
+                <ng-container
+                  *ngIf="c.terreno as terrenoActual">
 
                   <table>
+
                     <thead>
                     <tr>
                       <th>UNIDAD</th>
@@ -187,20 +355,34 @@
                     </thead>
 
                     <tbody>
-                    <tr *ngFor="let m of tiposMovimiento">
-                      <td>{{ m.nombre }}</td>
+
+                    <tr
+                      *ngFor="let m of tiposMovimiento">
+
                       <td>
-                        {{ obtenerCosto(terrenoActual, m.codigo) }}
+                        {{ m.nombre }}
                       </td>
+
+                      <td>
+                        {{
+                          obtenerCosto(
+                            terrenoActual,
+                            m.codigo
+                          )
+                        }}
+                      </td>
+
                     </tr>
+
                     </tbody>
+
                   </table>
 
                 </ng-container>
 
                 <div *ngIf="unidadSeleccionada as u">
 
-                  <h3>UNIDAD</h3>
+                  <h3>UNIDAD BAJO CURSOR</h3>
 
                   <p>
                     TIPO: {{ u.unitType }}
@@ -224,6 +406,54 @@
 
             </div>
 
+            <!-- RESULTADO DEL ÚLTIMO COMBATE -->
+            <div
+              class="caja unidad-ficha__combate"
+              *ngIf="resultadoCombate as combate">
+
+              <h2>ÚLTIMO COMBATE</h2>
+
+              <p>
+                ATACANTE:
+                #{{ combate.attackerUnitId }}
+              </p>
+
+              <p>
+                OBJETIVO:
+                #{{ combate.targetUnitId }}
+              </p>
+
+              <p>
+                DAÑO CAUSADO:
+                -{{ combate.damageDealt }}
+              </p>
+
+              <p>
+                CONTRAATAQUE:
+                -{{ combate.counterattackDamage }}
+              </p>
+
+              <p>
+                VIDA ATACANTE:
+                {{ combate.attackerHealth }}
+              </p>
+
+              <p>
+                VIDA OBJETIVO:
+                {{ combate.targetHealth }}
+              </p>
+
+              <p *ngIf="combate.targetDestroyed">
+                UNIDAD ENEMIGA DESTRUIDA
+              </p>
+
+              <p *ngIf="combate.attackerDestroyed">
+                UNIDAD ATACANTE DESTRUIDA
+              </p>
+
+            </div>
+
+            <!-- LEYENDA DEL TABLERO -->
             <div class="caja">
 
               <h2>LEYENDA</h2>
@@ -241,14 +471,21 @@
 
               </div>
 
-              <p class="caja__vacio" *ngIf="modoDemo">
+              <p
+                class="caja__vacio"
+                *ngIf="modoDemo">
+
                 LOS NÚMEROS DEL 1 AL 4 REPRESENTAN
                 LAS BASES DE LOS JUGADORES.
+
               </p>
 
             </div>
 
-            <div class="caja" *ngIf="!modoDemo">
+            <!-- CONTROLES EXISTENTES -->
+            <div
+              class="caja"
+              *ngIf="!modoDemo">
 
               <h2>CONTROLES DE PARTIDA</h2>
 
@@ -256,6 +493,7 @@
 
                 <button
                   type="button"
+                  [disabled]="accionEnCurso"
                   (click)="cargarMapa()">
                   ACTUALIZAR MAPA
                 </button>
@@ -263,6 +501,7 @@
                 <button
                   type="button"
                   class="secondary"
+                  [disabled]="accionEnCurso"
                   (click)="cargarDatos()">
                   ACTUALIZAR PARTIDA
                 </button>
@@ -282,8 +521,10 @@
         </div>
 
       </div>
+
     </div>
 
+    <!-- INFORMACIÓN GENERAL -->
     <div
       *ngIf="!modoDemo"
       class="panel extra">
@@ -298,6 +539,20 @@
           El servidor Spring Boot administra los datos
           de la partida, el mapa y las unidades.
         </p>
+
+
+
+        <p>
+          Los movimientos y ataques se solicitan al servidor.
+          Spring Boot comprueba si cada acción es válida
+          y devuelve los resultados.
+        </p>
+
+        <p>
+          Capturar propiedades, producir unidades y utilizar
+          poderes de comandante son funcionalidades pendientes.
+        </p>
+
 
         <a
           class="btn secondary"

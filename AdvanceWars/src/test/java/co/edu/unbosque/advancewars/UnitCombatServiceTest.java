@@ -30,12 +30,14 @@ import co.edu.unbosque.advancewars.repository.GameStateRepository;
 import co.edu.unbosque.advancewars.repository.UnitRepository;
 import co.edu.unbosque.advancewars.repository.PropertyRepository;
 import co.edu.unbosque.advancewars.service.UnitCombatService;
+import co.edu.unbosque.advancewars.service.GameVictoryService;
 
 class UnitCombatServiceTest {
 
     private GameStateRepository games;
     private UnitRepository units;
     private UnitCombatService service;
+    private GameVictoryService victoryService;
     private GameState game;
     private User creator;
     private Unit attacker;
@@ -48,7 +50,8 @@ class UnitCombatServiceTest {
     void setUp() {
         games = mock(GameStateRepository.class);
         units = mock(UnitRepository.class);
-        service = new UnitCombatService(games, units, mock(PropertyRepository.class));
+        victoryService = mock(GameVictoryService.class);
+        service = new UnitCombatService(games, units, mock(PropertyRepository.class), victoryService);
 
         creator = new User("tester", "pass", "test@example.com");
         ReflectionTestUtils.setField(creator, "id", 4L);
@@ -137,6 +140,7 @@ class UnitCombatServiceTest {
         assertEquals(0, result.getTargetHealth());
         assertTrue(result.isTargetDestroyed());
         verify(units).delete(target);
+        verify(victoryService).checkArmyDefeat(game, second);
         verify(units).save(attacker);
         verify(units, never()).save(target);
     }
@@ -148,6 +152,7 @@ class UnitCombatServiceTest {
         assertEquals(1, result.getCounterattackDamage());
         assertTrue(result.isAttackerDestroyed());
         verify(units).delete(attacker);
+        verify(victoryService).checkArmyDefeat(game, first);
         verify(units).save(target);
         verify(units, never()).save(attacker);
     }
