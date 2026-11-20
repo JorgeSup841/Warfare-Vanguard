@@ -23,6 +23,9 @@ export class Partidascomponent implements OnInit {
     FINISHED: 'TERMINADA',
   };
 
+  filtro = 'TODAS';
+  opciones = ['TODAS', 'SETUP', 'IN_PROGRESS', 'FINISHED'];
+
   /** Carga las partidas al abrir la pantalla. */
   ngOnInit(): void {
     this.cargar();
@@ -44,5 +47,17 @@ export class Partidascomponent implements OnInit {
         this.cdr.detectChanges();
       },
     });
+  }
+
+  /** Partidas que coinciden con el filtro elegido. */
+  get partidasFiltradas(): partidaresumen[] {
+    if (this.filtro === 'TODAS') return this.partidas;
+    return this.partidas.filter((p) => p.status === this.filtro);
+  }
+
+  /** Cuántas partidas hay en un estado. */
+  contar(estado: string): number {
+    if (estado === 'TODAS') return this.partidas.length;
+    return this.partidas.filter((p) => p.status === estado).length;
   }
 }

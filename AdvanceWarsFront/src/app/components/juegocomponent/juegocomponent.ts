@@ -44,6 +44,8 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
   private router = inject(Router);
   avisoTurno = '';
   terminando = false;
+  colores = ['#e74b40', '#366cb1', '#3f9e4d', '#e0b020'];
+  ganancias: Record<number, number> = {};
   constructor(
     private ruta: ActivatedRoute,
     private catalogos: juegoservice,
@@ -366,6 +368,12 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.partida) return;
     this.terminando = true;
     this.error = '';
+
+    const dineroAntes: Record<number, number> = {};
+    for (const j of this.partida.players) {
+      dineroAntes[j.turnOrder] = j.money;
+    }
+
     const turno = {
       currentRound: this.partida.currentRound,
       currentPlayerOrder: this.partida.currentPlayerOrder,
@@ -377,6 +385,13 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
         if (p.status === 'FINISHED') {
           this.router.navigate(['/partidas', this.id, 'resultados']);
           return;
+        }
+        this.ganancias = {};
+        for (const j of p.players) {
+          const diferencia = j.money - (dineroAntes[j.turnOrder] ?? j.money);
+          if (diferencia > 0) {
+            this.ganancias[j.turnOrder] = diferencia;
+          }
         }
         this.mostrarAviso();
         this.cargarDatos();
@@ -391,11 +406,12 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  /** Muestra "Turno de X" encima del tablero durante 2 segundos. */
+  /** Muestra "Turno de X" y lo que ganó durante 2 segundos. */
   private mostrarAviso(): void {
     this.avisoTurno = `TURNO DE ${this.jugadorEnTurno}`;
     setTimeout(() => {
       this.avisoTurno = '';
+      this.ganancias = {};
       this.cdr.detectChanges();
     }, 2000);
   }

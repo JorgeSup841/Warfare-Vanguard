@@ -34,7 +34,10 @@
 
           <div class="field">
             <label for="semilla">SEMILLA (opcional)</label>
-            <input id="semilla" type="number" name="semilla" [(ngModel)]="semilla" placeholder="Vacío = al azar">
+            <div class="flex">
+              <input id="semilla" type="number" name="semilla" [(ngModel)]="semilla" placeholder="Vacío = al azar">
+              <button type="button" class="secondary" (click)="semillaAlAzar()">🎲 AL AZAR</button>
+            </div>
           </div>
 
           <p class="message error" *ngIf="mensaje">{{ mensaje }}</p>

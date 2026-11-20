@@ -10,11 +10,23 @@
       <div class="panel-body">
         <button type="button" class="secondary" (click)="cargar()" [disabled]="cargando">ACTUALIZAR</button>
 
+        <div class="filtros">
+          <button
+            type="button"
+            *ngFor="let op of opciones"
+            class="filtro"
+            [class.filtro--activo]="filtro === op"
+            (click)="filtro = op">
+            {{ op === 'TODAS' ? 'TODAS' : estados[op] }} ({{ contar(op) }})
+          </button>
+        </div>
+
         <p *ngIf="cargando">Cargando partidas...</p>
         <p class="message error" *ngIf="mensaje">{{ mensaje }}</p>
         <p *ngIf="!cargando && !mensaje && partidas.length === 0">Todavía no tienes partidas.</p>
+        <p *ngIf="partidas.length > 0 && partidasFiltradas.length === 0">No hay partidas en este estado.</p>
 
-        <div *ngFor="let p of partidas" class="fila">
+        <div *ngFor="let p of partidasFiltradas" class="fila">
           <div>
             <strong>PARTIDA #{{ p.id }}</strong><br>
             <span>{{ estados[p.status] || p.status }} · {{ p.playerCount }} JUGADORES · RONDA {{ p.currentRound }}</span>

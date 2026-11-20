@@ -206,3 +206,22 @@ button:disabled {
 .fila span {
   font-size: 12px;
 }
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.filtro {
+  padding: 6px 10px;
+  font-size: 11px;
+  background: #e8d9a8;
+  color: #1b292e;
+  border: 2px solid #1b292e;
+  cursor: pointer;
+}
+
+.filtro--activo {
+  background: #ffd44f;
+}

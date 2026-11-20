@@ -111,10 +111,12 @@
             <div
               *ngFor="let j of partida.players"
               class="hud__jugador"
+              [style.border-left-color]="colores[j.turnOrder - 1]"
               [class.hud__jugador--activo]="j.turnOrder === partida.currentPlayerOrder"
               [class.hud__jugador--fuera]="j.status === 'ELIMINATED'">
-              <strong>J{{ j.turnOrder }} {{ j.name }}</strong>
+              <strong [style.color]="colores[j.turnOrder - 1]">J{{ j.turnOrder }} {{ j.name }}</strong>
               <span>$ {{ j.money }}</span>
+              <span class="hud__ganancia" *ngIf="ganancias[j.turnOrder]">+$ {{ ganancias[j.turnOrder] }}</span>
               <span *ngIf="j.status === 'WINNER'">GANADOR</span>
               <span *ngIf="j.status === 'ELIMINATED'">ELIMINADO</span>
             </div>

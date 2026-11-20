@@ -33,6 +33,11 @@ export class Crearpartidacomponent {
     this.nombres = nuevos;
   }
 
+  /** Pone una semilla aleatoria. */
+  semillaAlAzar(): void {
+    this.semilla = Math.floor(Math.random() * 1000000);
+  }
+
   /** Revisa los datos y pide al back crear la partida. */
   crear(): void {
     const nombres = this.nombres.map((n) => n.trim());
