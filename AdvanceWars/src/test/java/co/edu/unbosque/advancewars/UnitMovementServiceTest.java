@@ -14,6 +14,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import co.edu.unbosque.advancewars.dto.MoveUnitRequestDTO;
+import co.edu.unbosque.advancewars.dto.ReachableTileDTO;
 import co.edu.unbosque.advancewars.dto.UnitDTO;
 import co.edu.unbosque.advancewars.enums.MovementType;
 import co.edu.unbosque.advancewars.enums.TerrainType;
@@ -28,8 +29,8 @@ import co.edu.unbosque.advancewars.model.Unit;
 import co.edu.unbosque.advancewars.model.UnitDefinition;
 import co.edu.unbosque.advancewars.model.User;
 import co.edu.unbosque.advancewars.repository.GameStateRepository;
-import co.edu.unbosque.advancewars.repository.UnitRepository;
 import co.edu.unbosque.advancewars.repository.PropertyRepository;
+import co.edu.unbosque.advancewars.repository.UnitRepository;
 import co.edu.unbosque.advancewars.service.UnitMovementService;
 
 class UnitMovementServiceTest {
@@ -48,7 +49,7 @@ class UnitMovementServiceTest {
     void setUp() {
         games = mock(GameStateRepository.class);
         units = mock(UnitRepository.class);
-        service = new UnitMovementService(games, units, mock(PropertyRepository.class));
+       // service = new UnitMovementService(games, units, mock(PropertyRepository.class));
 
         creator = new User("tester", "pass", "test@example.com");
         ReflectionTestUtils.setField(creator, "id", 4L);
@@ -83,6 +84,7 @@ class UnitMovementServiceTest {
         allUnits.add(infantry);
 
         when(games.findWithLockByIdAndCreatedBy_Id(2L, 4L)).thenReturn(Optional.of(game));
+        when(games.findByIdAndCreatedBy_Id(2L, 4L)).thenReturn(Optional.of(game));
         when(units.findById(15L)).thenReturn(Optional.of(infantry));
         when(units.findAllByOwner_GameState_Id(2L)).thenAnswer(inv -> allUnits);
     }
@@ -217,5 +219,44 @@ class UnitMovementServiceTest {
         otherGame.addPlayer(otherOwner);
         infantry.setOwner(otherOwner);
         assertStatus(HttpStatus.NOT_FOUND, () -> service.move(2L, 15L, request(2, 1), creator));
+    }
+
+    @Test
+    void reachablePreviewIncludesValidTilesButNotOrigin() {
+        List<ReachableTileDTO> cells = service.reachableTiles(2L, 15L, creator);
+        assertTrue(cells.stream().anyMatch(c -> c.x() == 2 && c.y() == 1 && c.cost() == 1));
+        assertFalse(cells.stream().anyMatch(c -> c.x() == 1 && c.y() == 1));
+        assertFalse(cells.stream().anyMatch(c -> c.x() == 4 && c.y() == 4));
+        verify(units, never()).save(any(Unit.class));
+    }
+
+    @Test
+    void reachablePreviewRespectsWaterAndOtherUnits() {
+        terrain(2, 1, TerrainType.WATER);
+        Unit other = new Unit(infantryDef, game.findPlayerByOrder(2), map.findTileAt(1, 2).orElseThrow());
+        ReflectionTestUtils.setField(other, "id", 99L);
+        allUnits.add(other);
+        List<ReachableTileDTO> cells = service.reachableTiles(2L, 15L, creator);
+        assertFalse(cells.stream().anyMatch(c -> c.x() == 2 && c.y() == 1));
+        assertFalse(cells.stream().anyMatch(c -> c.x() == 1 && c.y() == 2));
+    }
+
+    @Test
+    void reachablePreviewRespectsFuelAndTurn() {
+        infantry.setCurrentFuel(1);
+        List<ReachableTileDTO> cells = service.reachableTiles(2L, 15L, creator);
+        assertTrue(cells.stream().allMatch(c -> c.cost() <= 1));
+        infantry.setOwner(game.findPlayerByOrder(2));
+        assertTrue(service.reachableTiles(2L, 15L, creator).isEmpty());
+    }
+
+    @Test
+    void reachablePreviewRequiresOwnGameAndLoggedInUser() {
+        ResponseStatusException unauthorized = assertThrows(ResponseStatusException.class,
+                () -> service.reachableTiles(2L, 15L, null));
+        assertEquals(HttpStatus.UNAUTHORIZED, unauthorized.getStatusCode());
+        ResponseStatusException missing = assertThrows(ResponseStatusException.class,
+                () -> service.reachableTiles(10L, 15L, creator));
+        assertEquals(HttpStatus.NOT_FOUND, missing.getStatusCode());
     }
 }

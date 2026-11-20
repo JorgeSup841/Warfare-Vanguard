@@ -10,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import co.edu.unbosque.advancewars.dto.AttackResultDTO;
 import co.edu.unbosque.advancewars.dto.AttackUnitRequestDTO;
 import co.edu.unbosque.advancewars.enums.GameStatus;
+import co.edu.unbosque.advancewars.enums.GameLogType;
 import co.edu.unbosque.advancewars.enums.UnitType;
 import co.edu.unbosque.advancewars.model.GameState;
 import co.edu.unbosque.advancewars.model.Player;
@@ -20,7 +21,7 @@ import co.edu.unbosque.advancewars.repository.GameStateRepository;
 import co.edu.unbosque.advancewars.repository.PropertyRepository;
 import co.edu.unbosque.advancewars.repository.UnitRepository;
 
-/** Combate basico: infanteria vs infanteria, con contraataque. */
+/** Combate terrestre entre infanterias y tanques, con contraataque. */
 @Service
 public class UnitCombatService {
 
@@ -28,13 +29,15 @@ public class UnitCombatService {
 	private final UnitRepository unitRepository;
 	private final PropertyRepository propertyRepository;
 	private final GameVictoryService victoryService;
+	private final GameEventService events;
 
 	public UnitCombatService(GameStateRepository gameRepository, UnitRepository unitRepository,
-			PropertyRepository propertyRepository, GameVictoryService victoryService) {
+			PropertyRepository propertyRepository, GameVictoryService victoryService, GameEventService events) {
 		this.gameRepository = gameRepository;
 		this.unitRepository = unitRepository;
 		this.propertyRepository = propertyRepository;
 		this.victoryService = victoryService;
+		this.events = events;
 	}
 
 	@Transactional
@@ -95,11 +98,10 @@ public class UnitCombatService {
 			throw new ResponseStatusException(HttpStatus.CONFLICT,
 					"La unidad ya realizo una accion de ataque o captura");
 		}
-		// Version inicial: solo existe infanteria en las partidas creadas.
-		if (attacker.getDefinition().getUnitType() != UnitType.INFANTRY
-				|| target.getDefinition().getUnitType() != UnitType.INFANTRY) {
-			throw new ResponseStatusException(HttpStatus.CONFLICT,
-					"Por ahora solo se permite combate entre infanterias");
+		UnitType attackerType = attacker.getDefinition().getUnitType();
+		UnitType targetType = target.getDefinition().getUnitType();
+		if (!isGroundCombatUnit(attackerType) || !isGroundCombatUnit(targetType)) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "Por ahora solo combaten INFANTRY y TANK");
 		}
 
 		int distance = Math.abs(attacker.getPosition().getX() - target.getPosition().getX())
@@ -109,14 +111,14 @@ public class UnitCombatService {
 		}
 
 		// Regla sencilla: el ataque resta hasta 4 HP.
-		int damage = Math.min(4, target.getCurrentHealth());
+		int damage = Math.min(baseDamage(attackerType, targetType), target.getCurrentHealth());
 		target.receiveDamage(damage);
 		attacker.markAttacked();
 
 		// Si el defensor sobrevive, responde automaticamente con hasta 2 HP de dano.
 		int counterDamage = 0;
 		if (!target.isDestroyed()) {
-			counterDamage = Math.min(2, attacker.getCurrentHealth());
+			counterDamage = Math.min(counterDamage(targetType, attackerType), attacker.getCurrentHealth());
 			attacker.receiveDamage(counterDamage);
 		}
 
@@ -138,6 +140,10 @@ public class UnitCombatService {
 			unitRepository.save(attacker);
 		}
 
+		events.record(game, attackerOwner, GameLogType.UNIT_ATTACKED,
+				"Unidad #" + attacker.getId() + " (" + attackerType + ") ataco a #" + target.getId() + " (" + targetType
+						+ "): dano " + damage + ", contraataque " + counterDamage);
+
 		if (target.isDestroyed() || attacker.isDestroyed()) {
 			// Forzamos el DELETE antes de contar las tropas que quedan en MySQL.
 			unitRepository.flush();
@@ -153,10 +159,35 @@ public class UnitCombatService {
 				target.getCurrentHealth());
 	}
 
+	private boolean isGroundCombatUnit(UnitType type) {
+		return type == UnitType.INFANTRY || type == UnitType.TANK;
+	}
+
+	/** Tabla sencilla de dano. No modifica el contrato JSON de ataque. */
+	private int baseDamage(UnitType attacker, UnitType defender) {
+		if (attacker == UnitType.INFANTRY && defender == UnitType.INFANTRY)
+			return 4;
+		if (attacker == UnitType.INFANTRY && defender == UnitType.TANK)
+			return 2;
+		if (attacker == UnitType.TANK && defender == UnitType.INFANTRY)
+			return 6;
+		return 5; // TANK contra TANK
+	}
+
+	/** Un defensor que sobrevive devuelve menos dano que en un ataque normal. */
+	private int counterDamage(UnitType defender, UnitType attacker) {
+		if (defender == UnitType.INFANTRY && attacker == UnitType.INFANTRY)
+			return 2;
+		if (defender == UnitType.INFANTRY && attacker == UnitType.TANK)
+			return 1;
+		if (defender == UnitType.TANK && attacker == UnitType.INFANTRY)
+			return 3;
+		return 3; // TANK contra TANK
+	}
+
 	// Una tropa destruida no puede dejar una captura pendiente.
 	private void cancelCapture(Unit unit) {
-		Optional<Property> found =
-				propertyRepository.findByTile_Id(unit.getTile().getId());
+		Optional<Property> found = propertyRepository.findByTile_Id(unit.getTile().getId());
 		if (found.isPresent()) {
 			Property property = found.get();
 			if (property.getCapturingPlayer() != null

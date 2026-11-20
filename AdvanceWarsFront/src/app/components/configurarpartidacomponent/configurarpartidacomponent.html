@@ -40,8 +40,7 @@
           </div>
 
           <p>
-            Revisa tu escuadrón y prepárate
-            para entrar al campo de batalla.
+            Revisa tu escuadrón antes de entrar al campo de batalla.
           </p>
 
           <div class="flex"
@@ -50,23 +49,19 @@
             <button type="button"
                     (click)="confirmar = true"
                     [disabled]="iniciando">
-              {{ iniciando ? 'INICIANDO...' : 'INICIAR PARTIDA ▸' }}
+              INICIAR PARTIDA ▸
             </button>
 
           </div>
 
           <div class="message"
-               *ngIf="confirmar && partida.status === 'SETUP'"
-               role="group"
-               aria-label="Confirmación de inicio">
+               *ngIf="confirmar && partida.status === 'SETUP'">
 
             <p>
-              ¿Iniciar la partida?
-              Esta acción no se puede repetir.
+              ¿Iniciar la partida? Esta acción no se puede repetir.
             </p>
 
             <div class="flex">
-
               <button type="button"
                       (click)="iniciar()"
                       [disabled]="iniciando">
@@ -79,8 +74,8 @@
                       [disabled]="iniciando">
                 CANCELAR
               </button>
-
             </div>
+
           </div>
 
           <a *ngIf="partida.status !== 'SETUP'"

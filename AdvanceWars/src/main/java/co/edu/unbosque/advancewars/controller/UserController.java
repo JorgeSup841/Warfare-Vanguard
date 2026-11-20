@@ -69,7 +69,7 @@ public class UserController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "Consultar usuario por ID", description = "Solo ADMIN")
-    public ResponseEntity<UserResponseDTO> find(@PathVariable Long id) {
+    public ResponseEntity<UserResponseDTO> find(@PathVariable("id") Long id) {
         return ResponseEntity.ok(users.find(id));
     }
 
@@ -83,7 +83,7 @@ public class UserController {
      */
     @PatchMapping("/{id}/role")
     @Operation(summary = "Modificar rol", description = "Solo ADMIN; no permite modificar el rol propio")
-    public ResponseEntity<UserResponseDTO> role(@PathVariable Long id,
+    public ResponseEntity<UserResponseDTO> role(@PathVariable("id") Long id,
             @Valid @RequestBody RoleUpdateRequestDTO request, Principal principal) {
         return ResponseEntity.ok(users.setRole(id, request.getRole(), principal.getName()));
     }
@@ -98,7 +98,7 @@ public class UserController {
      */
     @PatchMapping("/{id}/enabled")
     @Operation(summary = "Habilitar o deshabilitar usuario", description = "Solo ADMIN, sujeto a verificación de correo")
-    public ResponseEntity<UserResponseDTO> enabled(@PathVariable Long id,
+    public ResponseEntity<UserResponseDTO> enabled(@PathVariable("id") Long id,
             @Valid @RequestBody EnabledUpdateRequestDTO request, Principal principal) {
         return ResponseEntity.ok(users.setEnabled(id, request.getEnabled(), principal.getName()));
     }

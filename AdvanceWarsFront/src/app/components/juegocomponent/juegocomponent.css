@@ -6,7 +6,7 @@
   --gold: #ffd44f;
   --red: #e74b40;
   --blue: #366cb1;
-  font-family: 'Silkscreen', monospace;
+  font-family: 'Pixelify Sans', monospace;
 }
 
 :host *,
@@ -109,7 +109,7 @@ textarea {
   color: var(--ink);
   border: 4px solid var(--ink);
   border-radius: 0;
-  font: 16px 'Silkscreen', monospace;
+  font: 16px 'Pixelify Sans', monospace;
 }
 
 textarea {
@@ -537,7 +537,8 @@ td {
 .hud__ganancia {
   color: #7ee081;
   font-weight: bold;
-=======
+}
+
 /*
  * ================================================
  * TAREA 3.9: FICHA DE UNIDAD SELECCIONADA
@@ -547,7 +548,7 @@ td {
  * No modifica los estilos del HUD de Persona 2.
  */
 
-/* TARJETA PRINCIPAL DE LA UNIDAD */
+  /* TARJETA PRINCIPAL DE LA UNIDAD */
 
 .unidad-ficha {
   position: relative;
@@ -555,144 +556,167 @@ td {
   background: #fff7dc;
 }
 
-/* BANDA DECORATIVA SUPERIOR */
+  /* BANDA DECORATIVA SUPERIOR */
 
-.unidad-ficha::before {
-  content: '';
-  display: block;
-  height: 8px;
-  margin: -16px -16px 16px;
-  background: repeating-linear-gradient(
-    90deg,
-    var(--gold) 0 20px,
-    var(--ink) 20px 24px
-  );
-}
+  .unidad-ficha::before {
+    content: '';
+    display: block;
+    height: 8px;
+    margin: -16px -16px 16px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--gold) 0 20px,
+      var(--ink) 20px 24px
+    );
+  }
 
-/* NOMBRE Y TIPO DE UNIDAD */
+  /* NOMBRE Y TIPO DE UNIDAD */
 
-.unidad-ficha__encabezado {
-  padding-bottom: 12px;
-  margin-bottom: 12px;
-  border-bottom: 3px dashed var(--ink);
-}
+  .unidad-ficha__encabezado {
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom: 3px dashed var(--ink);
+  }
 
-.unidad-ficha__encabezado h3 {
-  margin: 8px 0;
-  font-size: 11px;
-  color: #2d5a3d;
-  overflow-wrap: anywhere;
-}
+  .unidad-ficha__encabezado h3 {
+    margin: 8px 0;
+    font-size: 11px;
+    color: #2d5a3d;
+    overflow-wrap: anywhere;
+  }
 
-.unidad-ficha__encabezado p {
-  overflow-wrap: anywhere;
-}
+  .unidad-ficha__encabezado p {
+    overflow-wrap: anywhere;
+  }
 
-/* DATOS: PROPIETARIO, POSICIÓN, VIDA Y COMBUSTIBLE */
+  /* DATOS: PROPIETARIO, POSICIÓN, VIDA Y COMBUSTIBLE */
 
-.unidad-ficha__datos {
-  display: grid;
-  grid-template-columns: repeat(
+  .unidad-ficha__datos {
+    display: grid;
+    grid-template-columns: repeat(
     2,
     minmax(0, 1fr)
   );
-  gap: 12px 10px;
-  padding: 4px 0 14px;
-}
-
-.unidad-ficha__datos p {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-
-.unidad-ficha__datos strong {
-  font: 7px/1.9 'Press Start 2P', monospace;
-  color: var(--olive);
-}
-
-/* PANEL DE ESTADO DE LA UNIDAD */
-
-.unidad-ficha__estado {
-  padding: 12px;
-  margin-bottom: 12px;
-  background: #eddfad;
-  border: 3px solid var(--ink);
-}
-
-.unidad-ficha__estado h3 {
-  margin: 0 0 12px;
-  font-size: 9px;
-  color: #2d5a3d;
-}
-
-.unidad-ficha__estado p {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 5px 8px;
-  padding: 8px 0;
-  margin: 0;
-  border-bottom: 1px solid #b6aa81;
-  overflow-wrap: anywhere;
-}
-
-.unidad-ficha__estado p:last-child {
-  border-bottom: 0;
-}
-
-.unidad-ficha__estado strong {
-  font-size: 10px;
-}
-
-/* ESTADO DISPONIBLE */
-
-.unidad-ficha__estado span {
-  color: #246b3b;
-  font-weight: bold;
-}
-
-/* ESTADO AGOTADO: YA SE MOVIÓ / YA ATACÓ */
-
-.unidad-ficha__estado .unidad-ficha__agotada {
-  color: #a12f27;
-}
-
-/* RESULTADO DEL ÚLTIMO COMBATE */
-
-.unidad-ficha__combate {
-  background: #ffefcf;
-  border-color: var(--ink);
-}
-
-.unidad-ficha__combate h2 {
-  color: #9a3929;
-}
-
-.unidad-ficha__combate p {
-  padding: 6px 0;
-  margin: 0;
-  border-bottom: 1px solid #dbcca8;
-  overflow-wrap: anywhere;
-}
-
-.unidad-ficha__combate p:last-child {
-  border-bottom: 0;
-}
-
-/* ADAPTACIÓN DE LA FICHA A MÓVILES PEQUEÑOS */
-
-@media (max-width: 400px) {
-  .unidad-ficha__datos {
-    grid-template-columns: 1fr;
+    gap: 12px 10px;
+    padding: 4px 0 14px;
   }
+
+  .unidad-ficha__datos p {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .unidad-ficha__datos strong {
+    font: 7px/1.9 'Press Start 2P', monospace;
+    color: var(--olive);
+  }
+
+  /* PANEL DE ESTADO DE LA UNIDAD */
 
   .unidad-ficha__estado {
-    padding: 9px;
+    padding: 12px;
+    margin-bottom: 12px;
+    background: #eddfad;
+    border: 3px solid var(--ink);
   }
 
+  .unidad-ficha__estado h3 {
+    margin: 0 0 12px;
+    font-size: 9px;
+    color: #2d5a3d;
+  }
+
+  .unidad-ficha__estado p {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 5px 8px;
+    padding: 8px 0;
+    margin: 0;
+    border-bottom: 1px solid #b6aa81;
+    overflow-wrap: anywhere;
+  }
+
+  .unidad-ficha__estado p:last-child {
+    border-bottom: 0;
+  }
+
+  .unidad-ficha__estado strong {
+    font-size: 10px;
+  }
+
+  /* ESTADO DISPONIBLE */
+
+  .unidad-ficha__estado span {
+    color: #246b3b;
+    font-weight: bold;
+  }
+
+  /* ESTADO AGOTADO: YA SE MOVIÓ / YA ATACÓ */
+
+  .unidad-ficha__estado .unidad-ficha__agotada {
+    color: #a12f27;
+  }
+
+  /* RESULTADO DEL ÚLTIMO COMBATE */
+
+  .unidad-ficha__combate {
+    background: #ffefcf;
+    border-color: var(--ink);
+  }
+
+  .unidad-ficha__combate h2 {
+    color: #9a3929;
+  }
+
+  .unidad-ficha__combate p {
+    padding: 6px 0;
+    margin: 0;
+    border-bottom: 1px solid #dbcca8;
+    overflow-wrap: anywhere;
+  }
+
+  .unidad-ficha__combate p:last-child {
+    border-bottom: 0;
+  }
+
+  /* ADAPTACIÓN DE LA FICHA A MÓVILES PEQUEÑOS */
+
+  @media (max-width: 400px) {
+    .unidad-ficha__datos {
+      grid-template-columns: 1fr;
+    }
+
+    .unidad-ficha__estado {
+      padding: 9px;
+    }
+
+  }
+
+/* El indicador explica el color de las casillas calculadas en el backend. */
+.alcance-leyenda {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  margin: 9px 0;
+  border: 1px solid rgba(90, 243, 147, .65);
+  background: rgba(19, 75, 49, .68);
+  color: #e6ffef;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.alcance-leyenda__muestra {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  border: 2px solid #52ffae;
+  border-radius: 4px;
+  background: rgba(66, 255, 146, .31);
 }

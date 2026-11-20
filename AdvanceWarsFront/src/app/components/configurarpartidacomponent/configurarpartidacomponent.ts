@@ -42,8 +42,18 @@ export class Configurarpartidacomponent implements OnInit {
     });
   }
 
+  /** Muestra la pregunta de confirmación. */
+  solicitarInicio(): void {
+    this.confirmar = true;
+  }
+
+  /** Oculta la pregunta de confirmación. */
+  cancelarInicio(): void {
+    this.confirmar = false;
+  }
+
   /** Pide al back iniciar la partida y abre el tablero. */
-  iniciar(): void {
+  confirmarInicio(): void {
     this.iniciando = true;
     this.confirmar = false;
     this.mensaje = '';

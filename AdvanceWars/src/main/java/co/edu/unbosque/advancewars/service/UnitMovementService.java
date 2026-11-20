@@ -1,9 +1,11 @@
 package co.edu.unbosque.advancewars.service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Set;
 
@@ -13,12 +15,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import co.edu.unbosque.advancewars.dto.MoveUnitRequestDTO;
+import co.edu.unbosque.advancewars.dto.ReachableTileDTO;
 import co.edu.unbosque.advancewars.dto.UnitDTO;
 import co.edu.unbosque.advancewars.enums.GameStatus;
+import co.edu.unbosque.advancewars.enums.GameLogType;
 import co.edu.unbosque.advancewars.enums.MovementType;
 import co.edu.unbosque.advancewars.enums.TerrainType;
 import co.edu.unbosque.advancewars.model.GameMap;
 import co.edu.unbosque.advancewars.model.GameState;
+import co.edu.unbosque.advancewars.model.Property;
 import co.edu.unbosque.advancewars.model.Tile;
 import co.edu.unbosque.advancewars.model.Unit;
 import co.edu.unbosque.advancewars.model.User;
@@ -33,12 +38,14 @@ public class UnitMovementService {
     private final GameStateRepository gameRepository;
     private final UnitRepository unitRepository;
     private final PropertyRepository propertyRepository;
+    private final GameEventService events;
 
     public UnitMovementService(GameStateRepository gameRepository, UnitRepository unitRepository,
-            PropertyRepository propertyRepository) {
+            PropertyRepository propertyRepository, GameEventService events) {
         this.gameRepository = gameRepository;
         this.unitRepository = unitRepository;
         this.propertyRepository = propertyRepository;
+        this.events = events;
     }
 
     @Transactional
@@ -125,24 +132,95 @@ public class UnitMovementService {
         }
 
         // Al abandonar un edificio, pierde la captura que llevaba acumulada.
-        propertyRepository.findByTile_Id(unit.getTile().getId()).ifPresent(property -> {
+        Optional<Property> previousProperty =
+                propertyRepository.findByTile_Id(unit.getTile().getId());
+        if (previousProperty.isPresent()) {
+            Property property = previousProperty.get();
             if (property.getCapturingPlayer() != null
                     && property.getCapturingPlayer().getId().equals(unit.getOwner().getId())) {
                 property.resetCaptureProgress();
                 propertyRepository.save(property);
             }
-        });
+        }
 
         unit.moveTo(destination, fuelCost);
         unitRepository.save(unit);
+        events.record(game, unit.getOwner(), GameLogType.UNIT_MOVED, "Unidad #" + unit.getId()
+                + " movida de (" + startX + "," + startY + ") a (" + endX + "," + endY + ")");
         return new UnitDTO(unit);
     }
 
-    /** Calcula el camino de menor costo sin atravesar agua ni otras tropas. */
+    /**
+     * Consulta las casillas permitidas sin cambiar posiciones ni gastar combustible.
+     * Emplea el mismo cálculo de rutas que move(), con autorización por partida.
+     */
+    @Transactional(readOnly = true)
+    public List<ReachableTileDTO> reachableTiles(Long gameId, Long unitId, User creator) {
+        if (creator == null || creator.getId() == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Debes iniciar sesion");
+        }
+        GameState game = gameRepository.findByIdAndCreatedBy_Id(gameId, creator.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida no encontrada"));
+        if (game.getStatus() != GameStatus.IN_PROGRESS) {
+            return List.of();
+        }
+        Unit unit = unitRepository.findById(unitId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Unidad no encontrada"));
+        if (unit.getOwner() == null || unit.getOwner().getGameState() == null
+                || !gameId.equals(unit.getOwner().getGameState().getId())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unidad no encontrada en esta partida");
+        }
+        if (!unit.getOwner().isActive() || unit.getOwner().getTurnOrder() != game.getCurrentPlayerOrder()
+                || unit.isDestroyed() || unit.isMovedThisTurn() || unit.isAttackedThisTurn()
+                || unit.isCapturedThisTurn()) {
+            return List.of();
+        }
+        GameMap map = game.getGameMap();
+        if (map == null || map.getHeight() == 0 || map.getWidth() == 0) {
+            return List.of();
+        }
+        Tile[][] tiles = new Tile[map.getHeight()][map.getWidth()];
+        for (Tile tile : map.getTiles()) {
+            tiles[tile.getPosition().getY()][tile.getPosition().getX()] = tile;
+        }
+        Set<Long> occupied = new HashSet<>();
+        for (Unit other : unitRepository.findAllByOwner_GameState_Id(gameId)) {
+            if (!other.getId().equals(unitId)) {
+                occupied.add(other.getTile().getId());
+            }
+        }
+        int[][] costs = reachableCosts(tiles, occupied, unit.getPosition().getX(),
+                unit.getPosition().getY(), unit.getDefinition().getMovementType(),
+                unit.getDefinition().getMovementPoints());
+        List<ReachableTileDTO> result = new ArrayList<>();
+        for (int y = 0; y < map.getHeight(); y++) {
+            for (int x = 0; x < map.getWidth(); x++) {
+                int cost = costs[y][x];
+                if (cost == 0 || cost == Integer.MAX_VALUE || tiles[y][x] == null) {
+                    continue;
+                }
+                int fuelCost = unit.getDefinition().isUsesFuel()
+                        ? cost * unit.getDefinition().getFuelPerMovementPoint() : 0;
+                if (fuelCost <= unit.getCurrentFuel()) {
+                    result.add(new ReachableTileDTO(x, y, cost));
+                }
+            }
+        }
+        return result;
+    }
+
+    /** El movimiento y la vista previa comparten exactamente el mismo algoritmo. */
     private int shortestPathCost(Tile[][] tiles, Set<Long> occupied,
             int startX, int startY, int endX, int endY,
             MovementType movementType, int maximumPoints) {
+        int[][] costs = reachableCosts(tiles, occupied, startX, startY, movementType, maximumPoints);
+        int cost = costs[endY][endX];
+        return cost == Integer.MAX_VALUE ? -1 : cost;
+    }
 
+    /** Dijkstra: rutas ortogonales y costos iguales a los usados por el movimiento real. */
+    private int[][] reachableCosts(Tile[][] tiles, Set<Long> occupied,
+            int startX, int startY, MovementType movementType, int maximumPoints) {
         int height = tiles.length;
         int width = tiles[0].length;
         int[][] best = new int[height][width];
@@ -150,8 +228,6 @@ public class UnitMovementService {
             Arrays.fill(row, Integer.MAX_VALUE);
         }
         best[startY][startX] = 0;
-
-        // Cada elemento contiene {x, y, costo acumulado}.
         PriorityQueue<int[]> pending = new PriorityQueue<>(Comparator.comparingInt(step -> step[2]));
         pending.add(new int[] {startX, startY, 0});
         int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
@@ -164,10 +240,6 @@ public class UnitMovementService {
             if (total != best[y][x]) {
                 continue;
             }
-            if (x == endX && y == endY) {
-                return total;
-            }
-
             for (int[] direction : directions) {
                 int nx = x + direction[0];
                 int ny = y + direction[1];
@@ -189,7 +261,7 @@ public class UnitMovementService {
                 }
             }
         }
-        return -1;
+        return best;
     }
 
     /** -1 significa que ese terreno es intransitable para la unidad. */

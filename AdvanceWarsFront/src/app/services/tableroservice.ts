@@ -1,55 +1,13 @@
-
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-
-
-import { Injectable, inject } from '@angular/core';
-
-import {
-  HttpClient,
-  HttpHeaders
-} from '@angular/common/http';
-
-import {
-  Observable,
-  throwError
-} from 'rxjs';
-
-
 import { API_BASE_URL } from './api-config';
 import { usuarioservice } from './usuarioservice';
-
 import {
-  nuevapartida,
-  partidaresumen,
-  tablero,
-  unidadservidor,
-  estadojuego,
-  eventojuego,
-  seleccionjugador,
-  registrarasiento,
-  turnoactual,
-
-  registrarasiento
-
+  nuevapartida, partidaresumen, tablero, unidadservidor,
+  estadojuego, eventojuego, seleccionjugador, registrarasiento, turnoactual, resultadoCaptura, casillaalcanzable
 } from '../models/tablero';
-
-import {
-  resultadoataque
-} from '../models/unidad';
-
-/**
- * Información del turno utilizada por Spring Boot
- * para validar movimientos y ataques.
- *
- * Se deriva de partidaresumen para conservar
- * compatibilidad con el modelo actual.
- */
-type turnoactual = Pick<
-  partidaresumen,
-  'currentRound' | 'currentPlayerOrder'
->;
+import { resultadoataque } from '../models/unidad';
 
 /**
  * Servicio principal de partidas de AURA WARS.
@@ -63,24 +21,11 @@ type turnoactual = Pick<
 })
 export class tableroservice {
 
-  private http = inject(HttpClient);
-  private auth = inject(usuarioservice);
-  private readonly api = `${API_BASE_URL}/games`;
-  /** Construye las cabeceras HTTP de la sesión JWT. */
-
-
   private readonly http = inject(HttpClient);
-
   private readonly auth = inject(usuarioservice);
-
   private readonly api = `${API_BASE_URL}/games`;
 
-  /**
-   * Obtiene las cabeceras JWT del usuario autenticado.
-   *
-   * @returns Cabeceras HTTP con autenticación.
-   */
-
+  /** Construye las cabeceras autenticadas para el backend. */
   private headers(): HttpHeaders {
     return this.auth.getHeaders();
   }
@@ -179,6 +124,14 @@ export class tableroservice {
    * @param id Identificador de la partida.
    * @returns Estado actualizado de la partida.
    */
+  /** Pide las casillas alcanzables al backend sin alterar la partida. */
+  movimientosDisponibles(id: number, unidadId: number): Observable<casillaalcanzable[]> {
+    return this.http.get<casillaalcanzable[]>(
+      `${this.api}/${id}/units/${unidadId}/reachable`,
+      { headers: this.headers() }
+    );
+  }
+
   iniciarPartida(
     id: number
   ): Observable<partidaresumen> {
@@ -371,83 +324,29 @@ export class tableroservice {
     );
   }
 
-  /**
-   * Reserva la captura de propiedades.
-   *
-   * @param id Identificador de la partida.
-   * @param unidadId Unidad que intenta capturar.
-   * @returns Error de funcionalidad pendiente.
-   */
-  capturar(
-    id: number,
-    unidadId: number
-  ): Observable<unknown> {
-
-    return this.pendiente(
-      'Capturar propiedad',
-      {
-        id,
-        unidadId
-      }
+  /** Captura una propiedad bajo una infantería, con el turno confirmado. */
+  capturar(id: number, unidadId: number, turno: turnoactual): Observable<resultadoCaptura> {
+    return this.http.post<resultadoCaptura>(
+      `${this.api}/${id}/units/${unidadId}/capture`, turno,
+      { headers: this.headers() }
     );
   }
 
-  /**
-   * Reserva la producción de unidades.
-   *
-   * @param id Identificador de la partida.
-   * @param propertyId Identificador de la propiedad.
-   * @param unitDefinitionId Tipo de unidad.
-   * @param spawnX Coordenada horizontal.
-   * @param spawnY Coordenada vertical.
-   * @returns Error de funcionalidad pendiente.
-   */
-  producir(
-    id: number,
-    propertyId: number,
-    unitDefinitionId: number,
-    spawnX: number,
-    spawnY: number
-  ): Observable<unknown> {
-
-    return this.pendiente(
-      'Producir unidad',
-      {
-        id,
-        propertyId,
-        unitDefinitionId,
-        spawnX,
-        spawnY
-      }
+  /** Produce una unidad en una fábrica propia, si el servidor lo permite. */
+  producir(id: number, propertyId: number, unitType: 'INFANTRY' | 'TANK',
+    turno: turnoactual): Observable<unidadservidor> {
+    return this.http.post<unidadservidor>(
+      `${this.api}/${id}/units/produce`, { propertyId, unitType, ...turno },
+      { headers: this.headers() }
     );
   }
 
-
-  /** Termina el turno del jugador actual y devuelve la partida actualizada. */
+  /** Finaliza el turno y devuelve el nuevo GameDTO del servidor. */
   finTurno(id: number, turno: turnoactual): Observable<partidaresumen> {
-    return this.http.post<partidaresumen>(`${this.api}/${id}/end-turn`, turno, {
-      headers: this.headers(),
-    });
-
-  /**
-   * Reserva la finalización del turno.
-   *
-   * Este método pertenece a Persona 2.
-   * Se conserva la implementación pendiente
-   * de la versión de referencia.
-   *
-   * @param id Identificador de la partida.
-   * @returns Error de funcionalidad pendiente.
-   */
-  finTurno(
-    id: number
-  ): Observable<unknown> {
-
-    return this.pendiente(
-      'Finalizar turno',
-      { id }
+    return this.http.post<partidaresumen>(
+      `${this.api}/${id}/end-turn`, turno,
+      { headers: this.headers() }
     );
-
   }
 
   /**
