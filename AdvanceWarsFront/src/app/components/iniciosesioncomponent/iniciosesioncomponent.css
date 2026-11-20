@@ -256,3 +256,10 @@ button:disabled {
   font: 10px 'Silkscreen', monospace;
   margin-top: 35px;
 }
+
+.error-login {
+  margin: 14px 0 0;
+  color: #d63031;
+  font-size: 14px;
+  text-align: center;
+}

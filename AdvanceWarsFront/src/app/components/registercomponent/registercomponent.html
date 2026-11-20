@@ -1,46 +1,178 @@
+
 <section class="screen">
   <div class="wrap narrow">
-    <header class="top"><h1>NUEVO RECLUTA</h1>
-      <p>TU PRÓXIMA CAMPAÑA COMIENZA AQUÍ</p></header>
+
+    <header class="top">
+      <h1>NUEVO RECLUTA</h1>
+      <p>TU PRÓXIMA CAMPAÑA COMIENZA AQUÍ</p>
+    </header>
+
     <div class="panel">
-      <div class="panel-head azul">REGISTRO / 02 ■</div>
-      <div class="panel-body">
-        <p class="field-title">ELIGE TU INSIGNIA (VISUAL)</p>
-        <div class="insignias">
-          <button type="button" *ngFor="let color of ['ROJO','AZUL','VERDE','DORADO']"
-                  [class.elegido]="colorVisual===color" (click)="colorVisual=color"
-                  [attr.aria-pressed]="colorVisual===color"><span class="icon"
-                                                                  [attr.data-color]="color">✚</span>{{ color }}
-          </button>
-        </div>
-        <p class="seleccionado">■ {{ colorVisual }} — VISTA PREVIA</p>
-        <form (ngSubmit)="registrar(usuario.value,correo.value,clave.value,repite.value,terminos.checked)" novalidate>
-          <div class="field"><label for="regUsuario">NOMBRE DE USUARIO</label><input #usuario id="regUsuario"
-                                                                                     name="usuario"
-                                                                                     autocomplete="username"
-                                                                                     placeholder="TU NOMBRE" required>
-          </div>
-          <div class="field"><label for="regCorreo">CORREO ELECTRÓNICO</label><input #correo id="regCorreo"
-                                                                                     name="correo" type="email"
-                                                                                     autocomplete="email"
-                                                                                     placeholder="TU@CORREO.COM"
-                                                                                     required></div>
-          <div class="field"><label for="regClave">CONTRASEÑA</label><input #clave id="regClave" name="clave"
-                                                                            type="password" autocomplete="new-password"
-                                                                            placeholder="MÍNIMO 12 CARACTERES"
-                                                                            minlength="12" required></div>
-          <div class="field"><label for="regRepite">CONFIRMAR CONTRASEÑA</label><input #repite id="regRepite"
-                                                                                       name="repite" type="password"
-                                                                                       autocomplete="new-password"
-                                                                                       required></div>
-          <label class="terminos"><input #terminos type="checkbox"> ACEPTO LOS TÉRMINOS DEL SERVICIO</label>
-          <p *ngIf="error" class="message error" role="alert">{{ error }}</p>
-          <button type="submit" class="full"
-                  [disabled]="procesando">{{ procesando ? 'REGISTRANDO...' : 'CREAR CUENTA' }} ▸
-          </button>
-        </form>
+
+      <div class="panel-head azul">
+        REGISTRO / 02 ■
       </div>
+
+      <div class="panel-body">
+
+        <p class="field-title">
+          ELIGE TU INSIGNIA
+        </p>
+
+        <div class="insignias">
+
+          <button
+            type="button"
+            *ngFor="let color of ['ROJO', 'AZUL', 'VERDE', 'DORADO']"
+            [class.elegido]="colorVisual === color"
+            [attr.aria-pressed]="colorVisual === color"
+            (click)="colorVisual = color">
+
+            <span
+              class="icon"
+              [attr.data-color]="color">
+              ✚
+            </span>
+
+            {{ color }}
+
+          </button>
+
+        </div>
+
+        <p class="seleccionado">
+          ■ {{ colorVisual }} — VISTA PREVIA
+        </p>
+
+        <form
+          (ngSubmit)="registrar(
+            usuario.value,
+            correo.value,
+            clave.value,
+            repite.value,
+            terminos.checked
+          )"
+          novalidate>
+
+          <div class="field">
+            <label for="regUsuario">
+              NOMBRE DE USUARIO
+            </label>
+
+            <input
+              #usuario
+              id="regUsuario"
+              name="usuario"
+              type="text"
+              autocomplete="username"
+              placeholder="TU NOMBRE DE COMANDANTE"
+              required>
+          </div>
+
+          <div class="field">
+            <label for="regCorreo">
+              CORREO ELECTRÓNICO
+            </label>
+
+            <input
+              #correo
+              id="regCorreo"
+              name="correo"
+              type="email"
+              autocomplete="email"
+              placeholder="TU@CORREO.COM"
+              required>
+          </div>
+
+          <div class="field">
+            <label for="regClave">
+              CONTRASEÑA
+            </label>
+
+            <input
+              #clave
+              id="regClave"
+              name="clave"
+              type="password"
+              autocomplete="new-password"
+              placeholder="MÍNIMO 12 CARACTERES"
+              minlength="12"
+              required>
+          </div>
+
+          <div class="field">
+            <label for="regRepite">
+              CONFIRMAR CONTRASEÑA
+            </label>
+
+            <input
+              #repite
+              id="regRepite"
+              name="repite"
+              type="password"
+              autocomplete="new-password"
+              placeholder="REPITE TU CONTRASEÑA"
+              minlength="12"
+              required>
+          </div>
+
+          <div class="field">
+            <label for="regNacimiento">
+              FECHA DE NACIMIENTO
+            </label>
+
+            <input
+              id="regNacimiento"
+              name="nacimiento"
+              type="date">
+          </div>
+
+          <label class="terminos">
+
+            <input
+              #terminos
+              type="checkbox"
+              name="terminos">
+
+            ACEPTO LOS TÉRMINOS DEL SERVICIO
+
+          </label>
+
+          <p
+            *ngIf="error"
+            class="message error"
+            role="alert">
+            {{ error }}
+          </p>
+
+          <button
+            type="submit"
+            class="full"
+            [disabled]="procesando">
+
+            {{ procesando ? 'REGISTRANDO...' : 'CREAR CUENTA' }}
+            ▸
+
+          </button>
+
+        </form>
+
+        <p class="back">
+          ¿YA TIENES UNA CUENTA?
+          <a routerLink="/">
+            INICIAR SESIÓN ▸
+          </a>
+        </p>
+
+      </div>
+
     </div>
-    <p class="back"><a routerLink="/">‹ VOLVER AL INICIO DE SESIÓN</a></p>
+
+    <p class="back">
+      <a routerLink="/">
+        ‹ VOLVER AL INICIO DE SESIÓN
+      </a>
+    </p>
+
   </div>
 </section>

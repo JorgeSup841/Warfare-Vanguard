@@ -1,3 +1,4 @@
+
 :host {
   display: block;
   --ink: #1b292e;
@@ -9,16 +10,21 @@
   font-family: 'Silkscreen', monospace;
 }
 
-:host *, :host *::before, :host *::after {
+:host *,
+:host *::before,
+:host *::after {
   box-sizing: border-box;
 }
 
-.screen {
+.screen,
+.juego {
   min-height: calc(100vh - 110px);
-  background-color: var(--olive);
-  background-image: linear-gradient(#ffffff0d 1px, transparent 1px), linear-gradient(90deg, #ffffff0d 1px, transparent 1px);
-  background-size: 24px 24px;
   padding: 38px 15px 65px;
+  background-color: var(--olive);
+  background-image:
+    linear-gradient(#ffffff0d 1px, transparent 1px),
+    linear-gradient(90deg, #ffffff0d 1px, transparent 1px);
+  background-size: 24px 24px;
   color: var(--cream);
 }
 
@@ -27,7 +33,9 @@
   margin: 0 auto;
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   font-family: 'Press Start 2P', monospace;
   line-height: 1.7;
   overflow-wrap: anywhere;
@@ -54,7 +62,8 @@ a {
   color: inherit;
 }
 
-.panel {
+.panel,
+.caja {
   background: var(--cream);
   color: var(--ink);
   border: 5px solid var(--ink);
@@ -80,21 +89,24 @@ a {
   margin-bottom: 17px;
 }
 
-label, .field-title {
+label,
+.field-title {
   font-family: 'Press Start 2P', monospace;
   font-size: 9px;
   line-height: 1.8;
 }
 
-input, select, textarea {
+input,
+select,
+textarea {
   min-width: 0;
   width: 100%;
-  font: 16px 'Silkscreen', monospace;
   padding: 10px 12px;
   background: #fff8de;
   color: var(--ink);
   border: 4px solid var(--ink);
   border-radius: 0;
+  font: 16px 'Silkscreen', monospace;
 }
 
 textarea {
@@ -102,7 +114,8 @@ textarea {
   resize: vertical;
 }
 
-button, .btn {
+button,
+.btn {
   display: inline-block;
   text-decoration: none;
   padding: 13px 16px;
@@ -115,17 +128,19 @@ button, .btn {
   text-align: center;
 }
 
-button:hover:not(:disabled), .btn:hover {
+button:hover:not(:disabled),
+.btn:hover {
   background: #ffe88e;
 }
 
-button:active:not(:disabled), .btn:active {
+button:active:not(:disabled),
+.btn:active {
   box-shadow: none;
   transform: translate(4px, 4px);
 }
 
 button:disabled {
-  opacity: .6;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
@@ -137,25 +152,37 @@ button:disabled {
   background: #f09d88;
 }
 
-:where(a,button,input,textarea,select):focus-visible {
+.azul {
+  background: var(--blue);
+  color: var(--cream);
+}
+
+:where(a, button, input, textarea, select):focus-visible {
   outline: 3px solid var(--blue);
   outline-offset: 3px;
 }
 
-.message {
+.message,
+.juego__mensaje {
   margin: 14px 0;
   padding: 13px;
   background: #dfebb8;
-  color: #1b292e;
-  border: 3px solid #1b292e;
+  color: var(--ink);
+  border: 3px solid var(--ink);
 }
 
 .message.error {
   background: #ffbfaa;
 }
 
+.juego__mensaje {
+  text-align: center;
+  color: var(--ink);
+}
+
 .muted {
-  opacity: .85;
+  opacity: 0.85;
+  font-size: 12px;
 }
 
 .grid {
@@ -163,11 +190,239 @@ button:disabled {
   gap: 15px;
 }
 
-.flex {
+.flex,
+.header {
   display: flex;
   gap: 12px;
   align-items: center;
   flex-wrap: wrap;
+}
+
+.header {
+  justify-content: space-between;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.commands {
+  margin: 22px 0;
+}
+
+.commands button {
+  font-size: 8px;
+}
+
+.juego__cabecera {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.badge {
+  display: inline-block;
+  background: var(--ink);
+  color: var(--gold);
+  padding: 6px 12px;
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+
+.juego__cabecera h1 {
+  margin: 12px 0 0;
+  color: var(--gold);
+  text-shadow: 4px 4px 0 var(--ink);
+}
+
+.juego__controles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--ink);
+  border: 3px solid var(--ink);
+  font-size: 13px;
+  letter-spacing: 2px;
+}
+
+.control input {
+  width: 110px;
+  padding: 8px;
+  font-size: 14px;
+  background: #fff8de;
+}
+
+.game-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 290px;
+  gap: 18px;
+}
+
+.map-col {
+  min-width: 0;
+}
+
+.marco,
+.juego__marco {
+  min-width: 0;
+  overflow: hidden;
+  border: 5px solid var(--ink);
+  background: #24382e;
+  box-shadow: 7px 7px 0 #101c20;
+}
+
+.lienzo {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+}
+
+.juego__lienzo {
+  width: 100%;
+  min-height: 400px;
+  font-size: 0;
+}
+
+.lienzo canvas,
+.juego__lienzo canvas {
+  display: block;
+  width: 100%;
+}
+
+.sidebar,
+.juego__panel {
+  min-width: 0;
+}
+
+.sidebar {
+  background: #eddfad;
+  border: 3px solid var(--ink);
+  padding: 16px;
+  color: var(--ink);
+}
+
+.sidebar h2 {
+  font-size: 10px;
+}
+
+.sidebar p {
+  font-size: 12px;
+}
+
+.sidebar button {
+  font-size: 8px;
+  padding: 8px;
+}
+
+.juego__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.caja {
+  padding: 16px;
+  font-size: 13px;
+}
+
+.caja h2 {
+  margin: 0 0 10px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #2d5a3d;
+}
+
+.caja p {
+  margin: 4px 0;
+}
+
+.caja__terreno {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.caja__vacio {
+  color: #666;
+  line-height: 1.4;
+}
+
+.swatch,
+.leyenda__color {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--ink);
+  margin-right: 8px;
+}
+
+.leyenda {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0;
+}
+
+.extra {
+  margin-top: 20px;
+}
+
+table {
+  width: 100%;
+  margin-top: 10px;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 4px 6px;
+  text-align: left;
+  border-bottom: 1px solid #d9d2bd;
+}
+
+.btn--claro,
+.btn--chico {
+  background: #fbf6e9;
+  color: var(--ink);
+  padding: 8px 14px;
+  box-shadow: none;
+}
+
+.btn--chico.activo {
+  background: var(--gold);
+}
+
+@media (max-width: 850px) {
+  .game-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .juego__panel {
+    width: 100%;
+  }
+}
+
+@media (max-width: 700px) {
+  .juego {
+    padding: 20px 16px;
+  }
+
+  .juego__controles {
+    gap: 12px;
+  }
+
+  .juego__lienzo {
+    min-height: 280px;
+  }
 }
 
 @media (max-width: 640px) {
@@ -183,98 +438,8 @@ button:disabled {
     font-size: 8px;
   }
 
-  button, .btn {
+  button,
+  .btn {
     font-size: 8px;
-  }
-}
-
-.azul {
-  background: #366cb1;
-  color: #fff0c4;
-}
-
-.header {
-  justify-content: space-between;
-}
-
-.game-layout {
-  display: grid;
-  grid-template-columns:minmax(0, 1fr) 290px;
-  gap: 18px;
-}
-
-.map-col {
-  min-width: 0;
-}
-
-.marco {
-  border: 5px solid #1b292e;
-  background: #24382e;
-  overflow: hidden;
-}
-
-.lienzo {
-  width: 100%;
-  aspect-ratio: 4/3;
-}
-
-.lienzo canvas {
-  display: block;
-}
-
-.sidebar {
-  background: #eddfad;
-  border: 3px solid #1b292e;
-  padding: 16px;
-  min-width: 0;
-}
-
-.sidebar h2 {
-  font-size: 10px;
-}
-
-.sidebar p {
-  font-size: 12px;
-}
-
-.swatch {
-  display: inline-block;
-  width: 13px;
-  height: 13px;
-  border: 1px solid #1b292e;
-  margin-right: 8px;
-}
-
-.sidebar button {
-  font-size: 8px;
-  padding: 8px;
-}
-
-.extra {
-  margin-top: 20px;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
-  gap: 12px;
-}
-
-.commands {
-  margin: 22px 0;
-}
-
-.commands button {
-  font-size: 8px;
-}
-
-.muted {
-  color: #fff0c4;
-  font-size: 12px;
-}
-
-@media (max-width: 850px) {
-  .game-layout {
-    grid-template-columns:1fr;
   }
 }

@@ -1,34 +1,153 @@
-<section class="screen">
-  <div class="wrap narrow"><h1>VERIFICAR CÓDIGO</h1>
-    <div class="panel">
-      <div class="panel-head azul">CÓDIGO DE SEGURIDAD ■</div>
-      <div class="panel-body">
-        <ng-container *ngIf="!verificado; else aprobado">
-          <p *ngIf="tipo==='correo'">Enviamos un código a <strong>{{ correo }}</strong> para verificar tu cuenta.</p>
-          <p *ngIf="tipo==='login'">Revisa tu correo e introduce el código recibido para acceder.</p>
-          <p *ngIf="!tipo" class="message error">No hay una verificación activa. Vuelve al inicio de sesión.</p>
-          <form *ngIf="tipo" (ngSubmit)="verificar(codigo.value)" novalidate>
-            <div class="field"><label for="codigo">CÓDIGO DEL CORREO</label><input #codigo id="codigo" name="codigo"
-                                                                                   type="text" inputmode="numeric"
-                                                                                   pattern="[0-9]{6}"
-                                                                                   autocomplete="one-time-code"
-                                                                                   maxlength="6" placeholder="000000"
-                                                                                   required></div>
-            <div *ngIf="error" class="message error" role="alert">{{ error }}</div>
-            <div *ngIf="mensaje" class="message" role="status">{{ mensaje }}</div>
-            <button type="submit" class="full" [disabled]="procesando">{{ procesando ? 'VERIFICANDO...' : 'VERIFICAR' }}
-              ▸
-            </button>
-            <button type="button" class="secondary full mas" [disabled]="procesando" (click)="reenviar()">REENVIAR
-              CÓDIGO
-            </button>
-          </form>
-        </ng-container>
-        <ng-template #aprobado><h2>¡CUENTA ACTIVADA!</h2>
-          <p>Ya puedes iniciar sesión.</p><a routerLink="/" class="btn">INICIAR SESIÓN ▸</a></ng-template>
-        <p class="nota">Solo escribe el código. El identificador técnico se envía automáticamente.</p>
+
+<section class="screen verificar">
+
+  <div class="wrap narrow">
+
+    <h1>VERIFICAR CÓDIGO</h1>
+
+    <div class="panel tarjeta">
+
+      <div class="panel-head azul">
+        CÓDIGO DE SEGURIDAD ■
       </div>
+
+      <div class="panel-body">
+
+        <ng-container *ngIf="!verificado; else aprobado">
+
+          <span class="badge">
+            VERIFICACIÓN
+          </span>
+
+          <h2>REVISA TU CORREO</h2>
+
+          <p
+            *ngIf="tipo === 'correo'"
+            class="texto">
+            Enviamos un código de 6 dígitos a
+            <strong>{{ correo }}</strong>
+            para activar tu cuenta.
+          </p>
+
+          <p
+            *ngIf="tipo === 'login'"
+            class="texto">
+            Enviamos un código de 6 dígitos a tu correo.
+            Introdúcelo para iniciar sesión en AURA WARS.
+          </p>
+
+          <p
+            *ngIf="!tipo"
+            class="message error"
+            role="alert">
+            No hay una verificación activa.
+            Vuelve al inicio de sesión.
+          </p>
+
+          <form
+            *ngIf="tipo"
+            (ngSubmit)="verificar(codigo.value)"
+            novalidate>
+
+            <div class="field">
+
+              <label
+                class="etiqueta"
+                for="codigo">
+                CÓDIGO DEL CORREO
+              </label>
+
+              <input
+                #codigo
+                id="codigo"
+                name="codigo"
+                class="campo"
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]{6}"
+                autocomplete="one-time-code"
+                maxlength="6"
+                placeholder="000000"
+                required>
+
+            </div>
+
+            <p
+              *ngIf="error"
+              class="message error"
+              role="alert">
+              {{ error }}
+            </p>
+
+            <p
+              *ngIf="mensaje"
+              class="message"
+              role="status">
+              {{ mensaje }}
+            </p>
+
+            <button
+              type="submit"
+              class="boton full"
+              [disabled]="procesando">
+
+              {{ procesando ? 'VERIFICANDO...' : 'VERIFICAR CÓDIGO' }}
+              ▸
+
+            </button>
+
+            <button
+              type="button"
+              class="enlace"
+              [disabled]="procesando"
+              (click)="reenviar()">
+
+              ¿NO RECIBISTE EL CÓDIGO?
+              REENVIAR
+
+            </button>
+
+          </form>
+
+        </ng-container>
+
+        <ng-template #aprobado>
+
+          <span class="badge">
+            VERIFICACIÓN COMPLETADA
+          </span>
+
+          <h2>¡CUENTA ACTIVADA!</h2>
+
+          <p class="texto">
+            Tu correo electrónico ha sido verificado
+            correctamente. Ya puedes iniciar sesión
+            en AURA WARS.
+          </p>
+
+          <a
+            routerLink="/"
+            class="boton full">
+            INICIAR SESIÓN ▸
+          </a>
+
+        </ng-template>
+
+        <p class="nota">
+          Solo necesitas ingresar el código recibido
+          por correo electrónico.
+        </p>
+
+      </div>
+
     </div>
-    <p class="back"><a routerLink="/">‹ VOLVER AL INICIO</a></p>
+
+    <p class="back">
+      <a routerLink="/">
+        ‹ VOLVER AL INICIO
+      </a>
+    </p>
+
   </div>
+
 </section>

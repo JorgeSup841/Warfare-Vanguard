@@ -1,11 +1,10 @@
 package co.edu.unbosque.advancewars.exception;
 
-import co.edu.unbosque.advancewars.dto.ApiErrorDTO;
-import co.edu.unbosque.advancewars.service.OtpService;
-import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
+
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.mail.MailException;
@@ -13,6 +12,11 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
+
+import co.edu.unbosque.advancewars.dto.ApiErrorDTO;
+import co.edu.unbosque.advancewars.service.OtpService;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Transforma excepciones de la API en respuestas HTTP seguras.
@@ -27,6 +31,24 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.UNAUTHORIZED, ex.getMessage(), req);
     }
 
+    
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiErrorDTO> responseStatus(
+            ResponseStatusException ex,
+            HttpServletRequest req) {
+
+        HttpStatusCode status = ex.getStatusCode();
+
+        return ResponseEntity.status(status).body(
+            new ApiErrorDTO(
+                Instant.now(),
+                status.value(),
+                HttpStatus.valueOf(status.value()).getReasonPhrase(),
+                ex.getReason(),
+                req.getRequestURI()
+            )
+        );
+    }
     /**
      * Devuelve HTTP 400 para una solicitud de negocio inválida.
      */

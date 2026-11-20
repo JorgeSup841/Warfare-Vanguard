@@ -1,16 +1,20 @@
+
 import { partida } from './partida';
+
 export interface nuevapartida {
   playerNames: string[];
   width: number;
   height: number;
   seed: number;
 }
+
 export interface jugadorservidor {
   name: string;
   turnOrder: number;
   money: number;
   status: string;
 }
+
 export interface partidaresumen {
   id: number;
   status: string;
@@ -23,6 +27,7 @@ export interface partidaresumen {
   playerNames: string[];
   players: jugadorservidor[];
 }
+
 export interface casillatablero {
   x: number;
   y: number;
@@ -30,12 +35,14 @@ export interface casillatablero {
   propertyType: string | null;
   ownerOrder: number | null;
 }
+
 export interface tablero {
   gameId: number;
   width: number;
   height: number;
   tiles: casillatablero[];
 }
+
 export interface unidadservidor {
   id: number;
   unitType: string;
@@ -47,16 +54,19 @@ export interface unidadservidor {
   movedThisTurn: boolean;
   attackedThisTurn: boolean;
 }
-// Reservados para futuras fases; backend AdvanceWars(3).zip no expone /state ni /logs.
+
 export type estadojuego = partida;
+
 export interface seleccionjugador {
   factionId: number;
   commanderId: number;
 }
+
 export interface registrarasiento {
   name: string;
   turnOrder?: number;
 }
+
 export interface eventojuego {
   id?: number;
   eventType?: string;
