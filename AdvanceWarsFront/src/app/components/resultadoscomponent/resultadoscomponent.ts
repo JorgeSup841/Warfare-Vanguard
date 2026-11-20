@@ -3,7 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription, forkJoin } from 'rxjs';
 import { tableroservice } from '../../services/tableroservice';
 import { ReporteService } from '../../services/reporte.service';
-import { partidaresumen, unidadservidor } from '../../models/tablero';
+import { partidaresumen, unidadservidor } from '../../models/tablero'; // <-- Import cerrado correctamente
+
 /** Presenta los resultados y permite descargar el informe PDF. */
 @Component({
   selector: 'app-resultadoscomponent',
@@ -18,23 +19,36 @@ export class Resultadoscomponent implements OnInit, OnDestroy {
   error = '';
   mensaje = '';
   cargando = false;
+
   private subs = new Subscription();
+
   constructor(
     private ruta: ActivatedRoute,
     private api: tableroservice,
     private pdf: ReporteService,
     private cdr: ChangeDetectorRef,
   ) {}
+
   /** Inicializa y carga los datos de la pantalla. */
   ngOnInit(): void {
-    this.id = Number(this.ruta.snapshot.paramMap.get('id'));
+    const idParam = Number(this.ruta.snapshot.paramMap.get('id'));
+
+    // Evita llamadas HTTP con NaN si la URL es inválida
+    if (isNaN(idParam) || idParam <= 0) {
+      this.error = 'El identificador de la partida no es válido.';
+      return;
+    }
+
+    this.id = idParam;
     this.cargar();
   }
+
   /** Consulta los datos necesarios para presentar la pantalla. */
   cargar(): void {
     this.cargando = true;
     this.error = '';
     this.cdr.markForCheck();
+
     this.subs.add(
       forkJoin({
         partida: this.api.getPartida(this.id),
@@ -54,8 +68,14 @@ export class Resultadoscomponent implements OnInit, OnDestroy {
       }),
     );
   }
+
   /** Descarga el informe PDF asociado a los resultados. */
   descargar(): void {
+    // Limpia estados previos antes de iniciar la descarga
+    this.error = '';
+    this.mensaje = '';
+    this.cdr.markForCheck();
+
     this.subs.add(
       this.pdf.obtener(this.id).subscribe({
         next: (blob) => {
@@ -74,6 +94,7 @@ export class Resultadoscomponent implements OnInit, OnDestroy {
       }),
     );
   }
+
   /** Libera los recursos y suscripciones del componente. */
   ngOnDestroy(): void {
     this.subs.unsubscribe();
