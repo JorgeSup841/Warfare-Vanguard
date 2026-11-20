@@ -11,8 +11,8 @@
           <button [disabled]="ocupado">{{ ocupado ? 'ENVIANDO...' : 'SOLICITAR CÓDIGO' }}</button>
         </form>
         <form *ngIf="modo === 'restablecer'" (ngSubmit)="restablecer(identificador.value, codigo.value, nueva.value)">
-          <p>El backend actual envía un código y un identificador en el correo de recuperación. Introduce ambos.</p>
-          <div class="field"><label for="idRec">IDENTIFICADOR DEL CORREO</label><input #identificador id="idRec"
+          <p>Te enviamos un correo con el identificador de recuperación y el código de 6 dígitos. Ingrésalos junto con tu nueva contraseña para volver a entrar.</p>
+          <div class="field"><label for="idRec">IDENTIFICADOR PARA RESTABLECER CONTRASEÑA</label><input #identificador id="idRec"
                                                                                        autocomplete="off" required>
           </div>
           <div class="field"><label for="codigoRec">CÓDIGO DE 6 DÍGITOS</label><input #codigo id="codigoRec"

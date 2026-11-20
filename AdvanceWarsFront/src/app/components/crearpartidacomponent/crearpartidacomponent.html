@@ -40,10 +40,12 @@
             </div>
           </div>
 
-          <p class="message error" *ngIf="mensaje">{{ mensaje }}</p>
+          <p>Rellena todos los espacios.</p>
 
-          <button type="submit" [disabled]="creando">
-            {{ creando ? 'CREANDO...' : 'CREAR PARTIDA ▸' }}
+          <p *ngIf="error || mensaje" class="message error" role="alert">{{ error || mensaje }}</p>
+
+          <button type="submit" [disabled]="ocupado || creando">
+            {{ (ocupado || creando) ? 'CREANDO...' : 'CREAR PARTIDA ▸' }}
           </button>
         </form>
 
