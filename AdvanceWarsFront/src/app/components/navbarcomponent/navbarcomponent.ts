@@ -1,6 +1,7 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
-import { Router } from '@angular/router';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
 import { usuarioservice } from '../../services/usuarioservice';
+
 /** Barra de navegación de AURA WARS. */
 @Component({
   selector: 'app-navbarcomponent',
@@ -8,16 +9,24 @@ import { usuarioservice } from '../../services/usuarioservice';
   templateUrl: './navbarcomponent.html',
   styleUrl: './navbarcomponent.css',
 })
-export class Navbarcomponent {
-  constructor(
-    public auth: usuarioservice,
-    private router: Router,
-    private cdr: ChangeDetectorRef,
-  ) {}
+export class Navbarcomponent implements OnInit {
+  auth = inject(usuarioservice);
+  private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
+
+  /** Cada vez que se cambia de página, vuelve a revisar si hay sesión. */
+  ngOnInit(): void {
+    this.router.events.subscribe((evento) => {
+      if (evento instanceof NavigationEnd) {
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
   /** Cierra la sesión y regresa al inicio. */
   salir(): void {
     this.auth.logout();
-    this.router.navigate(['/']).catch(() => this.cdr.markForCheck());
     this.cdr.markForCheck();
+    this.router.navigate(['/']);
   }
 }

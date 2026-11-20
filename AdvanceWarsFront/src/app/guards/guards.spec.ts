@@ -2,8 +2,9 @@ import { TestBed } from '@angular/core/testing';
 import { RouterModule, RouterStateSnapshot, ActivatedRouteSnapshot } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { adminGuard } from './admin.guard';
-import { authGuard } from './auth.guard';
+import { adminGuard } from './admin-guard';
+import { authGuard } from './auth-guard';
+
 describe('guards Aura Wars', () => {
   it('bloquea partida sin sesión', () => {
     TestBed.configureTestingModule({
@@ -15,6 +16,7 @@ describe('guards Aura Wars', () => {
     );
     expect(resultado).not.toBe(true);
   });
+
   it('no concede ADMIN sin una sesión ADMIN', () => {
     TestBed.configureTestingModule({
       imports: [RouterModule.forRoot([])],
