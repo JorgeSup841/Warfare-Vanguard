@@ -107,15 +107,25 @@ public class AuthController {
 	 * @return confirmación o respuesta de código inválido
 	 */
 	@PostMapping("/verify-email")
-	@Operation(summary = "Verificar correo electrónico", description = "Valida el código OTP de activación de la cuenta")
+	@Operation(
+	    summary = "Verificar correo electrónico",
+	    description = "Valida el código OTP de activación de la cuenta"
+	)
 	@SecurityRequirements
-	public ResponseEntity<Map<String, String>> verifyEmail(@Valid @RequestBody OtpVerificationRequestDTO request,
-			HttpServletRequest httpRequest) {
-		publicRequestRateLimiter.check(httpRequest.getRemoteAddr());
-		if (!auth.verifyEmail(request.getChallengeId(), request.getCode())) {
-			return ResponseEntity.badRequest().body(Map.of("message", "Código inválido o vencido"));
-		}
-		return ResponseEntity.ok(Map.of("message", "Correo verificado"));
+	public ResponseEntity<Map<String, String>> verifyEmail(
+	        @Valid @RequestBody OtpVerificationRequestDTO request,
+	        HttpServletRequest httpRequest) {
+
+	    publicRequestRateLimiter.check(httpRequest.getRemoteAddr());
+
+	    if (!auth.verifyEmail(request.getChallengeId(), request.getCode())) {
+	        return ResponseEntity.badRequest()
+	                .body(Map.of("message", "Código inválido o vencido"));
+	    }
+
+	    return ResponseEntity.ok(
+	            Map.of("message", "Correo verificado")
+	    );
 	}
 
 	/**
