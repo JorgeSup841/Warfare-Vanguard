@@ -8,31 +8,17 @@ describe('jugadorGuard', () => {
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
-        {
-          provide: usuarioservice,
-          useValue: { estaAutenticado: () => false, getRole: () => null, isAdmin: () => false },
-        },
-      ],
+        {provide: usuarioservice, useValue: {estaAutenticado:()=>false,getRole:()=>null,isAdmin:()=>false}}
+      ]
     });
     const resultado = TestBed.runInInjectionContext(() =>
-      jugadorGuard({} as ActivatedRouteSnapshot, { url: '/partidas' } as RouterStateSnapshot),
-    );
+      jugadorGuard({} as ActivatedRouteSnapshot, {url:'/partidas'} as RouterStateSnapshot));
     expect(resultado).not.toBe(true);
     expect(resultado).toBeInstanceOf(Object);
   });
   it('permite partidas a USER y ADMIN autenticados', () => {
-    TestBed.configureTestingModule({
-      providers: [
-        provideRouter([]),
-        {
-          provide: usuarioservice,
-          useValue: { estaAutenticado: () => true, getRole: () => 'USER' },
-        },
-      ],
-    });
-    const user = TestBed.runInInjectionContext(() =>
-      jugadorGuard({} as ActivatedRouteSnapshot, { url: '/partidas' } as RouterStateSnapshot),
-    );
+    TestBed.configureTestingModule({providers:[provideRouter([]),{provide:usuarioservice,useValue:{estaAutenticado:()=>true,getRole:()=> 'USER'}}]});
+    const user=TestBed.runInInjectionContext(()=>jugadorGuard({} as ActivatedRouteSnapshot,{url:'/partidas'} as RouterStateSnapshot));
     expect(user).toBe(true);
   });
 });

@@ -8,28 +8,17 @@ describe('adminGuard', () => {
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
-        {
-          provide: usuarioservice,
-          useValue: { estaAutenticado: () => false, getRole: () => null, isAdmin: () => false },
-        },
-      ],
+        {provide: usuarioservice, useValue: {estaAutenticado:()=>false,getRole:()=>null,isAdmin:()=>false}}
+      ]
     });
     const resultado = TestBed.runInInjectionContext(() =>
-      adminGuard({} as ActivatedRouteSnapshot, { url: '/partidas' } as RouterStateSnapshot),
-    );
+      adminGuard({} as ActivatedRouteSnapshot, {url:'/partidas'} as RouterStateSnapshot));
     expect(resultado).not.toBe(true);
     expect(resultado).toBeInstanceOf(Object);
   });
   it('permite administración exclusivamente a ADMIN', () => {
-    TestBed.configureTestingModule({
-      providers: [
-        provideRouter([]),
-        { provide: usuarioservice, useValue: { isAdmin: () => true } },
-      ],
-    });
-    const resultado = TestBed.runInInjectionContext(() =>
-      adminGuard({} as ActivatedRouteSnapshot, { url: '/admin' } as RouterStateSnapshot),
-    );
+    TestBed.configureTestingModule({providers:[provideRouter([]),{provide:usuarioservice,useValue:{isAdmin:()=>true}}]});
+    const resultado=TestBed.runInInjectionContext(()=>adminGuard({} as ActivatedRouteSnapshot,{url:'/admin'} as RouterStateSnapshot));
     expect(resultado).toBe(true);
   });
 });

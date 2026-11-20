@@ -90,10 +90,7 @@ export class Crearpartidacomponent implements OnInit, OnDestroy {
           next: (p) => {
             this.ocupado = false;
             this.cdr.markForCheck();
-            this.router.navigate(['/partidas', p.id, 'configurar']).catch(() => {
-              this.error = 'No se pudo abrir la pantalla solicitada.';
-              this.cdr.markForCheck();
-            });
+            this.router.navigate(['/partidas', p.id, 'configurar']).catch(() => { this.error = 'No se pudo abrir la pantalla solicitada.'; this.cdr.markForCheck(); });
           },
           error: (e) => {
             this.ocupado = false;

@@ -1,15 +1,10 @@
-
 import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, Subscription } from 'rxjs';
 import { usuarioservice } from '../../services/usuarioservice';
 
-/**
- * Gestiona la verificación de códigos OTP en AURA WARS.
- * Permite activar cuentas, completar el inicio de sesión
- * y solicitar un nuevo código de seguridad.
- */
+/** Valida códigos OTP del registro y del inicio de sesión. */
 @Component({
   selector: 'app-verificarcomponent',
   standalone: false,
@@ -17,12 +12,10 @@ import { usuarioservice } from '../../services/usuarioservice';
   styleUrl: './verificarcomponent.css'
 })
 export class Verificarcomponent implements OnDestroy {
-
   mensaje = '';
   error = '';
   procesando = false;
   verificado = false;
-
   private subs = new Subscription();
 
   constructor(
@@ -31,41 +24,19 @@ export class Verificarcomponent implements OnDestroy {
     private cdr: ChangeDetectorRef
   ) {}
 
-  /**
-   * Obtiene el tipo de verificación pendiente.
-   *
-   * @returns Tipo de desafío o null si no existe.
-   */
   get tipo(): 'correo' | 'login' | null {
     return this.auth.getDesafio()?.tipo ?? null;
   }
 
-  /**
-   * Obtiene el correo asociado al desafío.
-   *
-   * @returns Correo electrónico o una cadena vacía.
-   */
   get correo(): string {
     return this.auth.getDesafio()?.correo ?? '';
   }
 
-  /**
-   * Valida un código OTP de seis dígitos.
-   * Si corresponde al registro, activa la cuenta.
-   * Si corresponde al login, completa la autenticación
-   * y redirige al usuario según su rol.
-   *
-   * @param codigo Código recibido por correo electrónico.
-   */
+  /** Comprueba el código de seis dígitos recibido por correo. */
   verificar(codigo: string): void {
-
-    if (this.procesando) {
-      return;
-    }
-
+    if (this.procesando) return;
     this.mensaje = '';
     this.error = '';
-
     const limpio = codigo.trim();
 
     if (!/^\d{6}$/.test(limpio)) {
@@ -74,10 +45,11 @@ export class Verificarcomponent implements OnDestroy {
       return;
     }
 
+    // Guardamos el tipo ANTES de suscribirnos. El servicio elimina el
+    // desafío al terminar un login correcto.
     const tipoPendiente = this.tipo;
-
     if (!tipoPendiente) {
-      this.error = 'No hay una verificación pendiente. Vuelve al inicio.';
+      this.error = 'No hay verificación pendiente. Vuelve al inicio.';
       this.cdr.markForCheck();
       return;
     }
@@ -85,128 +57,58 @@ export class Verificarcomponent implements OnDestroy {
     this.procesando = true;
     this.cdr.markForCheck();
 
-    const peticion: Observable<unknown> =
-      tipoPendiente === 'login'
-        ? this.auth.verificarLogin(limpio)
-        : this.auth.verificarCorreo(limpio);
+    // Unificamos el tipo del observable para evitar TS2349. El usuario
+    // introduce solamente el código; challengeId lo agrega usuarioservice.
+    const peticion: Observable<unknown> = tipoPendiente === 'login'
+      ? this.auth.verificarLogin(limpio)
+      : this.auth.verificarCorreo(limpio);
 
-    this.subs.add(
-      peticion.subscribe({
-
-        next: () => {
-
-          this.procesando = false;
-
-          if (tipoPendiente === 'correo') {
-
-            this.verificado = true;
-            this.auth.limpiarDesafio();
-
-          } else {
-
-            const destino = this.auth.isAdmin()
-              ? '/admin'
-              : '/panel';
-
-            this.router.navigate([destino]).then(
-              (navegado) => {
-
-                if (!navegado) {
-                  this.error = 'No se pudo abrir la pantalla solicitada.';
-                  this.cdr.markForCheck();
-                }
-
-              }
-            ).catch(() => {
-
-              this.error = 'Ocurrió un error al abrir la pantalla solicitada.';
-              this.cdr.markForCheck();
-
-            });
-          }
-
-          this.cdr.markForCheck();
-        },
-
-        error: (error: HttpErrorResponse) => {
-
-          this.procesando = false;
-
-          switch (error.status) {
-
-            case 0:
-              this.error = 'No hay conexión con el servidor.';
-              break;
-
-            case 400:
-              this.error = 'El código ingresado no es válido.';
-              break;
-
-            case 401:
-              this.error = 'El código es incorrecto o ha vencido.';
-              break;
-
-            case 429:
-              this.error = 'Demasiados intentos. Espera antes de reintentar.';
-              break;
-
-            default:
-              this.error = 'No se pudo verificar el código.';
-          }
-
-          this.cdr.markForCheck();
+    this.subs.add(peticion.subscribe({
+      next: () => {
+        this.procesando = false;
+        if (tipoPendiente === 'correo') {
+          this.verificado = true;
+          this.auth.limpiarDesafio();
+        } else {
+          this.router.navigate(['/panel']).catch(() => { this.error = 'No se pudo abrir la pantalla solicitada.'; this.cdr.markForCheck(); });
         }
-
-      })
-    );
+        this.cdr.markForCheck();
+      },
+      error: (e: HttpErrorResponse) => {
+        this.procesando = false;
+        this.error = e.status === 429
+          ? 'Demasiados intentos. Espera antes de reintentar.'
+          : e.status === 0
+          ? 'No hay conexión con el servidor.'
+          : 'Código incorrecto o vencido.';
+        this.cdr.markForCheck();
+      }
+    }));
   }
 
-  /**
-   * Solicita el reenvío del código OTP asociado
-   * al desafío de autenticación pendiente.
-   */
+  /** Solicita un nuevo código de verificación. */
   reenviar(): void {
-
-    if (this.procesando || !this.tipo) {
-      return;
-    }
-
+    if (this.procesando || !this.tipo) return;
     this.procesando = true;
     this.error = '';
     this.mensaje = '';
-
     this.cdr.markForCheck();
 
-    this.subs.add(
-      this.auth.reenviarCodigo().subscribe({
-
-        next: () => {
-
-          this.procesando = false;
-          this.mensaje = 'Enviamos un nuevo código a tu correo.';
-
-          this.cdr.markForCheck();
-        },
-
-        error: (error: HttpErrorResponse) => {
-
-          this.procesando = false;
-
-          this.error = error.status === 429
-            ? 'Debes esperar antes de solicitar otro código.'
-            : 'No se pudo reenviar el código. Intenta nuevamente.';
-
-          this.cdr.markForCheck();
-        }
-
-      })
-    );
+    this.subs.add(this.auth.reenviarCodigo().subscribe({
+      next: () => {
+        this.procesando = false;
+        this.mensaje = 'Enviamos un nuevo código a tu correo.';
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.procesando = false;
+        this.error = 'No se pudo reenviar el código. Espera antes de reintentar.';
+        this.cdr.markForCheck();
+      }
+    }));
   }
 
-  /**
-   * Cancela las suscripciones activas cuando Angular
-   * destruye el componente.
-   */
+  /** Libera los recursos y suscripciones del componente. */
   ngOnDestroy(): void {
     this.subs.unsubscribe();
   }
