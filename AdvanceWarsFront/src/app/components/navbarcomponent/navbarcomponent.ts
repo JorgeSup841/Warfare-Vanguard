@@ -26,6 +26,7 @@ export class Navbarcomponent implements OnInit {
   /** Cierra la sesión y regresa al inicio. */
   salir(): void {
     this.auth.logout();
+    this.cdr.markForCheck();
     this.router.navigate(['/']);
   }
 }
