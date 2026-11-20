@@ -126,22 +126,40 @@ public class PropertyGenerationService {
                             int quantity, GameMap map) {
         int added = 0;
 
-        for (Tile tile : candidates) {
-            if (added == quantity) {
-                break;
+        // Primero intentamos repartir los edificios. En mapas pequenos
+        // permitimos colocarlos mas cerca para no quedarnos sin espacio.
+        for (int pass = 0; pass < 2 && added < quantity; pass++) {
+            for (Tile tile : candidates) {
+                if (added == quantity) {
+                    break;
+                }
+                if (!canBuild(tile, occupied, map.getWidth(), map.getHeight())) {
+                    continue;
+                }
+                if (definition.getType() == PropertyType.PORT && !isCoastal(tile, map)) {
+                    continue;
+                }
+                if (pass == 0 && isCloseToBuilding(tile, properties)) {
+                    continue;
+                }
+                addProperty(properties, occupied, definition, tile);
+                added++;
             }
-
-            if (!canBuild(tile, occupied, map.getWidth(), map.getHeight())) {
-                continue;
-            }
-
-            if (definition.getType() == PropertyType.PORT && !isCoastal(tile, map)) {
-                continue;
-            }
-
-            addProperty(properties, occupied, definition, tile);
-            added++;
         }
+    }
+
+    // Evita que ciudades y edificios neutrales aparezcan amontonados.
+    private boolean isCloseToBuilding(Tile candidate, List<Property> properties) {
+        int x = candidate.getPosition().getX();
+        int y = candidate.getPosition().getY();
+        for (Property property : properties) {
+            int otherX = property.getTile().getPosition().getX();
+            int otherY = property.getTile().getPosition().getY();
+            if (Math.abs(x - otherX) + Math.abs(y - otherY) < 3) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // Coloca el edificio y deja su casilla como llanura.
