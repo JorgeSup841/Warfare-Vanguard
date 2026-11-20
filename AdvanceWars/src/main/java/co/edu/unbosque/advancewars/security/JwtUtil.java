@@ -1,20 +1,26 @@
 package co.edu.unbosque.advancewars.security;
 
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
+import java.security.MessageDigest;
+import java.time.Instant;
+import java.util.Date;
+import java.util.HexFormat;
+import java.util.UUID;
+
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import co.edu.unbosque.advancewars.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
-import java.time.Instant;
-import java.util.Date;
-import javax.crypto.Mac;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 /**
  * Genera, interpreta y valida JWT firmados para usuarios de AdvanceWars.
@@ -53,6 +59,7 @@ public class JwtUtil {
     public String generateToken(User user) {
         Instant now = Instant.now();
         return Jwts.builder()
+                .setId(UUID.randomUUID().toString())
                 .setSubject(user.getUsername())
                 .claim("uid", user.getId())
                 .claim("role", user.getRole().name())
@@ -159,7 +166,7 @@ public class JwtUtil {
             mac.init(new SecretKeySpec(fingerprintKey, "HmacSHA256"));
             byte[] bytes = mac.doFinal((user.getId() + ":" + user.getPassword())
                     .getBytes(StandardCharsets.UTF_8));
-            return java.util.HexFormat.of().formatHex(bytes);
+            return HexFormat.of().formatHex(bytes);
         } catch (GeneralSecurityException exception) {
             throw new IllegalStateException("No se puede calcular la versión de credenciales", exception);
         }
@@ -173,7 +180,7 @@ public class JwtUtil {
      * @return verdadero si las huellas son iguales
      */
     private boolean constantTimeEquals(String left, String right) {
-        return java.security.MessageDigest.isEqual(left.getBytes(StandardCharsets.UTF_8),
+        return MessageDigest.isEqual(left.getBytes(StandardCharsets.UTF_8),
                 right.getBytes(StandardCharsets.UTF_8));
     }
 }

@@ -7,6 +7,8 @@ import co.edu.unbosque.advancewars.exception.ResourceNotFoundException;
 import co.edu.unbosque.advancewars.model.User;
 import co.edu.unbosque.advancewars.repository.UserRepository;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Optional;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
     private final UserRepository repository;
     private final ModelMapper modelMapper;
+    private final UserSessionService sessions;
 
     /**
      * Inicializa la persistencia y conversión entre entidades y DTO.
@@ -26,9 +29,11 @@ public class UserService {
      * @param repository repositorio de cuentas
      * @param modelMapper conversor de usuarios a DTO de respuesta
      */
-    public UserService(UserRepository repository, ModelMapper modelMapper) {
+    public UserService(UserRepository repository, ModelMapper modelMapper,
+            UserSessionService sessions) {
         this.repository = repository;
         this.modelMapper = modelMapper;
+        this.sessions = sessions;
     }
 
     /**
@@ -39,9 +44,11 @@ public class UserService {
      */
     @Transactional(readOnly = true)
     public UserResponseDTO me(String username) {
-        User user = repository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("Cuenta no encontrada"));
-        return toDto(user);
+        Optional<User> found = repository.findByUsername(username);
+        if (found.isEmpty()) {
+            throw new ResourceNotFoundException("Cuenta no encontrada");
+        }
+        return toDto(found.get());
     }
 
     /**
@@ -51,7 +58,11 @@ public class UserService {
      */
     @Transactional(readOnly = true)
     public List<UserResponseDTO> list() {
-        return repository.findAll().stream().map(this::toDto).toList();
+        List<UserResponseDTO> result = new ArrayList<>();
+        for (User user : repository.findAll()) {
+            result.add(toDto(user));
+        }
+        return result;
     }
 
     /**
@@ -79,7 +90,13 @@ public class UserService {
         if (user.getUsername().equals(actingUsername)) {
             throw new BadRequestException("No puedes cambiar tu propio rol");
         }
-        user.setRole(role);
+        if (role == null) {
+            throw new BadRequestException("Rol obligatorio");
+        }
+        if (user.getRole() != role) {
+            user.setRole(role);
+            sessions.revokeAllForUser(user.getId());
+        }
         return toDto(user);
     }
 
@@ -101,6 +118,9 @@ public class UserService {
             throw new BadRequestException("Primero se debe verificar el correo");
         }
         user.setEnabled(enabled);
+        if (!enabled) {
+            sessions.revokeAllForUser(user.getId());
+        }
         return toDto(user);
     }
 
@@ -121,7 +141,10 @@ public class UserService {
      * @return entidad recuperada
      */
     private User load(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Cuenta no encontrada"));
+        Optional<User> found = repository.findById(id);
+        if (found.isEmpty()) {
+            throw new ResourceNotFoundException("Cuenta no encontrada");
+        }
+        return found.get();
     }
 }

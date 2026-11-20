@@ -1,11 +1,14 @@
 package co.edu.unbosque.advancewars.repository;
 
 import co.edu.unbosque.advancewars.model.User;
+import co.edu.unbosque.advancewars.enums.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 /** Proporciona consultas de persistencia para cuentas de usuario. */
 public interface UserRepository extends JpaRepository<User, Long> {
+
+    boolean existsByRole(Role role);
 
     /** Busca un usuario mediante su nombre de usuario. */
     Optional<User> findByUsername(String username);

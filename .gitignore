@@ -30,3 +30,5 @@ yarn-error.log*
 AdvanceWars/src/main/resources/application.properties
 
 AdvanceWars.zip
+
+AdvanceWarsFront/angular.json

@@ -25,6 +25,13 @@ import co.edu.unbosque.advancewars.repository.PropertyDefinitionRepository;
 @Service
 public class PropertyGenerationService {
 
+    private static final long PROPERTY_SEED_VARIATION = 987654321L;
+    private static final int MINIMUM_BUILDING_DISTANCE = 3;
+    private static final int MINIMUM_LARGE_MAP_AREA = 100;
+    private static final int PORT_AREA_PER_BUILDING = 250;
+    private static final int AIRPORT_AREA_PER_BUILDING = 160;
+    private static final int CITY_AREA_PER_BUILDING = 40;
+
     private final PropertyDefinitionRepository definitionRepository;
 
     public PropertyGenerationService(PropertyDefinitionRepository definitionRepository) {
@@ -33,6 +40,12 @@ public class PropertyGenerationService {
 
     // Genera edificios para una partida que ya tiene jugadores y mapa.
     public List<Property> generateProperties(GameState game) {
+        if (game == null || game.getGameMap() == null) {
+            throw new IllegalArgumentException("La partida debe tener un mapa");
+        }
+        if (game.getPlayers().size() < 2 || game.getPlayers().size() > 4) {
+            throw new IllegalArgumentException("La partida debe tener entre 2 y 4 jugadores");
+        }
         GameMap map = game.getGameMap();
         int width = map.getWidth();
         int height = map.getHeight();
@@ -48,17 +61,17 @@ public class PropertyGenerationService {
         Set<Position> occupied = new HashSet<>();
 
         // Orden: jugador 1 arriba izquierda, jugador 2 abajo derecha.
-        int[][] bases = {
-            {1, 1},
-            {width - 2, height - 2},
-            {width - 2, 1},
-            {1, height - 2}
+        Position[] bases = {
+            new Position(1, 1),
+            new Position(width - 2, height - 2),
+            new Position(width - 2, 1),
+            new Position(1, height - 2)
         };
 
         // Una base propia para cada jugador.
         for (int i = 0; i < game.getPlayers().size(); i++) {
             Player player = game.getPlayers().get(i);
-            Tile tile = map.findTileAt(bases[i][0], bases[i][1]).orElseThrow();
+            Tile tile = map.findTileAt(bases[i].getX(), bases[i].getY()).orElseThrow();
             tile.setTerrainType(TerrainType.PLAIN);
             properties.add(new Property(headquarters, tile, player));
             occupied.add(tile.getPosition());
@@ -66,7 +79,7 @@ public class PropertyGenerationService {
 
         // Mezclamos casillas para variar las propiedades con la semilla.
         List<Tile> candidates = new ArrayList<>(map.getTiles());
-        Collections.shuffle(candidates, new Random(game.getSeed() ^ 987654321L));
+        Collections.shuffle(candidates, new Random(game.getSeed() ^ PROPERTY_SEED_VARIATION));
 
         // Cada jugador tiene una fabrica neutral cerca de su base.
         for (int i = 0; i < game.getPlayers().size(); i++) {
@@ -80,26 +93,26 @@ public class PropertyGenerationService {
         int area = width * height;
 
         // Los puertos necesitan agua en una casilla vecina.
-        if (area >= 100) {
+        if (area >= MINIMUM_LARGE_MAP_AREA) {
             addNeutral(properties, occupied, candidates, port,
-                    Math.max(1, area / 250), map);
+                    Math.max(1, area / PORT_AREA_PER_BUILDING), map);
         }
 
         // Los aeropuertos se generan en mapas medianos y grandes.
-        if (area >= 100) {
+        if (area >= MINIMUM_LARGE_MAP_AREA) {
             addNeutral(properties, occupied, candidates, airport,
-                    Math.max(1, area / 160), map);
+                    Math.max(1, area / AIRPORT_AREA_PER_BUILDING), map);
         }
 
         // Distribuimos ciudades neutrales por todo el mapa.
         addNeutral(properties, occupied, candidates, city,
-                Math.max(1, area / 40), map);
+                Math.max(1, area / CITY_AREA_PER_BUILDING), map);
 
         return properties;
     }
 
     // Encuentra una casilla disponible lo mas cerca posible de la base.
-    private Tile findNearest(List<Tile> candidates, int[] base,
+    private Tile findNearest(List<Tile> candidates, Position base,
                              Set<Position> occupied, int width, int height) {
         Tile nearest = null;
         int minDistance = Integer.MAX_VALUE;
@@ -109,8 +122,8 @@ public class PropertyGenerationService {
                 continue;
             }
 
-            int distance = Math.abs(tile.getPosition().getX() - base[0])
-                    + Math.abs(tile.getPosition().getY() - base[1]);
+            int distance = Math.abs(tile.getPosition().getX() - base.getX())
+                    + Math.abs(tile.getPosition().getY() - base.getY());
 
             if (distance < minDistance) {
                 nearest = tile;
@@ -155,7 +168,7 @@ public class PropertyGenerationService {
         for (Property property : properties) {
             int otherX = property.getTile().getPosition().getX();
             int otherY = property.getTile().getPosition().getY();
-            if (Math.abs(x - otherX) + Math.abs(y - otherY) < 3) {
+            if (Math.abs(x - otherX) + Math.abs(y - otherY) < MINIMUM_BUILDING_DISTANCE) {
                 return true;
             }
         }
