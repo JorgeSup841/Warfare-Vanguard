@@ -101,17 +101,41 @@
           {{ mensaje }}
         </p>
 
-        <p *ngIf="partida">
-          ESTADO: {{ partida.status }}
-          · RONDA: {{ partida.currentRound }}
-          · TURNO: {{ partida.currentPlayerOrder }}
-        </p>
+        <!-- HUD -->
+        <div class="hud" *ngIf="partida">
+          <div class="hud__turno">
+            RONDA {{ partida.currentRound }} · TURNO DE {{ jugadorEnTurno }}
+          </div>
+
+          <div class="hud__jugadores">
+            <div
+              *ngFor="let j of partida.players"
+              class="hud__jugador"
+              [class.hud__jugador--activo]="j.turnOrder === partida.currentPlayerOrder"
+              [class.hud__jugador--fuera]="j.status === 'ELIMINATED'">
+              <strong>J{{ j.turnOrder }} {{ j.name }}</strong>
+              <span>$ {{ j.money }}</span>
+              <span *ngIf="j.status === 'WINNER'">GANADOR</span>
+              <span *ngIf="j.status === 'ELIMINATED'">ELIMINADO</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="btn"
+            (click)="terminarTurno()"
+            [disabled]="terminando || partida.status !== 'IN_PROGRESS'">
+            {{ terminando ? 'TERMINANDO...' : 'TERMINAR TURNO' }}
+          </button>
+        </div>
+        <!-- /HUD -->
 
         <div class="game-layout">
 
           <div class="map-col">
 
             <div class="marco juego__marco">
+              <div class="aviso-turno" *ngIf="avisoTurno">{{ avisoTurno }}</div>
               <div
                 id="contenedor-juego"
                 class="lienzo juego__lienzo"
@@ -271,12 +295,6 @@
         <p>
           El servidor Spring Boot administra los datos
           de la partida, el mapa y las unidades.
-        </p>
-
-        <p>
-          Las acciones de movimiento, combate, captura,
-          producción y finalización de turnos se habilitarán
-          cuando sus endpoints estén implementados.
         </p>
 
         <a

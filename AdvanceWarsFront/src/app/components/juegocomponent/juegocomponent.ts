@@ -1,5 +1,5 @@
-import { Component, AfterViewInit, ChangeDetectorRef, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, AfterViewInit, ChangeDetectorRef, OnDestroy, OnInit, inject } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import Phaser from 'phaser';
 import { forkJoin, Subscription } from 'rxjs';
 import { juegoservice } from '../../services/juegoservice';
@@ -41,6 +41,9 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     { codigo: 'SHIP', nombre: 'Barco' },
   ];
   seleccion: { x: number; y: number; terreno?: terreno } | null = null;
+  private router = inject(Router);
+  avisoTurno = '';
+  terminando = false;
   constructor(
     private ruta: ActivatedRoute,
     private catalogos: juegoservice,
@@ -349,6 +352,52 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
         },
       }),
     );
+  }
+
+  /** Nombre del jugador que tiene el turno ahora. */
+  get jugadorEnTurno(): string {
+    if (!this.partida) return '';
+    const actual = this.partida.players.find((j) => j.turnOrder === this.partida?.currentPlayerOrder);
+    return actual ? actual.name : '';
+  }
+
+  /** Le pide al back terminar el turno actual. */
+  terminarTurno(): void {
+    if (!this.partida) return;
+    this.terminando = true;
+    this.error = '';
+    const turno = {
+      currentRound: this.partida.currentRound,
+      currentPlayerOrder: this.partida.currentPlayerOrder,
+    };
+    this.api.finTurno(this.id, turno).subscribe({
+      next: (p) => {
+        this.partida = p;
+        this.terminando = false;
+        if (p.status === 'FINISHED') {
+          this.router.navigate(['/partidas', this.id, 'resultados']);
+          return;
+        }
+        this.mostrarAviso();
+        this.cargarDatos();
+        this.cdr.detectChanges();
+      },
+      error: (e) => {
+        this.terminando = false;
+        this.error = e.error?.message || 'No se pudo terminar el turno';
+        this.cargarDatos();
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  /** Muestra "Turno de X" encima del tablero durante 2 segundos. */
+  private mostrarAviso(): void {
+    this.avisoTurno = `TURNO DE ${this.jugadorEnTurno}`;
+    setTimeout(() => {
+      this.avisoTurno = '';
+      this.cdr.detectChanges();
+    }, 2000);
   }
 
   /** Libera los recursos y suscripciones del componente. */
