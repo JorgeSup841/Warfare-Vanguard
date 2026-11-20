@@ -537,7 +537,9 @@ td {
 .hud__ganancia {
   color: #7ee081;
   font-weight: bold;
-= = = = = = = /*
+}
+
+/*
  * ================================================
  * TAREA 3.9: FICHA DE UNIDAD SELECCIONADA
  * ================================================
@@ -548,7 +550,7 @@ td {
 
   /* TARJETA PRINCIPAL DE LA UNIDAD */
 
-. unidad-ficha {
+.unidad-ficha {
   position: relative;
   overflow: hidden;
   background: #fff7dc;
@@ -695,4 +697,26 @@ td {
     }
 
   }
+
+/* El indicador explica el color de las casillas calculadas en el backend. */
+.alcance-leyenda {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  margin: 9px 0;
+  border: 1px solid rgba(90, 243, 147, .65);
+  background: rgba(19, 75, 49, .68);
+  color: #e6ffef;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.alcance-leyenda__muestra {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  border: 2px solid #52ffae;
+  border-radius: 4px;
+  background: rgba(66, 255, 146, .31);
 }

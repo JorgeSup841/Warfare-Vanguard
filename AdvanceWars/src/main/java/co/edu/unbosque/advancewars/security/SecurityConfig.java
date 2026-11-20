@@ -145,9 +145,7 @@ public class SecurityConfig {
 					auth.requestMatchers("/api/admin/**").hasRole("ADMIN");
 					auth.requestMatchers("/api/users/**").hasRole("ADMIN");
 					
-					auth.requestMatchers("/api/games/**").permitAll();
-
-					auth.requestMatchers("/api/auth/me", "/api/users/me", "/api/games/**").authenticated();
+					auth.requestMatchers("/api/auth/me", "/api/users/me", "/api/games", "/api/games/**").authenticated();
 
 					auth.anyRequest().authenticated();
 				});

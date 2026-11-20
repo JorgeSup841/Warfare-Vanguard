@@ -1,6 +1,8 @@
 package co.edu.unbosque.advancewars.controller;
 
 import java.util.List;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,10 +20,10 @@ import co.edu.unbosque.advancewars.dto.EndTurnRequestDTO;
 import co.edu.unbosque.advancewars.dto.GameDTO;
 import co.edu.unbosque.advancewars.dto.MapDTO;
 import co.edu.unbosque.advancewars.dto.MoveUnitRequestDTO;
+import co.edu.unbosque.advancewars.dto.ReachableTileDTO;
 import co.edu.unbosque.advancewars.dto.ProduceUnitRequestDTO;
 import co.edu.unbosque.advancewars.dto.UnitDTO;
 import co.edu.unbosque.advancewars.model.User;
-import co.edu.unbosque.advancewars.repository.UserRepository; // Ajusta el nombre si tu repositorio se llama distinto
 import co.edu.unbosque.advancewars.service.GameService;
 import co.edu.unbosque.advancewars.service.UnitCombatService;
 import co.edu.unbosque.advancewars.service.UnitCaptureService;
@@ -38,9 +40,8 @@ public class GameController {
 	private final UnitCombatService unitCombatService;
 	private final UnitCaptureService unitCaptureService;
 	private final UnitProductionService unitProductionService;
-	private final UserRepository userRepository; // Temporal para pruebas
-
-	public GameController(GameService gameService, UserRepository userRepository,
+	
+	public GameController(GameService gameService,
 			UnitMovementService unitMovementService, UnitCombatService unitCombatService,
 			UnitCaptureService unitCaptureService, UnitProductionService unitProductionService) {
 		this.gameService = gameService;
@@ -48,7 +49,6 @@ public class GameController {
 		this.unitCombatService = unitCombatService;
 		this.unitCaptureService = unitCaptureService;
 		this.unitProductionService = unitProductionService;
-		this.userRepository = userRepository;
 	}
 
 	/** Crea una partida para el usuario que inicio sesion. */
@@ -65,72 +65,75 @@ public class GameController {
 
 	/** Devuelve el mapa con sus casillas y propiedades. */
 	@GetMapping("/{id}/map")
-	public MapDTO getMyMap(@PathVariable Long id, @AuthenticationPrincipal User creator) {
+	public MapDTO getMyMap(@PathVariable("id") Long id, @AuthenticationPrincipal User creator) {
 		return gameService.getMyMap(id, resolveUser(creator));
 	}
 
 	/** Consulta una partida especifica del usuario autenticado. */
 	@GetMapping("/{id}")
-	public GameDTO getMyGame(@PathVariable Long id, @AuthenticationPrincipal User creator) {
+	public GameDTO getMyGame(@PathVariable("id") Long id, @AuthenticationPrincipal User creator) {
 		return gameService.getMyGame(id, resolveUser(creator));
 	}
 
 	/** Comienza la partida y crea los soldados iniciales. */
 	@PostMapping("/{id}/start")
-	public GameDTO startGame(@PathVariable Long id, @AuthenticationPrincipal User creator) {
+	public GameDTO startGame(@PathVariable("id") Long id, @AuthenticationPrincipal User creator) {
 		return gameService.startGame(id, resolveUser(creator));
 	}
 
 	/** Cambia al siguiente jugador y, cuando corresponde, inicia otra ronda. */
 	@PostMapping("/{id}/end-turn")
-	public GameDTO endTurn(@PathVariable Long id, @RequestBody EndTurnRequestDTO expected,
+	public GameDTO endTurn(@PathVariable("id") Long id, @RequestBody EndTurnRequestDTO expected,
 			@AuthenticationPrincipal User creator) {
 		return gameService.endTurn(id, expected, resolveUser(creator));
 	}
 
 	/** Lista las unidades que hay sobre el tablero. */
 	@GetMapping("/{id}/units")
-	public List<UnitDTO> getMyUnits(@PathVariable Long id, @AuthenticationPrincipal User creator) {
+	public List<UnitDTO> getMyUnits(@PathVariable("id") Long id, @AuthenticationPrincipal User creator) {
 		return gameService.getMyUnits(id, resolveUser(creator));
+	}
+
+	/** Vista previa autorizada y de solo lectura de las casillas alcanzables. */
+	@GetMapping("/{id}/units/{unitId}/reachable")
+	public List<ReachableTileDTO> reachableTiles(@PathVariable("id") Long id,
+			@PathVariable("unitId") Long unitId, @AuthenticationPrincipal User creator) {
+		return unitMovementService.reachableTiles(id, unitId, resolveUser(creator));
 	}
 
 	/** Mueve una tropa una sola vez por turno a una casilla alcanzable. */
 	@PostMapping("/{id}/units/{unitId}/move")
-	public UnitDTO moveUnit(@PathVariable Long id, @PathVariable Long unitId, @RequestBody MoveUnitRequestDTO request,
+	public UnitDTO moveUnit(@PathVariable("id") Long id, @PathVariable("unitId") Long unitId, @RequestBody MoveUnitRequestDTO request,
 			@AuthenticationPrincipal User creator) {
 		return unitMovementService.move(id, unitId, request, resolveUser(creator));
 	}
 
 	/** Una infanteria ataca a otra infanteria enemiga adyacente. */
 	@PostMapping("/{id}/units/{unitId}/attack")
-	public AttackResultDTO attackUnit(@PathVariable Long id, @PathVariable Long unitId,
+	public AttackResultDTO attackUnit(@PathVariable("id") Long id, @PathVariable("unitId") Long unitId,
 			@RequestBody AttackUnitRequestDTO request, @AuthenticationPrincipal User creator) {
 		return unitCombatService.attack(id, unitId, request, resolveUser(creator));
 	}
 
 	/** Captura la propiedad donde se encuentra una infanteria. */
 	@PostMapping("/{id}/units/{unitId}/capture")
-	public CaptureResultDTO captureProperty(@PathVariable Long id, @PathVariable Long unitId,
+	public CaptureResultDTO captureProperty(@PathVariable("id") Long id, @PathVariable("unitId") Long unitId,
 			@RequestBody EndTurnRequestDTO request, @AuthenticationPrincipal User creator) {
 		return unitCaptureService.capture(id, unitId, request, resolveUser(creator));
 	}
 
 	/** Compra una unidad en una fabrica propia que este desocupada. */
 	@PostMapping("/{id}/units/produce")
-	public UnitDTO produceUnit(@PathVariable Long id, @RequestBody ProduceUnitRequestDTO request,
+	public UnitDTO produceUnit(@PathVariable("id") Long id, @RequestBody ProduceUnitRequestDTO request,
 			@AuthenticationPrincipal User creator) {
 		return unitProductionService.produce(id, request, resolveUser(creator));
 	}
 
-	/** Temporal: devuelve un usuario de la BD si la peticion no trae JWT. */
+	/** Nunca se suplantan usuarios cuando la autenticación falta. */
 	private User resolveUser(User creator) {
-		if (creator != null) {
-			return creator;
+		if (creator == null || creator.getId() == null) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Debes iniciar sesión");
 		}
-		List<User> users = userRepository.findAll();
-		if (users.isEmpty()) {
-			throw new IllegalStateException("Debe existir al menos un usuario en la tabla useraccount");
-		}
-		return users.get(0);
+		return creator;
 	}
 }

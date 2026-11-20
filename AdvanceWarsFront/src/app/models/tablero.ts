@@ -23,6 +23,7 @@ export interface jugadorservidor {
   turnOrder: number;
   money: number;
   status: string;
+  factionCode?: string | null;
 }
 
 /**
@@ -52,6 +53,9 @@ export interface casillatablero {
   terrain: string;
   propertyType: string | null;
   ownerOrder: number | null;
+  propertyId?: number | null;
+  captureProgress?: number;
+  capturingPlayerOrder?: number | null;
 }
 
 /**
@@ -102,4 +106,26 @@ export interface eventojuego {
 export interface turnoactual {
   currentRound: number;
   currentPlayerOrder: number;
+}
+
+/** Respuesta real de CaptureResultDTO. */
+export interface resultadoCaptura {
+  unitId: number;
+  propertyId: number;
+  propertyType: string;
+  x: number;
+  y: number;
+  captureProgress: number;
+  requiredProgress: number;
+  ownerOrder: number | null;
+  capturingPlayerOrder: number | null;
+  captured: boolean;
+}
+
+
+/** Posición disponible y costo de movimiento calculados por Spring Boot. */
+export interface casillaalcanzable {
+  x: number;
+  y: number;
+  cost: number;
 }

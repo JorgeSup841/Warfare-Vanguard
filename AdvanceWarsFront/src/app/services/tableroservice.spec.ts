@@ -101,4 +101,13 @@ describe('tableroservice', () => {
     );
   });
 
+  it('solicita las casillas de movimiento con GET y no mueve la unidad', () => {
+    service.movimientosDisponibles(42, 7).subscribe(casillas => {
+      expect(casillas).toEqual([{ x: 3, y: 4, cost: 2 }]);
+    });
+    const peticion = http.expectOne(`${API_BASE_URL}/games/42/units/7/reachable`);
+    expect(peticion.request.method).toBe('GET');
+    peticion.flush([{ x: 3, y: 4, cost: 2 }]);
+  });
+
 });

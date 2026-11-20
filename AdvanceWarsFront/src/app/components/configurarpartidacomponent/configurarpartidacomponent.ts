@@ -42,8 +42,35 @@ export class Configurarpartidacomponent implements OnInit {
     });
   }
 
+  /** Muestra la confirmación antes de iniciar una partida válida. */
+  solicitarInicio(): void {
+    if (this.iniciando || this.partida?.status !== 'SETUP') {
+      return;
+    }
+    this.confirmar = true;
+    this.mensaje = '';
+  }
+
+  /** Confirma el inicio y delega la transición al servidor. */
+  confirmarInicio(): void {
+    if (!this.confirmar) {
+      return;
+    }
+    this.iniciar();
+  }
+
+  /** Cierra la confirmación sin realizar solicitudes HTTP. */
+  cancelarInicio(): void {
+    if (!this.iniciando) {
+      this.confirmar = false;
+    }
+  }
+
   /** Pide al back iniciar la partida y abre el tablero. */
   iniciar(): void {
+    if (this.iniciando || this.partida?.status !== 'SETUP' || !this.confirmar) {
+      return;
+    }
     this.iniciando = true;
     this.confirmar = false;
     this.mensaje = '';
