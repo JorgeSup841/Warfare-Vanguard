@@ -18,6 +18,7 @@ import co.edu.unbosque.advancewars.dto.EndTurnRequestDTO;
 import co.edu.unbosque.advancewars.dto.GameDTO;
 import co.edu.unbosque.advancewars.dto.MapDTO;
 import co.edu.unbosque.advancewars.dto.MoveUnitRequestDTO;
+import co.edu.unbosque.advancewars.dto.ProduceUnitRequestDTO;
 import co.edu.unbosque.advancewars.dto.UnitDTO;
 import co.edu.unbosque.advancewars.model.User;
 import co.edu.unbosque.advancewars.repository.UserRepository; // Ajusta el nombre si tu repositorio se llama distinto
@@ -25,6 +26,7 @@ import co.edu.unbosque.advancewars.service.GameService;
 import co.edu.unbosque.advancewars.service.UnitCombatService;
 import co.edu.unbosque.advancewars.service.UnitCaptureService;
 import co.edu.unbosque.advancewars.service.UnitMovementService;
+import co.edu.unbosque.advancewars.service.UnitProductionService;
 
 /** Rutas REST para crear partidas y consultar las propias. */
 @RestController
@@ -35,15 +37,17 @@ public class GameController {
 	private final UnitMovementService unitMovementService;
 	private final UnitCombatService unitCombatService;
 	private final UnitCaptureService unitCaptureService;
+	private final UnitProductionService unitProductionService;
 	private final UserRepository userRepository; // Temporal para pruebas
 
 	public GameController(GameService gameService, UserRepository userRepository,
 			UnitMovementService unitMovementService, UnitCombatService unitCombatService,
-			UnitCaptureService unitCaptureService) {
+			UnitCaptureService unitCaptureService, UnitProductionService unitProductionService) {
 		this.gameService = gameService;
 		this.unitMovementService = unitMovementService;
 		this.unitCombatService = unitCombatService;
 		this.unitCaptureService = unitCaptureService;
+		this.unitProductionService = unitProductionService;
 		this.userRepository = userRepository;
 	}
 
@@ -111,12 +115,22 @@ public class GameController {
 		return unitCaptureService.capture(id, unitId, request, resolveUser(creator));
 	}
 
+	/** Compra una unidad en una fabrica propia que este desocupada. */
+	@PostMapping("/{id}/units/produce")
+	public UnitDTO produceUnit(@PathVariable Long id, @RequestBody ProduceUnitRequestDTO request,
+			@AuthenticationPrincipal User creator) {
+		return unitProductionService.produce(id, request, resolveUser(creator));
+	}
+
 	/** Temporal: devuelve un usuario de la BD si la peticion no trae JWT. */
 	private User resolveUser(User creator) {
 		if (creator != null) {
 			return creator;
 		}
-		return userRepository.findAll().stream().findFirst().orElseThrow(
-				() -> new IllegalStateException("Debe existir al menos un usuario en la tabla useraccount"));
+		List<User> users = userRepository.findAll();
+		if (users.isEmpty()) {
+			throw new IllegalStateException("Debe existir al menos un usuario en la tabla useraccount");
+		}
+		return users.get(0);
 	}
 }
