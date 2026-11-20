@@ -14,8 +14,10 @@ import { Admincomponent } from './components/admincomponent/admincomponent';
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
 import { jugadorGuard } from './guards/jugador.guard';
+import { invitadoGuard } from './guards/invitado.guard';
+
 const routes: Routes = [
-  { path: '', component: Iniciosesioncomponent },
+  { path: '', component: Iniciosesioncomponent, canActivate: [invitadoGuard] },
   { path: 'register', component: Registercomponent },
   { path: 'verificar', component: Verificarcomponent },
   { path: 'recuperar', component: Recuperarcomponent },
