@@ -2,10 +2,12 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { Iniciosesioncomponent } from './components/iniciosesioncomponent/iniciosesioncomponent';
 import { Registercomponent } from './components/registercomponent/registercomponent';
+import { Juegocomponent } from './components/juegocomponent/juegocomponent';
 
 const routes: Routes = [
   { path: '', component: Iniciosesioncomponent },
-  { path: 'register', component: Registercomponent }
+  { path: 'register', component: Registercomponent },
+  {path : 'juego', component: Juegocomponent}
 ];
 
 @NgModule({
