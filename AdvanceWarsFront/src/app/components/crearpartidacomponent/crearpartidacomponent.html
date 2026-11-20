@@ -1,50 +1,89 @@
+
 <section class="screen">
   <div class="wrap narrow">
     <h1>NUEVA CAMPAÑA</h1>
 
     <div class="panel">
       <div class="panel-head azul">CONFIGURAR PARTIDA ■</div>
+
       <div class="panel-body">
         <form (ngSubmit)="crear()">
+
           <div class="field">
             <label for="cantidad">NÚMERO DE JUGADORES</label>
-            <select id="cantidad" name="cantidad" [(ngModel)]="cantidad" (ngModelChange)="cambiarCantidad()">
+            <select id="cantidad"
+                    name="cantidad"
+                    [(ngModel)]="cantidad"
+                    (ngModelChange)="cambiarCantidad()">
               <option [ngValue]="2">2</option>
               <option [ngValue]="3">3</option>
               <option [ngValue]="4">4</option>
             </select>
           </div>
 
-          <div class="field" *ngFor="let n of nombres; let i = index; trackBy: porIndice">
-            <label [for]="'nombre' + i">JUGADOR {{ i + 1 }}</label>
-            <input [id]="'nombre' + i" [name]="'nombre' + i" [(ngModel)]="nombres[i]">
+          <div class="field"
+               *ngFor="let n of nombres; let i = index; trackBy: porIndice">
+            <label [for]="'nombre' + i">
+              JUGADOR {{ i + 1 }}
+            </label>
+            <input [id]="'nombre' + i"
+                   [name]="'nombre' + i"
+                   [(ngModel)]="nombres[i]">
           </div>
 
           <div class="flex">
             <div class="field">
               <label for="ancho">ANCHO (5 a 50)</label>
-              <input id="ancho" type="number" name="ancho" [(ngModel)]="ancho" min="5" max="50">
+              <input id="ancho"
+                     type="number"
+                     name="ancho"
+                     [(ngModel)]="ancho"
+                     min="5"
+                     max="50">
             </div>
+
             <div class="field">
               <label for="alto">ALTO (5 a 50)</label>
-              <input id="alto" type="number" name="alto" [(ngModel)]="alto" min="5" max="50">
+              <input id="alto"
+                     type="number"
+                     name="alto"
+                     [(ngModel)]="alto"
+                     min="5"
+                     max="50">
             </div>
           </div>
 
           <div class="field">
             <label for="semilla">SEMILLA (opcional)</label>
             <div class="flex">
-              <input id="semilla" type="number" name="semilla" [(ngModel)]="semilla" placeholder="Vacío = al azar">
-              <button type="button" class="secondary" (click)="semillaAlAzar()">🎲 AL AZAR</button>
+              <input id="semilla"
+                     type="number"
+                     name="semilla"
+                     [(ngModel)]="semilla"
+                     placeholder="Vacío = al azar">
+
+              <button type="button"
+                      class="secondary"
+                      (click)="semillaAlAzar()">
+                🎲 AL AZAR
+              </button>
             </div>
           </div>
 
-          <p>Rellena los nombres y configura el tamaño del mapa.</p>
-          <p class="message error" *ngIf="mensaje" role="alert">{{ mensaje }}</p>
+          <p>
+            Rellena los nombres y configura el tamaño del mapa.
+          </p>
+
+          <p *ngIf="mensaje"
+             class="message error"
+             role="alert">
+            {{ mensaje }}
+          </p>
 
           <button type="submit" [disabled]="creando">
             {{ creando ? 'CREANDO...' : 'CREAR PARTIDA ▸' }}
           </button>
+
         </form>
 
         <a routerLink="/partidas">‹ MIS PARTIDAS</a>

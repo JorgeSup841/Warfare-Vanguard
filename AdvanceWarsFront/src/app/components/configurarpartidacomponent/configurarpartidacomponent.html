@@ -1,56 +1,106 @@
+
 <section class="screen">
   <div class="wrap">
     <h1>PREPARAR PARTIDA #{{ id }}</h1>
 
     <div class="panel">
       <div class="panel-head azul">DATOS DE LA PARTIDA</div>
+
       <div class="panel-body">
-        <p *ngIf="!partida && !mensaje">Cargando partida...</p>
+
+        <p *ngIf="!partida && !mensaje">
+          Cargando partida...
+        </p>
 
         <div *ngIf="partida">
+
           <p>
-            ESTADO: {{ partida.status }} · {{ partida.playerCount }} JUGADORES ·
-            {{ partida.width }} × {{ partida.height }} · SEMILLA: {{ partida.seed }}
+            ESTADO: {{ partida.status }} ·
+            {{ partida.playerCount }} JUGADORES ·
+            MAPA: {{ partida.width }} × {{ partida.height }} ·
+            SEMILLA: {{ partida.seed }}
           </p>
 
           <h2>JUGADORES</h2>
+
           <p *ngFor="let jugador of partida.players">
-            {{ jugador.turnOrder }}. {{ jugador.name }} — {{ jugador.money }} CRÉDITOS
-            ({{ jugador.status }})
+            {{ jugador.turnOrder }}.
+            {{ jugador.name }} —
+            {{ jugador.money }} CRÉDITOS
+            <ng-container *ngIf="jugador.status">
+              ({{ jugador.status }})
+            </ng-container>
           </p>
 
           <div class="field">
             <label>COMANDANTE Y FACCIÓN</label>
-            <button type="button" class="secondary" disabled>PRÓXIMAMENTE</button>
-          </div>
-
-          <p>Revisa tu escuadrón antes de entrar al campo de batalla.</p>
-
-          <div class="flex" *ngIf="partida.status === 'SETUP' && !confirmar">
-            <button type="button" (click)="confirmar = true" [disabled]="iniciando">
-              {{ iniciando ? 'INICIANDO...' : 'INICIAR PARTIDA ▸' }}
+            <button type="button" class="secondary" disabled>
+              PRÓXIMAMENTE
             </button>
           </div>
 
-          <div class="message" *ngIf="confirmar" role="group" aria-label="Confirmación de inicio">
-            <p>¿Iniciar la partida? Esta acción no se puede repetir.</p>
+          <p>
+            Revisa tu escuadrón y prepárate
+            para entrar al campo de batalla.
+          </p>
+
+          <div class="flex"
+               *ngIf="partida.status === 'SETUP' && !confirmar">
+
+            <button type="button"
+                    (click)="confirmar = true"
+                    [disabled]="iniciando">
+              {{ iniciando ? 'INICIANDO...' : 'INICIAR PARTIDA ▸' }}
+            </button>
+
+          </div>
+
+          <div class="message"
+               *ngIf="confirmar && partida.status === 'SETUP'"
+               role="group"
+               aria-label="Confirmación de inicio">
+
+            <p>
+              ¿Iniciar la partida?
+              Esta acción no se puede repetir.
+            </p>
+
             <div class="flex">
-              <button type="button" (click)="iniciar()" [disabled]="iniciando">
+
+              <button type="button"
+                      (click)="iniciar()"
+                      [disabled]="iniciando">
                 {{ iniciando ? 'INICIANDO...' : 'SÍ, INICIAR' }}
               </button>
-              <button type="button" class="secondary" (click)="confirmar = false" [disabled]="iniciando">
+
+              <button type="button"
+                      class="secondary"
+                      (click)="confirmar = false"
+                      [disabled]="iniciando">
                 CANCELAR
               </button>
+
             </div>
           </div>
 
-          <a *ngIf="partida.status !== 'SETUP'" class="btn" [routerLink]="['/partidas', id, 'jugar']">
+          <a *ngIf="partida.status !== 'SETUP'"
+             class="btn"
+             [routerLink]="['/partidas', id, 'jugar']">
             IR AL TABLERO ▸
           </a>
+
         </div>
 
-        <p class="message error" *ngIf="mensaje" role="alert">{{ mensaje }}</p>
-        <a routerLink="/partidas">‹ MIS PARTIDAS</a>
+        <p class="message error"
+           *ngIf="mensaje"
+           role="alert">
+          {{ mensaje }}
+        </p>
+
+        <a routerLink="/partidas">
+          ‹ MIS PARTIDAS
+        </a>
+
       </div>
     </div>
   </div>
