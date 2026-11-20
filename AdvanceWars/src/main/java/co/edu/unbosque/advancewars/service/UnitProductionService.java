@@ -10,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import co.edu.unbosque.advancewars.dto.ProduceUnitRequestDTO;
 import co.edu.unbosque.advancewars.dto.UnitDTO;
 import co.edu.unbosque.advancewars.enums.GameStatus;
+import co.edu.unbosque.advancewars.enums.GameLogType;
 import co.edu.unbosque.advancewars.enums.MovementType;
 import co.edu.unbosque.advancewars.enums.PropertyType;
 import co.edu.unbosque.advancewars.enums.UnitCategory;
@@ -33,13 +34,15 @@ public class UnitProductionService {
 	private final PropertyRepository propertyRepository;
 	private final UnitDefinitionRepository definitionRepository;
 	private final UnitRepository unitRepository;
+	private final GameEventService events;
 
 	public UnitProductionService(GameStateRepository gameRepository, PropertyRepository propertyRepository,
-			UnitDefinitionRepository definitionRepository, UnitRepository unitRepository) {
+			UnitDefinitionRepository definitionRepository, UnitRepository unitRepository, GameEventService events) {
 		this.gameRepository = gameRepository;
 		this.propertyRepository = propertyRepository;
 		this.definitionRepository = definitionRepository;
 		this.unitRepository = unitRepository;
+		this.events = events;
 	}
 
 	@Transactional
@@ -130,6 +133,9 @@ public class UnitProductionService {
 
 		current.subtractMoney(definition.getProductionCost());
 		Unit saved = unitRepository.save(unit);
+		events.record(game, current, GameLogType.UNIT_PRODUCED,
+				"Unidad " + definition.getUnitType() + " #" + saved.getId() + " producida en propiedad #"
+						+ factory.getId() + " por " + definition.getProductionCost());
 		return new UnitDTO(saved);
 	}
 }

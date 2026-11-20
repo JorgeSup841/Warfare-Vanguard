@@ -18,6 +18,7 @@ import co.edu.unbosque.advancewars.dto.GameDTO;
 import co.edu.unbosque.advancewars.dto.MapDTO;
 import co.edu.unbosque.advancewars.dto.UnitDTO;
 import co.edu.unbosque.advancewars.enums.GameStatus;
+import co.edu.unbosque.advancewars.enums.GameLogType;
 import co.edu.unbosque.advancewars.model.GameConfiguration;
 import co.edu.unbosque.advancewars.model.GameState;
 import co.edu.unbosque.advancewars.model.Player;
@@ -38,18 +39,20 @@ public class GameService {
 	private final PropertyRepository propertyRepository;
 	private final UnitGenerationService unitGenerationService;
 	private final UnitRepository unitRepository;
+	private final GameEventService events;
 
 	private static final int STARTING_MONEY = 5000;
 
 	public GameService(GameStateRepository gameRepository, MapGenerationService mapGenerationService,
 			PropertyGenerationService propertyGenerationService, PropertyRepository propertyRepository,
-			UnitGenerationService unitGenerationService, UnitRepository unitRepository) {
+			UnitGenerationService unitGenerationService, UnitRepository unitRepository, GameEventService events) {
 		this.gameRepository = gameRepository;
 		this.mapGenerationService = mapGenerationService;
 		this.propertyGenerationService = propertyGenerationService;
 		this.propertyRepository = propertyRepository;
 		this.unitGenerationService = unitGenerationService;
 		this.unitRepository = unitRepository;
+		this.events = events;
 	}
 
 	/** Crea una partida, su mapa y sus propiedades en una sola transaccion. */
@@ -84,7 +87,10 @@ public class GameService {
 		GameState saved = gameRepository.save(game);
 
 		// Luego guardamos los edificios en casillas ya persistidas.
-		propertyRepository.saveAll(propertyGenerationService.generateProperties(saved));
+		List<Property> properties = propertyGenerationService.generateProperties(saved);
+		mapGenerationService.connectPropertiesToRoads(saved.getGameMap(), properties);
+		propertyRepository.saveAll(properties);
+		events.record(saved, null, GameLogType.GAME_CREATED, "Partida creada con " + names.size() + " jugadores");
 
 		return new GameDTO(saved);
 	}
@@ -160,6 +166,7 @@ public class GameService {
 		}
 		unitRepository.saveAll(units);
 		game.startGame(1);
+		events.record(game, game.findPlayerByOrder(1), GameLogType.GAME_STARTED, "Partida iniciada");
 		return new GameDTO(game);
 	}
 
@@ -202,6 +209,7 @@ public class GameService {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "La partida tiene un turno actual invalido");
 		}
 
+		Player previous = game.findPlayerByOrder(game.getCurrentPlayerOrder());
 		// Buscamos el siguiente jugador activo sin streams ni ordenar listas.
 		Player next = null;
 		Player firstActive = null;
@@ -225,17 +233,21 @@ public class GameService {
 		}
 		if (activeCount == 1) {
 			game.finishGame(firstActive.getTurnOrder());
+			events.record(game, firstActive, GameLogType.GAME_FINISHED, "Partida terminada. Ganador: " + firstActive.getName());
 			return new GameDTO(game);
 		}
 		if (next == null) {
 			next = firstActive;
 		}
 
+		// Registramos el cierre en la ronda que acaba, antes de incrementarla.
+		events.record(game, previous, GameLogType.TURN_ENDED, "Termino el turno del jugador " + previous.getName());
 		// Al volver al primer jugador disponible empieza una nueva ronda.
 		if (next.getTurnOrder() <= game.getCurrentPlayerOrder()) {
 			game.incrementRound();
 		}
 		game.changeCurrentPlayer(next.getTurnOrder());
+		events.record(game, next, GameLogType.TURN_STARTED, "Comenzo el turno del jugador " + next.getName());
 
 		// Solo se reactivan las unidades del jugador que empieza su turno.
 		for (Unit unit : unitRepository.findAllByOwner_Id(next.getId())) {
