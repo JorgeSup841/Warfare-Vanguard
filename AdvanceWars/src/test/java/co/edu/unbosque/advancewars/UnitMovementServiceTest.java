@@ -49,7 +49,7 @@ class UnitMovementServiceTest {
     void setUp() {
         games = mock(GameStateRepository.class);
         units = mock(UnitRepository.class);
-        service = new UnitMovementService(games, units, mock(PropertyRepository.class));
+       // service = new UnitMovementService(games, units, mock(PropertyRepository.class));
 
         creator = new User("tester", "pass", "test@example.com");
         ReflectionTestUtils.setField(creator, "id", 4L);
