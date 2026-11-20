@@ -18,6 +18,7 @@ export interface DatosEscena {
   alPasarSobre: (c: casilla | null) => void;
 }
 
+/** Escena Phaser que dibuja el terreno, las bases y la interacción con el cursor. */
 export class EscenaMapa extends Phaser.Scene {
 
   private datos!: DatosEscena;
@@ -28,11 +29,13 @@ export class EscenaMapa extends Phaser.Scene {
     super('EscenaMapa');
   }
 
+  /** Inicializa el mapa y restablece la selección anterior. */
   init(datos: DatosEscena): void {
     this.datos = datos;
     this.ultimaCasilla = null;
   }
 
+  /** Crea las capas de terreno, bases y resaltado para la escena Phaser. */
   create(): void {
     this.dibujarTerreno();
     this.dibujarBases();
@@ -43,6 +46,7 @@ export class EscenaMapa extends Phaser.Scene {
     this.activarMouse();
   }
 
+  /** Renderiza cada casilla del mapa según el tipo de terreno. */
   private dibujarTerreno(): void {
 
     const graficos = this.add.graphics();
@@ -82,6 +86,7 @@ export class EscenaMapa extends Phaser.Scene {
     }
   }
 
+  /** Convierte el color configurado para un terreno en un valor numérico de Phaser. */
   private colorDe(tipo: tipoterreno): number {
 
     const terrenoEncontrado = this.datos.terrenos.find(
@@ -95,6 +100,7 @@ export class EscenaMapa extends Phaser.Scene {
       : 0xffffff;
   }
 
+  /** Añade los elementos visuales propios de cada tipo de terreno. */
   private static decorar(
     graficos: Phaser.GameObjects.Graphics,
     tipo: tipoterreno,
@@ -168,6 +174,7 @@ export class EscenaMapa extends Phaser.Scene {
     }
   }
 
+  /** Dibuja las bases de los jugadores en el tablero. */
   private dibujarBases(): void {
 
     const graficos = this.add.graphics();
@@ -213,6 +220,7 @@ export class EscenaMapa extends Phaser.Scene {
     });
   }
 
+  /** Activa los eventos del puntero y comunica la casilla resaltada. */
   private activarMouse(): void {
 
     this.input.on(

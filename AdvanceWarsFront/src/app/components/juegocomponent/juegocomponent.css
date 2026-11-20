@@ -21,9 +21,8 @@
   min-height: calc(100vh - 110px);
   padding: 38px 15px 65px;
   background-color: var(--olive);
-  background-image:
-    linear-gradient(#ffffff0d 1px, transparent 1px),
-    linear-gradient(90deg, #ffffff0d 1px, transparent 1px);
+  background-image: linear-gradient(#ffffff0d 1px, transparent 1px),
+  linear-gradient(90deg, #ffffff0d 1px, transparent 1px);
   background-size: 24px 24px;
   color: var(--cream);
 }

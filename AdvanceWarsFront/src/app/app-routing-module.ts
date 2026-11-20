@@ -45,5 +45,5 @@ const routes: Routes = [
 /** Configura la navegación y las restricciones de acceso. */
 @NgModule({ imports: [RouterModule.forRoot(routes)], exports: [RouterModule] })
 export class AppRoutingModule {
-  static readonly rutas = routes;
+  readonly rutas: Routes = routes;
 }

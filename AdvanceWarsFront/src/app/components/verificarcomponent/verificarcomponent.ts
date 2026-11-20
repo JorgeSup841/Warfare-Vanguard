@@ -9,7 +9,7 @@ import { usuarioservice } from '../../services/usuarioservice';
   selector: 'app-verificarcomponent',
   standalone: false,
   templateUrl: './verificarcomponent.html',
-  styleUrl: './verificarcomponent.css'
+  styleUrl: './verificarcomponent.css',
 })
 export class Verificarcomponent implements OnDestroy {
   mensaje = '';
@@ -21,7 +21,7 @@ export class Verificarcomponent implements OnDestroy {
   constructor(
     public auth: usuarioservice,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {}
 
   get tipo(): 'correo' | 'login' | null {
@@ -59,31 +59,38 @@ export class Verificarcomponent implements OnDestroy {
 
     // Unificamos el tipo del observable para evitar TS2349. El usuario
     // introduce solamente el código; challengeId lo agrega usuarioservice.
-    const peticion: Observable<unknown> = tipoPendiente === 'login'
-      ? this.auth.verificarLogin(limpio)
-      : this.auth.verificarCorreo(limpio);
+    const peticion: Observable<unknown> =
+      tipoPendiente === 'login'
+        ? this.auth.verificarLogin(limpio)
+        : this.auth.verificarCorreo(limpio);
 
-    this.subs.add(peticion.subscribe({
-      next: () => {
-        this.procesando = false;
-        if (tipoPendiente === 'correo') {
-          this.verificado = true;
-          this.auth.limpiarDesafio();
-        } else {
-          this.router.navigate(['/panel']).catch(() => { this.error = 'No se pudo abrir la pantalla solicitada.'; this.cdr.markForCheck(); });
-        }
-        this.cdr.markForCheck();
-      },
-      error: (e: HttpErrorResponse) => {
-        this.procesando = false;
-        this.error = e.status === 429
-          ? 'Demasiados intentos. Espera antes de reintentar.'
-          : e.status === 0
-          ? 'No hay conexión con el servidor.'
-          : 'Código incorrecto o vencido.';
-        this.cdr.markForCheck();
-      }
-    }));
+    this.subs.add(
+      peticion.subscribe({
+        next: () => {
+          this.procesando = false;
+          if (tipoPendiente === 'correo') {
+            this.verificado = true;
+            this.auth.limpiarDesafio();
+          } else {
+            this.router.navigate(['/panel']).catch(() => {
+              this.error = 'No se pudo abrir la pantalla solicitada.';
+              this.cdr.markForCheck();
+            });
+          }
+          this.cdr.markForCheck();
+        },
+        error: (e: HttpErrorResponse) => {
+          this.procesando = false;
+          this.error =
+            e.status === 429
+              ? 'Demasiados intentos. Espera antes de reintentar.'
+              : e.status === 0
+                ? 'No hay conexión con el servidor.'
+                : 'Código incorrecto o vencido.';
+          this.cdr.markForCheck();
+        },
+      }),
+    );
   }
 
   /** Solicita un nuevo código de verificación. */
@@ -94,18 +101,20 @@ export class Verificarcomponent implements OnDestroy {
     this.mensaje = '';
     this.cdr.markForCheck();
 
-    this.subs.add(this.auth.reenviarCodigo().subscribe({
-      next: () => {
-        this.procesando = false;
-        this.mensaje = 'Enviamos un nuevo código a tu correo.';
-        this.cdr.markForCheck();
-      },
-      error: () => {
-        this.procesando = false;
-        this.error = 'No se pudo reenviar el código. Espera antes de reintentar.';
-        this.cdr.markForCheck();
-      }
-    }));
+    this.subs.add(
+      this.auth.reenviarCodigo().subscribe({
+        next: () => {
+          this.procesando = false;
+          this.mensaje = 'Enviamos un nuevo código a tu correo.';
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.procesando = false;
+          this.error = 'No se pudo reenviar el código. Espera antes de reintentar.';
+          this.cdr.markForCheck();
+        },
+      }),
+    );
   }
 
   /** Libera los recursos y suscripciones del componente. */

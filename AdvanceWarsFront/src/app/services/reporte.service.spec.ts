@@ -10,11 +10,11 @@ describe('ReporteService', () => {
     });
     const servicio = TestBed.inject(ReporteService);
     const http = TestBed.inject(HttpTestingController);
-    servicio.obtener(11).subscribe((b) => expect(b instanceof Blob).toBe(true));
-    const r = http.expectOne(`${API_BASE_URL}/games/11/report.pdf`);
-    expect(r.request.method).toBe('GET');
-    expect(r.request.responseType).toBe('blob');
-    r.flush(new Blob(['%PDF-1.4'], { type: 'application/pdf' }));
+    servicio.obtener(11).subscribe((archivo) => expect(archivo instanceof Blob).toBe(true));
+    const peticion = http.expectOne(`${API_BASE_URL}/games/11/report.pdf`);
+    expect(peticion.request.method).toBe('GET');
+    expect(peticion.request.responseType).toBe('blob');
+    peticion.flush(new Blob(['%PDF-1.4'], { type: 'application/pdf' }));
     http.verify();
   });
 });

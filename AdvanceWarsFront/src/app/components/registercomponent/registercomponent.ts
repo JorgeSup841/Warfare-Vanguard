@@ -48,7 +48,10 @@ export class Registercomponent implements OnDestroy {
           this.procesando = false;
           try {
             this.auth.prepararDesafio('correo', r, email.trim());
-            this.router.navigate(['/verificar']).catch(() => { this.error = 'No se pudo abrir la pantalla solicitada.'; this.cdr.markForCheck(); });
+            this.router.navigate(['/verificar']).catch(() => {
+              this.error = 'No se pudo abrir la pantalla solicitada.';
+              this.cdr.markForCheck();
+            });
           } catch (e) {
             this.error = e instanceof Error ? e.message : 'Respuesta de registro inválida.';
           }

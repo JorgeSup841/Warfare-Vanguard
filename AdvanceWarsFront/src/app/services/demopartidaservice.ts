@@ -3,8 +3,10 @@ import { configuracionmapa, casilla, tipoterreno } from '../models/mapa';
 import { faccion, partida, jugador, propiedadjuego } from '../models/partida';
 import { unidad, unidadjuego, tipounidad } from '../models/unidad';
 
+/** Genera partidas locales de demostración sin consultar el servidor. */
 @Injectable({ providedIn: 'root' })
 export class demopartidaservice {
+  /** Genera una partida local con bases, unidades y propiedades para los participantes. */
   crearDemo(
     cantidad: 2 | 3 | 4,
     config: configuracionmapa,
@@ -18,7 +20,7 @@ export class demopartidaservice {
     const tiles: casilla[] = [];
     for (let y = 0; y < alto; y++)
       for (let x = 0; x < ancho; x++) {
-        tiles.push({ x, y, terrainType: this.terreno(x, y, ancho, alto) });
+        tiles.push({ x, y, terrainType: demopartidaservice.terreno(x, y, ancho, alto) });
       }
     const lugares = [
       { x: 1, y: 1 },
@@ -41,7 +43,7 @@ export class demopartidaservice {
         money: 5000,
         status: 'ACTIVE',
         factionCode: f.code,
-        commanderCode: 'DEMO_' + f.code,
+        commanderCode: `DEMO_${f.code}`,
       });
       const puntos = [
         { x: pos.x, y: pos.y },
@@ -69,9 +71,25 @@ export class demopartidaservice {
         ownerOrder: orden,
         captureProgress: 0,
       });
-      units.push(this.nuevaUnidad(orden * 100 + 1, 'INFANTRY', orden, pos.x + dx, pos.y, catalogo));
       units.push(
-        this.nuevaUnidad(orden * 100 + 2, 'RECON', orden, pos.x + 2 * dx, pos.y, catalogo),
+        demopartidaservice.nuevaUnidad(
+          orden * 100 + 1,
+          'INFANTRY',
+          orden,
+          pos.x + dx,
+          pos.y,
+          catalogo,
+        ),
+      );
+      units.push(
+        demopartidaservice.nuevaUnidad(
+          orden * 100 + 2,
+          'RECON',
+          orden,
+          pos.x + 2 * dx,
+          pos.y,
+          catalogo,
+        ),
       );
     });
     return {
@@ -87,7 +105,9 @@ export class demopartidaservice {
       properties,
     };
   }
-  private nuevaUnidad(
+
+  /** Construye una unidad de demostración a partir de su definición. */
+  private static nuevaUnidad(
     id: number,
     tipo: tipounidad,
     orden: number,
@@ -114,7 +134,9 @@ export class demopartidaservice {
       capturedThisTurn: false,
     };
   }
-  private terreno(x: number, y: number, ancho: number, alto: number): tipoterreno {
+
+  /** Determina el terreno de una casilla mediante una distribución reproducible. */
+  private static terreno(x: number, y: number, ancho: number, alto: number): tipoterreno {
     if (x === Math.floor(ancho / 2) || y === Math.floor(alto / 2)) return 'ROAD';
     if ((x * 7 + y * 11) % 37 < 4) return 'WATER';
     if ((x * 3 + y * 5) % 19 < 3) return 'FOREST';

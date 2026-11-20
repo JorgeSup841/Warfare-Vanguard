@@ -1,8 +1,9 @@
-import * as Phaser from 'phaser';
+import Phaser from 'phaser';
 
 import { casilla, terreno } from '../models/mapa';
 import { faccion, partida } from '../models/partida';
 
+/** Escena Phaser para representar partidas completas y gestionar su interacción. */
 export class TableroScene extends Phaser.Scene {
   private readonly tamañoCasilla = 40;
 
@@ -28,6 +29,7 @@ export class TableroScene extends Phaser.Scene {
     super({ key: 'TableroScene' });
   }
 
+  /** Prepara las capas gráficas y los eventos del tablero. */
   create(): void {
     this.listaPreparada = true;
 
@@ -44,6 +46,7 @@ export class TableroScene extends Phaser.Scene {
     this.dibujarTablero();
   }
 
+  /** Actualiza los datos de partida, los terrenos y las facciones representadas. */
   establecerDatos(datos: partida, terrenos: terreno[], facciones: faccion[]): void {
     this.datos = datos;
     this.terrenos = terrenos;
@@ -54,6 +57,7 @@ export class TableroScene extends Phaser.Scene {
     }
   }
 
+  /** Almacena y destaca la casilla seleccionada. */
   marcarSeleccion(seleccion: casilla | null): void {
     this.seleccion = seleccion;
 
@@ -62,6 +66,7 @@ export class TableroScene extends Phaser.Scene {
     }
   }
 
+  /** Dibuja terrenos, propiedades, unidades e indicadores de vida. */
   private dibujarTablero(): void {
     if (!this.datos || !this.capaTerreno || !this.capaPropiedades || !this.capaUnidades) {
       return;
@@ -85,7 +90,7 @@ export class TableroScene extends Phaser.Scene {
 
       const color = definicion?.color ?? '#9bd36a';
 
-      this.capaTerreno.fillStyle(this.colorHexadecimal(color), 1);
+      this.capaTerreno.fillStyle(TableroScene.colorHexadecimal(color), 1);
 
       this.capaTerreno.fillRect(x, y, tamaño, tamaño);
 
@@ -169,6 +174,7 @@ export class TableroScene extends Phaser.Scene {
     this.dibujarSeleccion();
   }
 
+  /** Crea una etiqueta de texto integrada en la escena. */
   private agregarTexto(texto: string, x: number, y: number, color: string): void {
     const objeto = this.add.text(x, y, texto, {
       fontFamily: 'monospace',
@@ -181,6 +187,7 @@ export class TableroScene extends Phaser.Scene {
     this.listaTextos.push(objeto);
   }
 
+  /** Resalta gráficamente la casilla seleccionada. */
   private dibujarSeleccion(): void {
     if (!this.capaSeleccion) {
       return;
@@ -202,6 +209,7 @@ export class TableroScene extends Phaser.Scene {
     this.capaSeleccion.strokeRect(x + 2, y + 2, this.tamañoCasilla - 4, this.tamañoCasilla - 4);
   }
 
+  /** Obtiene el color de la facción propietaria de una casilla o unidad. */
   private colorJugador(orden: number | null): number {
     if (orden === null || !this.datos) {
       return 0xe2dfd2;
@@ -211,13 +219,15 @@ export class TableroScene extends Phaser.Scene {
 
     const faccion = this.facciones.find((f) => f.code === jugador?.factionCode);
 
-    return this.colorHexadecimal(faccion?.color ?? '#d63031');
+    return TableroScene.colorHexadecimal(faccion?.color ?? '#d63031');
   }
 
-  private colorHexadecimal(color: string): number {
+  /** Convierte un color hexadecimal CSS a un número compatible con Phaser. */
+  private static colorHexadecimal(color: string): number {
     return parseInt(color.replace('#', ''), 16);
   }
 
+  /** Configura las acciones del ratón para selección y desplazamiento. */
   private configurarControles(): void {
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       if (pointer.button === 2) {

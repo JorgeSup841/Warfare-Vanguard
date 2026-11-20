@@ -1,4 +1,3 @@
-
 <section class="screen juego">
   <div class="wrap">
 
@@ -155,19 +154,19 @@
 
                   <table>
                     <thead>
-                      <tr>
-                        <th>UNIDAD</th>
-                        <th>COSTO</th>
-                      </tr>
+                    <tr>
+                      <th>UNIDAD</th>
+                      <th>COSTO</th>
+                    </tr>
                     </thead>
 
                     <tbody>
-                      <tr *ngFor="let m of tiposMovimiento">
-                        <td>{{ m.nombre }}</td>
-                        <td>
-                          {{ obtenerCosto(terrenoActual, m.codigo) }}
-                        </td>
-                      </tr>
+                    <tr *ngFor="let m of tiposMovimiento">
+                      <td>{{ m.nombre }}</td>
+                      <td>
+                        {{ obtenerCosto(terrenoActual, m.codigo) }}
+                      </td>
+                    </tr>
                     </tbody>
                   </table>
 

@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { API_BASE_URL } from './api-config';
 import { usuarioservice } from './usuarioservice';
 import { usuario, rolusuario } from '../models/usuario';
+/** Servicio de administración de usuarios a través de la API Spring Boot. */
 @Injectable({ providedIn: 'root' })
 export class adminservice {
   private readonly api = `${API_BASE_URL}/users`;
@@ -11,9 +12,12 @@ export class adminservice {
     private http: HttpClient,
     private auth: usuarioservice,
   ) {}
+  /** Consulta los usuarios administrables con las credenciales actuales. */
   listarUsuarios(): Observable<usuario[]> {
     return this.http.get<usuario[]>(this.api, { headers: this.auth.getHeaders() });
   }
+
+  /** Modifica el rol de un usuario mediante PATCH autenticado. */
   cambiarRol(id: number, role: rolusuario): Observable<usuario> {
     return this.http.patch<usuario>(
       `${this.api}/${id}/role`,
@@ -21,6 +25,8 @@ export class adminservice {
       { headers: this.auth.getHeaders() },
     );
   }
+
+  /** Habilita o deshabilita una cuenta mediante PATCH autenticado. */
   cambiarEstado(id: number, enabled: boolean): Observable<usuario> {
     return this.http.patch<usuario>(
       `${this.api}/${id}/enabled`,

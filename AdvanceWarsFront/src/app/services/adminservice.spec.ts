@@ -15,16 +15,16 @@ describe('adminservice', () => {
   });
   afterEach(() => http.verify());
   it('consulta usuarios', () => {
-    api.listarUsuarios().subscribe((r) => expect(r).toEqual([]));
-    const r = http.expectOne(`${API_BASE_URL}/users`);
-    expect(r.request.method).toBe('GET');
-    r.flush([]);
+    api.listarUsuarios().subscribe((respuesta) => expect(respuesta).toEqual([]));
+    const peticion = http.expectOne(`${API_BASE_URL}/users`);
+    expect(peticion.request.method).toBe('GET');
+    peticion.flush([]);
   });
   it('cambia el estado por PATCH', () => {
     api.cambiarEstado(2, false).subscribe();
-    const r = http.expectOne(`${API_BASE_URL}/users/2/enabled`);
-    expect(r.request.method).toBe('PATCH');
-    expect(r.request.body).toEqual({ enabled: false });
-    r.flush({ id: 2, username: 'u', role: 'USER', enabled: false });
+    const peticion = http.expectOne(`${API_BASE_URL}/users/2/enabled`);
+    expect(peticion.request.method).toBe('PATCH');
+    expect(peticion.request.body).toEqual({ enabled: false });
+    peticion.flush({ id: 2, username: 'u', role: 'USER', enabled: false });
   });
 });

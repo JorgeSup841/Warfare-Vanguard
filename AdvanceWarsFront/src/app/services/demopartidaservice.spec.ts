@@ -12,10 +12,10 @@ describe('demopartidaservice', () => {
       { code: 'R', name: 'Rojo' },
       { code: 'A', name: 'Azul' },
     ] as faccion[];
-    const p = service.crearDemo(2, config, facciones, []);
-    expect(p.map.tiles.length).toBe(300);
-    expect(p.players.length).toBe(2);
-    expect(p.units.length).toBe(4);
-    expect(p.properties.length).toBe(4);
+    const partidaDemo = service.crearDemo(2, config, facciones, []);
+    expect(partidaDemo.map.tiles.length).toBe(300);
+    expect(partidaDemo.players.length).toBe(2);
+    expect(partidaDemo.units.length).toBe(4);
+    expect(partidaDemo.properties.length).toBe(4);
   });
 });

@@ -1,4 +1,3 @@
-
 import { partida } from './partida';
 
 export interface nuevapartida {

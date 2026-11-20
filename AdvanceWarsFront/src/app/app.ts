@@ -8,7 +8,9 @@ import { Title } from '@angular/platform-browser';
   styleUrl: './app.css',
 })
 export class App {
+  readonly titulo = 'AURA WARS';
+
   constructor(title: Title) {
-    title.setTitle('AURA WARS');
+    title.setTitle(this.titulo);
   }
 }
