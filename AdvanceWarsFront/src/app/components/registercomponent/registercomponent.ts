@@ -54,6 +54,7 @@ export class Registercomponent {
         // Se guarda lo que necesita la pantalla de verificación.
         localStorage.setItem('challengeId', respuesta.challengeId);
         localStorage.setItem('correoVerificar', correo.trim());
+        localStorage.setItem('tipoVerificacion', 'correo');
         this.router.navigate(['/verificar']);
       },
       error: e => {

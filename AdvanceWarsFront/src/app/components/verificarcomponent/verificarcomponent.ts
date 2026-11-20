@@ -1,4 +1,5 @@
 import { Component, ChangeDetectorRef, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { usuarioservice } from '../../services/usuarioservice';
 
 @Component({
@@ -9,18 +10,23 @@ import { usuarioservice } from '../../services/usuarioservice';
 })
 /**
  * Pantalla para escribir el código de 6 dígitos que llegó al correo.
+ * Sirve para dos cosas:
+ *  - 'correo': activar la cuenta después del registro.
+ *  - 'login': confirmar el inicio de sesión y recibir el token.
  */
 export class Verificarcomponent {
   private service = inject(usuarioservice);
+  private router = inject(Router);
   private cd = inject(ChangeDetectorRef);
 
+  tipo = localStorage.getItem('tipoVerificacion') ?? 'correo';
   correo = localStorage.getItem('correoVerificar') ?? '';
   mensaje = '';
   error = '';
   verificado = false;
 
   /**
-   * Envía el código al back para activar la cuenta.
+   * Envía el código al back.
    * @param codigo código de 6 dígitos
    */
   verificar(codigo: string) {
@@ -32,20 +38,31 @@ export class Verificarcomponent {
       return;
     }
 
-    const challengeId = localStorage.getItem('challengeId') ?? '';
+    const datos = { challengeId: localStorage.getItem('challengeId') ?? '', code: codigo.trim() };
 
-    this.service.verificarCorreo({ challengeId, code: codigo.trim() }).subscribe({
-      next: () => {
-        this.verificado = true;
-        localStorage.removeItem('challengeId');
-        localStorage.removeItem('correoVerificar');
-        this.cd.detectChanges();
-      },
-      error: e => {
-        this.error = e.status === 429 ? 'Demasiados intentos. Espera un momento.' : 'Código inválido o vencido.';
-        this.cd.detectChanges();
-      }
-    });
+    if (this.tipo === 'login') {
+      // LOGIN: el back devuelve el token y se guarda la sesión.
+      this.service.verificarLogin(datos).subscribe({
+        next: respuesta => {
+          localStorage.setItem('jwtToken', respuesta.accessToken);
+          localStorage.setItem('userRole', respuesta.user.role);
+          localStorage.setItem('username', respuesta.user.username);
+          this.limpiar();
+          this.router.navigate(['/juego']);
+        },
+        error: e => this.mostrarError(e.status)
+      });
+    } else {
+      // REGISTRO: se activa la cuenta.
+      this.service.verificarCorreo(datos).subscribe({
+        next: () => {
+          this.verificado = true;
+          this.limpiar();
+          this.cd.detectChanges();
+        },
+        error: e => this.mostrarError(e.status)
+      });
+    }
   }
 
   /**
@@ -67,5 +84,23 @@ export class Verificarcomponent {
         this.cd.detectChanges();
       }
     });
+  }
+
+  /**
+   * Muestra el mensaje de error según lo que respondió el back.
+   * @param estado código HTTP del error
+   */
+  private mostrarError(estado: number) {
+    this.error = estado === 429 ? 'Demasiados intentos. Espera un momento.' : 'Código inválido o vencido.';
+    this.cd.detectChanges();
+  }
+
+  /**
+   * Borra los datos temporales de la verificación.
+   */
+  private limpiar() {
+    localStorage.removeItem('challengeId');
+    localStorage.removeItem('correoVerificar');
+    localStorage.removeItem('tipoVerificacion');
   }
 }

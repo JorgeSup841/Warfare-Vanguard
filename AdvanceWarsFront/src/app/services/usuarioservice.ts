@@ -1,8 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { usuario, AuthRequest, AuthResponse, historial, registro, respuestapendiente, verificacion } from '../models/usuario';
-
+import { usuario, AuthRequest, AuthResponse, historial, registro, respuestapendiente, verificacion, respuestalogin } from '../models/usuario';
 /**
  * Servicio de usuarios: inicio de sesión, registro, manejo de la sesión,
  * administración de usuarios e historial de partidas. Se comunica con el backend.
@@ -181,5 +180,24 @@ export class usuarioservice {
    */
   reenviarCodigo(challengeId: string): Observable<respuestapendiente> {
     return this.http.post<respuestapendiente>(this.baseUrl + '/api/auth/resend-otp', { challengeId });
+  }
+  // ---------- LOGIN CON CÓDIGO ----------
+
+  /**
+   * Revisa usuario y contraseña. Si están bien, el back envía un código al correo.
+   * @param datos usuario y contraseña
+   * @returns el challengeId que se necesita para verificar el código
+   */
+  iniciarSesion(datos: { username: string; password: string }): Observable<respuestapendiente> {
+    return this.http.post<respuestapendiente>(this.baseUrl + '/api/auth/login', datos);
+  }
+
+  /**
+   * Verifica el código del login. Si es correcto, el back entrega el token.
+   * @param datos challengeId y código
+   * @returns token y datos del usuario
+   */
+  verificarLogin(datos: verificacion): Observable<respuestalogin> {
+    return this.http.post<respuestalogin>(this.baseUrl + '/api/auth/verify-otp', datos);
   }
 }

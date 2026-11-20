@@ -48,3 +48,14 @@ export interface verificacion {
   challengeId: string;
   code: string;
 }
+
+export interface respuestalogin {
+  accessToken: string;
+  tokenType: string;
+  user: {
+    id: number;
+    username: string;
+    email: string;
+    role: string;
+  };
+}

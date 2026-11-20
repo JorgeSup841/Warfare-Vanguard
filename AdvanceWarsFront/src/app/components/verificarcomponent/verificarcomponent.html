@@ -5,9 +5,13 @@
     <div *ngIf="!verificado">
       <span class="badge">VERIFICACIÓN</span>
       <h2>Revisa tu correo</h2>
-      <p class="texto">
+      <p class="texto" *ngIf="tipo === 'correo'">
         Enviamos un código de 6 dígitos a <strong>{{ correo }}</strong>.
         Escríbelo aquí para activar tu cuenta.
+      </p>
+      <p class="texto" *ngIf="tipo === 'login'">
+        Enviamos un código de 6 dígitos a tu correo.
+        Escríbelo aquí para entrar a la base.
       </p>
 
       <label class="etiqueta" for="codigo">Código</label>
