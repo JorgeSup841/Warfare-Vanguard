@@ -29,8 +29,8 @@ import co.edu.unbosque.advancewars.model.Unit;
 import co.edu.unbosque.advancewars.model.UnitDefinition;
 import co.edu.unbosque.advancewars.model.User;
 import co.edu.unbosque.advancewars.repository.GameStateRepository;
-import co.edu.unbosque.advancewars.repository.UnitRepository;
 import co.edu.unbosque.advancewars.repository.PropertyRepository;
+import co.edu.unbosque.advancewars.repository.UnitRepository;
 import co.edu.unbosque.advancewars.service.UnitMovementService;
 
 class UnitMovementServiceTest {

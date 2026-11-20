@@ -1,9 +1,8 @@
 package co.edu.unbosque.advancewars.controller;
 
 import java.util.List;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,22 +10,23 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
-import co.edu.unbosque.advancewars.dto.CreateGameDTO;
-import co.edu.unbosque.advancewars.dto.AttackUnitRequestDTO;
 import co.edu.unbosque.advancewars.dto.AttackResultDTO;
+import co.edu.unbosque.advancewars.dto.AttackUnitRequestDTO;
 import co.edu.unbosque.advancewars.dto.CaptureResultDTO;
+import co.edu.unbosque.advancewars.dto.CreateGameDTO;
 import co.edu.unbosque.advancewars.dto.EndTurnRequestDTO;
 import co.edu.unbosque.advancewars.dto.GameDTO;
 import co.edu.unbosque.advancewars.dto.MapDTO;
 import co.edu.unbosque.advancewars.dto.MoveUnitRequestDTO;
-import co.edu.unbosque.advancewars.dto.ReachableTileDTO;
 import co.edu.unbosque.advancewars.dto.ProduceUnitRequestDTO;
+import co.edu.unbosque.advancewars.dto.ReachableTileDTO;
 import co.edu.unbosque.advancewars.dto.UnitDTO;
 import co.edu.unbosque.advancewars.model.User;
 import co.edu.unbosque.advancewars.service.GameService;
-import co.edu.unbosque.advancewars.service.UnitCombatService;
 import co.edu.unbosque.advancewars.service.UnitCaptureService;
+import co.edu.unbosque.advancewars.service.UnitCombatService;
 import co.edu.unbosque.advancewars.service.UnitMovementService;
 import co.edu.unbosque.advancewars.service.UnitProductionService;
 
@@ -40,7 +40,7 @@ public class GameController {
 	private final UnitCombatService unitCombatService;
 	private final UnitCaptureService unitCaptureService;
 	private final UnitProductionService unitProductionService;
-	
+
 	public GameController(GameService gameService,
 			UnitMovementService unitMovementService, UnitCombatService unitCombatService,
 			UnitCaptureService unitCaptureService, UnitProductionService unitProductionService) {
@@ -103,12 +103,12 @@ public class GameController {
 
 	/** Mueve una tropa una sola vez por turno a una casilla alcanzable. */
 	@PostMapping("/{id}/units/{unitId}/move")
-	public UnitDTO moveUnit(@PathVariable("id") Long id, @PathVariable("unitId") Long unitId, @RequestBody MoveUnitRequestDTO request,
-			@AuthenticationPrincipal User creator) {
+	public UnitDTO moveUnit(@PathVariable("id") Long id, @PathVariable("unitId") Long unitId,
+			@RequestBody MoveUnitRequestDTO request, @AuthenticationPrincipal User creator) {
 		return unitMovementService.move(id, unitId, request, resolveUser(creator));
 	}
 
-	/** Una infanteria ataca a otra infanteria enemiga adyacente. */
+	/** Una unidad terrestre ataca a una unidad enemiga adyacente. */
 	@PostMapping("/{id}/units/{unitId}/attack")
 	public AttackResultDTO attackUnit(@PathVariable("id") Long id, @PathVariable("unitId") Long unitId,
 			@RequestBody AttackUnitRequestDTO request, @AuthenticationPrincipal User creator) {
@@ -129,7 +129,7 @@ public class GameController {
 		return unitProductionService.produce(id, request, resolveUser(creator));
 	}
 
-	/** Nunca se suplantan usuarios cuando la autenticación falta. */
+	/** Rechaza peticiones sin una cuenta autenticada; los jugadores locales no requieren cuenta. */
 	private User resolveUser(User creator) {
 		if (creator == null || creator.getId() == null) {
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Debes iniciar sesión");

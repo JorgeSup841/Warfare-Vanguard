@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Set;
 
@@ -17,10 +18,12 @@ import co.edu.unbosque.advancewars.dto.MoveUnitRequestDTO;
 import co.edu.unbosque.advancewars.dto.ReachableTileDTO;
 import co.edu.unbosque.advancewars.dto.UnitDTO;
 import co.edu.unbosque.advancewars.enums.GameStatus;
+import co.edu.unbosque.advancewars.enums.GameLogType;
 import co.edu.unbosque.advancewars.enums.MovementType;
 import co.edu.unbosque.advancewars.enums.TerrainType;
 import co.edu.unbosque.advancewars.model.GameMap;
 import co.edu.unbosque.advancewars.model.GameState;
+import co.edu.unbosque.advancewars.model.Property;
 import co.edu.unbosque.advancewars.model.Tile;
 import co.edu.unbosque.advancewars.model.Unit;
 import co.edu.unbosque.advancewars.model.User;
@@ -35,12 +38,14 @@ public class UnitMovementService {
     private final GameStateRepository gameRepository;
     private final UnitRepository unitRepository;
     private final PropertyRepository propertyRepository;
+    private final GameEventService events;
 
     public UnitMovementService(GameStateRepository gameRepository, UnitRepository unitRepository,
-            PropertyRepository propertyRepository) {
+            PropertyRepository propertyRepository, GameEventService events) {
         this.gameRepository = gameRepository;
         this.unitRepository = unitRepository;
         this.propertyRepository = propertyRepository;
+        this.events = events;
     }
 
     @Transactional
@@ -127,16 +132,21 @@ public class UnitMovementService {
         }
 
         // Al abandonar un edificio, pierde la captura que llevaba acumulada.
-        propertyRepository.findByTile_Id(unit.getTile().getId()).ifPresent(property -> {
+        Optional<Property> previousProperty =
+                propertyRepository.findByTile_Id(unit.getTile().getId());
+        if (previousProperty.isPresent()) {
+            Property property = previousProperty.get();
             if (property.getCapturingPlayer() != null
                     && property.getCapturingPlayer().getId().equals(unit.getOwner().getId())) {
                 property.resetCaptureProgress();
                 propertyRepository.save(property);
             }
-        });
+        }
 
         unit.moveTo(destination, fuelCost);
         unitRepository.save(unit);
+        events.record(game, unit.getOwner(), GameLogType.UNIT_MOVED, "Unidad #" + unit.getId()
+                + " movida de (" + startX + "," + startY + ") a (" + endX + "," + endY + ")");
         return new UnitDTO(unit);
     }
 

@@ -10,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import co.edu.unbosque.advancewars.dto.CaptureResultDTO;
 import co.edu.unbosque.advancewars.dto.EndTurnRequestDTO;
 import co.edu.unbosque.advancewars.enums.GameStatus;
+import co.edu.unbosque.advancewars.enums.GameLogType;
 import co.edu.unbosque.advancewars.enums.PropertyType;
 import co.edu.unbosque.advancewars.enums.UnitType;
 import co.edu.unbosque.advancewars.model.GameState;
@@ -32,13 +33,15 @@ public class UnitCaptureService {
 	private final UnitRepository unitRepository;
 	private final PropertyRepository propertyRepository;
 	private final GameVictoryService victoryService;
+	private final GameEventService events;
 
 	public UnitCaptureService(GameStateRepository gameRepository, UnitRepository unitRepository,
-			PropertyRepository propertyRepository, GameVictoryService victoryService) {
+			PropertyRepository propertyRepository, GameVictoryService victoryService, GameEventService events) {
 		this.gameRepository = gameRepository;
 		this.unitRepository = unitRepository;
 		this.propertyRepository = propertyRepository;
 		this.victoryService = victoryService;
+		this.events = events;
 	}
 
 	@Transactional
@@ -111,6 +114,14 @@ public class UnitCaptureService {
 		}
 		propertyRepository.save(property);
 		unitRepository.save(unit);
+		if (completed) {
+			events.record(game, player, GameLogType.PROPERTY_CAPTURED,
+					"Propiedad #" + property.getId() + " (" + property.getDefinition().getType() + ") capturada");
+		} else {
+			events.record(game, player, GameLogType.UNIT_CAPTURE_STARTED,
+					"Unidad #" + unit.getId() + " captura propiedad #" + property.getId()
+					+ ": " + progress + " puntos");
+		}
 		if (completed && property.getDefinition().getType() == PropertyType.HEADQUARTERS) {
 			victoryService.checkHeadquartersCapture(game, property, player);
 		}
