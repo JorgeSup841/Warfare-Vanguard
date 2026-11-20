@@ -50,12 +50,31 @@ export class Recuperarcomponent implements OnDestroy {
     if (this.ocupado) return;
     this.error = '';
     this.mensaje = '';
-    if (!id.trim() || !/^\d{6}$/.test(codigo.trim()) || clave.length < 12) {
-      this.error =
-        'Ingresa el identificador del correo, el código de 6 dígitos y la nueva contraseña (mínimo 12 caracteres).';
+
+    if (!id.trim()) {
+      this.error = 'Debes ingresar el identificador de recuperación.';
       this.cdr.markForCheck();
       return;
     }
+
+    if (!/^\d{6}$/.test(codigo.trim())) {
+      this.error = 'El código debe tener exactamente 6 dígitos.';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    if (clave.length < 12) {
+      this.error = 'La contraseña debe tener mínimo 12 caracteres.';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    if (clave.length > 64) {
+      this.error = 'La contraseña no puede superar los 64 caracteres.';
+      this.cdr.markForCheck();
+      return;
+    }
+
     try {
       this.auth.prepararRecuperacion(id);
     } catch (e) {

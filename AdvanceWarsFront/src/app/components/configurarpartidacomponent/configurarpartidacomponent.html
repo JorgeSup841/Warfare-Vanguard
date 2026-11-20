@@ -8,8 +8,7 @@
         <h2>JUGADORES</h2>
         <p *ngFor="let jugador of resumen?.players">{{ jugador.turnOrder }}. {{ jugador.name }} — {{ jugador.money }}
           CRÉDITOS ({{ jugador.status }})</p>
-        <p>Spring Boot asigna automáticamente los jugadores cuando se crea la partida. La selección persistente de
-          facción y comandante todavía no tiene endpoint en este backend.</p>
+        <p>Los comandantes y el orden de despliegue ya están definidos para esta batalla. Revisa tu escuadrón y prepárate para entrar al campo.</p>
         <div class="flex">
           <button type="button" [disabled]="ocupado || confirmacionInicio || !resumen || resumen.status !== 'SETUP'"
                   (click)="iniciar()">INICIAR PARTIDA ▸

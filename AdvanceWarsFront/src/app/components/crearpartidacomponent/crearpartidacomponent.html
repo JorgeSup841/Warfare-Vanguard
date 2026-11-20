@@ -22,7 +22,7 @@
           </div>
           <div class="field"><label for="semilla">SEMILLA</label><input id="semilla" type="number" name="semilla"
                                                                         [(ngModel)]="semilla" required></div>
-          <p>La configuración final se valida en Spring Boot. POST /api/games crea una partida en la base de datos.</p>
+          <p>Rellena todos los espacios.</p>
           <p *ngIf="error" class="message error" role="alert">{{ error }}</p>
           <button type="submit" [disabled]="ocupado">{{ ocupado ? 'CREANDO...' : 'CREAR PARTIDA' }} ▸</button>
         </form>
