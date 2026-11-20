@@ -2,6 +2,7 @@ package co.edu.unbosque.advancewars.security;
 
 import jakarta.servlet.DispatcherType;
 import java.util.List;
+import co.edu.unbosque.advancewars.service.UserSessionService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,8 +40,9 @@ public class SecurityConfig {
 	 * @param jwtUtil            servicio de tokens firmados
 	 * @param userDetailsService consulta usuarios al autenticar peticiones
 	 */
-	public SecurityConfig(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
-		this.jwtAuthFilter = new JwtAuthenticationFilter(jwtUtil, userDetailsService);
+	public SecurityConfig(JwtUtil jwtUtil, UserDetailsService userDetailsService,
+            UserSessionService sessions) {
+		this.jwtAuthFilter = new JwtAuthenticationFilter(jwtUtil, userDetailsService, sessions);
 		this.userDetailsService = userDetailsService;
 	}
 
@@ -141,9 +143,10 @@ public class SecurityConfig {
 					}
 
 					auth.requestMatchers("/api/admin/**").hasRole("ADMIN");
+					auth.requestMatchers("/api/users/me").authenticated();
 					auth.requestMatchers("/api/users/**").hasRole("ADMIN");
 
-					auth.requestMatchers("/api/auth/me", "/api/users/me", "/api/games", "/api/games/**").authenticated();
+					auth.requestMatchers("/api/auth/me", "/api/games", "/api/games/**").authenticated();
 
 					auth.anyRequest().authenticated();
 				});

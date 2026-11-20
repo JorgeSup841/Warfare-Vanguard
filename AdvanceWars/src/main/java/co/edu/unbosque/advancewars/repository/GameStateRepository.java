@@ -1,4 +1,3 @@
-
 package co.edu.unbosque.advancewars.repository;
 
 import java.util.List;
@@ -13,6 +12,9 @@ import co.edu.unbosque.advancewars.model.GameState;
 import jakarta.persistence.LockModeType;
 
 public interface GameStateRepository extends JpaRepository<GameState, Long> {
+
+    List<GameState> findAllByOrderByCreatedAtDesc();
+    long countByStatus(GameStatus status);
 
     // Buscar partidas por estado
     List<GameState> findAllByStatusOrderByCreatedAtDesc(GameStatus status);
