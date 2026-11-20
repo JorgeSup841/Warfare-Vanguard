@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { usuarioservice } from '../../services/usuarioservice';
+/** Registra cuentas y prepara la verificación del correo. */
 @Component({
   selector: 'app-registercomponent',
   standalone: false,
@@ -19,6 +20,7 @@ export class Registercomponent implements OnDestroy {
     private router: Router,
     private cdr: ChangeDetectorRef,
   ) {}
+  /** Valida el formulario y crea una cuenta en el servidor. */
   registrar(
     username: string,
     email: string,
@@ -46,7 +48,10 @@ export class Registercomponent implements OnDestroy {
           this.procesando = false;
           try {
             this.auth.prepararDesafio('correo', r, email.trim());
-            void this.router.navigate(['/verificar']);
+            this.router.navigate(['/verificar']).catch(() => {
+              this.error = 'No se pudo abrir la pantalla solicitada.';
+              this.cdr.markForCheck();
+            });
           } catch (e) {
             this.error = e instanceof Error ? e.message : 'Respuesta de registro inválida.';
           }
@@ -67,6 +72,7 @@ export class Registercomponent implements OnDestroy {
       }),
     );
   }
+  /** Libera los recursos y suscripciones del componente. */
   ngOnDestroy(): void {
     this.subs.unsubscribe();
   }

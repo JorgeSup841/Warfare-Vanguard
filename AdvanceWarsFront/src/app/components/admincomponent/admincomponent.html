@@ -12,17 +12,27 @@
         <h2>USUARIOS</h2>
         <div class="usuario" *ngFor="let u of usuarios">
           <span>#{{ u.id }} — {{ u.username }} ({{ u.email }})</span>
-          <select [ngModel]="u.role" (ngModelChange)="cambiarRol(u,$event)" [disabled]="procesando"
+          <select [ngModel]="confirmacion?.usuario === u && confirmacion?.tipo === 'rol' ? confirmacion?.valor : u.role"
+                  (ngModelChange)="cambiarRol(u,$event)" [disabled]="procesando || !!confirmacion"
                   aria-label="Rol de usuario">
             <option value="USER">JUGADOR</option>
             <option value="ADMIN">ADMINISTRADOR</option>
           </select>
-          <select [ngModel]="u.enabled" (ngModelChange)="cambiarEstado(u,$event)" [disabled]="procesando"
-                  aria-label="Estado de usuario">
+          <select
+            [ngModel]="confirmacion?.usuario === u && confirmacion?.tipo === 'estado' ? confirmacion?.valor : u.enabled"
+            (ngModelChange)="cambiarEstado(u,$event)" [disabled]="procesando || !!confirmacion"
+            aria-label="Estado de usuario">
             <option [ngValue]="true">HABILITADO</option>
             <option [ngValue]="false">DESHABILITADO</option>
           </select>
           <span>{{ u.emailVerified ? 'CORREO VERIFICADO' : 'CORREO PENDIENTE' }}</span>
+        </div>
+        <div *ngIf="confirmacion" class="message" role="group" aria-label="Confirmar cambio de usuario">
+          <p>{{ confirmacion.texto }}</p>
+          <div class="flex">
+            <button type="button" [disabled]="procesando" (click)="confirmarCambio()">CONFIRMAR CAMBIO</button>
+            <button type="button" class="secondary" [disabled]="procesando" (click)="cancelarCambio()">CANCELAR</button>
+          </div>
         </div>
         <p *ngIf="!usuarios.length">No hay usuarios para mostrar.</p>
         <h2>INFORME PDF</h2>

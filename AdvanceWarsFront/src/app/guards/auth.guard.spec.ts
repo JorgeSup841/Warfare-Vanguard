@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { provideRouter, Router, RouterStateSnapshot, ActivatedRouteSnapshot } from '@angular/router';
+import { provideRouter, RouterStateSnapshot, ActivatedRouteSnapshot } from '@angular/router';
 import { authGuard } from './auth.guard';
 import { usuarioservice } from '../services/usuarioservice';
 
@@ -8,17 +8,28 @@ describe('authGuard', () => {
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
-        {provide: usuarioservice, useValue: {estaAutenticado:()=>false,getRole:()=>null,isAdmin:()=>false}}
-      ]
+        {
+          provide: usuarioservice,
+          useValue: { estaAutenticado: () => false, getRole: () => null, isAdmin: () => false },
+        },
+      ],
     });
     const resultado = TestBed.runInInjectionContext(() =>
-      authGuard({} as ActivatedRouteSnapshot, {url:'/partidas'} as RouterStateSnapshot));
+      authGuard({} as ActivatedRouteSnapshot, { url: '/partidas' } as RouterStateSnapshot),
+    );
     expect(resultado).not.toBe(true);
     expect(resultado).toBeInstanceOf(Object);
   });
   it('permite la ruta si la sesión existe', () => {
-    TestBed.configureTestingModule({providers:[provideRouter([]),{provide:usuarioservice,useValue:{estaAutenticado:()=>true}}]});
-    const resultado=TestBed.runInInjectionContext(()=>authGuard({} as ActivatedRouteSnapshot,{url:'/panel'} as RouterStateSnapshot));
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([]),
+        { provide: usuarioservice, useValue: { estaAutenticado: () => true } },
+      ],
+    });
+    const resultado = TestBed.runInInjectionContext(() =>
+      authGuard({} as ActivatedRouteSnapshot, { url: '/panel' } as RouterStateSnapshot),
+    );
     expect(resultado).toBe(true);
   });
 });

@@ -4,6 +4,7 @@ import { Subscription, forkJoin } from 'rxjs';
 import { tableroservice } from '../../services/tableroservice';
 import { ReporteService } from '../../services/reporte.service';
 import { partidaresumen, unidadservidor } from '../../models/tablero';
+/** Presenta los resultados y permite descargar el informe PDF. */
 @Component({
   selector: 'app-resultadoscomponent',
   standalone: false,
@@ -24,10 +25,12 @@ export class Resultadoscomponent implements OnInit, OnDestroy {
     private pdf: ReporteService,
     private cdr: ChangeDetectorRef,
   ) {}
+  /** Inicializa y carga los datos de la pantalla. */
   ngOnInit(): void {
     this.id = Number(this.ruta.snapshot.paramMap.get('id'));
     this.cargar();
   }
+  /** Consulta los datos necesarios para presentar la pantalla. */
   cargar(): void {
     this.cargando = true;
     this.error = '';
@@ -51,6 +54,7 @@ export class Resultadoscomponent implements OnInit, OnDestroy {
       }),
     );
   }
+  /** Descarga el informe PDF asociado a los resultados. */
   descargar(): void {
     this.subs.add(
       this.pdf.obtener(this.id).subscribe({
@@ -70,6 +74,7 @@ export class Resultadoscomponent implements OnInit, OnDestroy {
       }),
     );
   }
+  /** Libera los recursos y suscripciones del componente. */
   ngOnDestroy(): void {
     this.subs.unsubscribe();
   }

@@ -11,10 +11,10 @@ describe('Recuperarcomponent', () => {
     TestBed.configureTestingModule({
       imports: [CommonModule, FormsModule, RouterModule.forRoot([])],
       providers: [provideHttpClient(), provideHttpClientTesting()],
-      declarations: [Recuperarcomponent]
+      declarations: [Recuperarcomponent],
     });
     // No se crea el canvas Phaser ni se envían solicitudes HTTP en esta prueba básica.
-    TestBed.overrideComponent(Recuperarcomponent, { set: {template: ''} });
+    TestBed.overrideComponent(Recuperarcomponent, { set: { template: '' } });
     await TestBed.compileComponents();
     const fixture = TestBed.createComponent(Recuperarcomponent);
     expect(fixture.componentInstance).toBeTruthy();

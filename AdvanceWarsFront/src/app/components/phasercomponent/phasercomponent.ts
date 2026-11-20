@@ -15,8 +15,8 @@ import {
 import type Phaser from 'phaser';
 import { casilla, terreno } from '../../models/mapa';
 import { faccion, partida } from '../../models/partida';
-import type { EscenaMapa } from '../../phaser/escenamapa';
 
+/** Integra una escena Phaser con los datos de Angular. */
 @Component({
   selector: 'app-phasercomponent',
   standalone: false,
@@ -24,15 +24,14 @@ import type { EscenaMapa } from '../../phaser/escenamapa';
   styleUrl: './phasercomponent.css',
 })
 export class Phasercomponent implements AfterViewInit, OnChanges, OnDestroy {
-  @ViewChild('contenedor', { static: true }) contenedor!: ElementRef<HTMLDivElement>;
+  @ViewChild('contenedor', { static: true }) contenedor?: ElementRef<HTMLDivElement>;
   @Input() juego: partida | null = null;
   @Input() terrenos: terreno[] = [];
   @Input() facciones: faccion[] = [];
   @Input() seleccion: casilla | null = null;
-  @Output() seleccionCambio = new EventEmitter<casilla | null>();
+  @Output() readonly seleccionCambio = new EventEmitter<casilla | null>();
   error = '';
   private phaser: Phaser.Game | null = null;
-  private escena: EscenaMapa | null = null;
   private vistaLista = false;
   private destruido = false;
   private iniciando = false;
@@ -40,18 +39,21 @@ export class Phasercomponent implements AfterViewInit, OnChanges, OnDestroy {
     private zone: NgZone,
     private cdr: ChangeDetectorRef,
   ) {}
+  /** Inicializa los recursos gráficos al estar disponible la vista. */
   ngAfterViewInit(): void {
     this.vistaLista = true;
-    void this.actualizar();
+    this.actualizar();
   }
+  /** Actualiza la escena cuando cambian las entradas del componente. */
   ngOnChanges(_changes: SimpleChanges): void {
-    if (this.vistaLista) void this.actualizar();
+    if (this.vistaLista) this.actualizar();
   }
+  /** Actualiza los objetos y datos de la escena Phaser. */
   private async actualizar(): Promise<void> {
     if (this.destruido || !this.vistaLista || !this.juego || this.iniciando) return;
     this.iniciando = true;
     try {
-      const [PhaserLib, { EscenaMapa, TAM_CASILLA }] = await Promise.all([
+      const [PhaserLib, { EscenaMapa }] = await Promise.all([
         import('phaser'),
         import('../../phaser/escenamapa'),
       ]);
@@ -75,7 +77,8 @@ export class Phasercomponent implements AfterViewInit, OnChanges, OnDestroy {
       };
       this.zone.runOutsideAngular(() => {
         if (!this.phaser) {
-          const element = this.contenedor.nativeElement;
+          const element = this.contenedor?.nativeElement;
+          if (!element) throw new Error('No se encontró el contenedor de Phaser.');
           const ancho = Math.max(320, element.clientWidth || 800);
           const alto = Math.max(300, element.clientHeight || 500);
           this.phaser = new PhaserLib.Game({
@@ -105,10 +108,10 @@ export class Phasercomponent implements AfterViewInit, OnChanges, OnDestroy {
       this.iniciando = false;
     }
   }
+  /** Libera los recursos y suscripciones del componente. */
   ngOnDestroy(): void {
     this.destruido = true;
     this.zone.runOutsideAngular(() => this.phaser?.destroy(true));
     this.phaser = null;
-    this.escena = null;
   }
 }

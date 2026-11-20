@@ -8,6 +8,7 @@ import { EscenaMapa, DatosEscena, TAM_CASILLA } from '../../phaser/escenamapa';
 import { casilla, configuracionmapa, terreno, mapa, tipoterreno } from '../../models/mapa';
 import { tablero, partidaresumen, unidadservidor } from '../../models/tablero';
 import { ReporteService } from '../../services/reporte.service';
+/** Muestra el tablero Phaser y consulta datos de la partida. */
 @Component({
   selector: 'app-juegocomponent',
   standalone: false,
@@ -40,6 +41,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     this.modoDemo = Boolean(this.ruta.snapshot.data['demo']);
     this.id = Number(this.ruta.snapshot.paramMap.get('id')) || 0;
   }
+  /** Inicializa y carga los datos de la pantalla. */
   ngOnInit(): void {
     this.subs.add(
       forkJoin({
@@ -49,7 +51,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
         next: (r) => {
           this.terrenos = r.terrenos;
           this.configuracion = r.config;
-          if (this.modoDemo) this.dibujar(this.demoMap(r.config));
+          if (this.modoDemo) this.dibujar(Juegocomponent.demoMap(r.config));
           else this.cargarMapa();
           this.cdr.markForCheck();
         },
@@ -61,6 +63,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
       }),
     );
   }
+  /** Inicializa los recursos gráficos al estar disponible la vista. */
   ngAfterViewInit(): void {
     this.viewLista = true;
     if (this.pendingMap) {
@@ -69,6 +72,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
       this.dibujar(pending);
     }
   }
+  /** Recupera el mapa de la partida registrada en el servidor. */
   cargarMapa(): void {
     if (this.modoDemo || !this.id) return;
     this.cargando = true;
@@ -89,6 +93,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
       }),
     );
   }
+  /** Consulta los datos complementarios para actualizar la vista. */
   cargarDatos(): void {
     if (this.modoDemo || !this.id) return;
     this.subs.add(
@@ -109,7 +114,8 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
       }),
     );
   }
-  private demoMap(config: configuracionmapa): tablero {
+  /** Genera un tablero local para la demostración. */
+  private static demoMap(config: configuracionmapa): tablero {
     const tiles: tablero['tiles'] = [];
     for (let y = 0; y < config.height; y++)
       for (let x = 0; x < config.width; x++) {
@@ -124,6 +130,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
       }
     return { gameId: 0, width: config.width, height: config.height, tiles };
   }
+  /** Representa el mapa recibido con una escena Phaser. */
   private dibujar(t: tablero): void {
     if (!this.viewLista) {
       this.pendingMap = t;
@@ -162,6 +169,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
       this.phaser.scene.add('EscenaMapa', EscenaMapa, true, datos);
     } else this.phaser.scene.getScene('EscenaMapa')?.scene.restart(datos);
   }
+  /** Actualiza la casilla resaltada por el cursor. */
   private alPasarSobre(c: casilla | null): void {
     if (!c) {
       if (this.seleccion) {
@@ -179,11 +187,11 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     this.cdr.markForCheck();
   }
   get unidadSeleccionada(): unidadservidor | null {
-    if (!this.seleccion) return null;
-    return (
-      this.unidades.find((u) => u.x === this.seleccion!.x && u.y === this.seleccion!.y) ?? null
-    );
+    const seleccion = this.seleccion;
+    if (!seleccion) return null;
+    return this.unidades.find((u) => u.x === seleccion.x && u.y === seleccion.y) ?? null;
   }
+  /** Recupera y guarda el reporte de la partida. */
   descargarPDF(): void {
     if (this.modoDemo || !this.id) return;
     this.subs.add(
@@ -204,6 +212,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
       }),
     );
   }
+  /** Libera los recursos y suscripciones del componente. */
   ngOnDestroy(): void {
     this.subs.unsubscribe();
     this.phaser?.destroy(true);

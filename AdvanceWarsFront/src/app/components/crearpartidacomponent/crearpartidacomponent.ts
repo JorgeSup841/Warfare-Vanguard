@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { configuracionmapa } from '../../models/mapa';
 import { juegoservice } from '../../services/juegoservice';
 import { tableroservice } from '../../services/tableroservice';
+/** Formulario para crear una partida en el servidor. */
 @Component({
   selector: 'app-crearpartidacomponent',
   standalone: false,
@@ -26,6 +27,7 @@ export class Crearpartidacomponent implements OnInit, OnDestroy {
     private router: Router,
     private cdr: ChangeDetectorRef,
   ) {}
+  /** Inicializa y carga los datos de la pantalla. */
   ngOnInit(): void {
     this.sub.add(
       this.catalogs.getConfiguracionMapa().subscribe({
@@ -42,6 +44,7 @@ export class Crearpartidacomponent implements OnInit, OnDestroy {
       }),
     );
   }
+  /** Actualiza la lista de jugadores de la partida. */
   cambiarCantidad(): void {
     this.nombres = Array.from(
       { length: this.cantidad },
@@ -49,6 +52,7 @@ export class Crearpartidacomponent implements OnInit, OnDestroy {
     );
     this.cdr.markForCheck();
   }
+  /** Valida los jugadores y crea una partida en Spring Boot. */
   crear(): void {
     if (this.ocupado) return;
     const nombres = this.nombres.map((n) => n.trim());
@@ -86,7 +90,10 @@ export class Crearpartidacomponent implements OnInit, OnDestroy {
           next: (p) => {
             this.ocupado = false;
             this.cdr.markForCheck();
-            void this.router.navigate(['/partidas', p.id, 'configurar']);
+            this.router.navigate(['/partidas', p.id, 'configurar']).catch(() => {
+              this.error = 'No se pudo abrir la pantalla solicitada.';
+              this.cdr.markForCheck();
+            });
           },
           error: (e) => {
             this.ocupado = false;
@@ -96,6 +103,7 @@ export class Crearpartidacomponent implements OnInit, OnDestroy {
         }),
     );
   }
+  /** Libera los recursos y suscripciones del componente. */
   ngOnDestroy(): void {
     this.sub.unsubscribe();
   }

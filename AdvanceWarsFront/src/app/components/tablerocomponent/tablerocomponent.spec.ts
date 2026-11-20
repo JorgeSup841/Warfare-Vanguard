@@ -11,10 +11,10 @@ describe('Tablerocomponent', () => {
     TestBed.configureTestingModule({
       imports: [CommonModule, FormsModule, RouterModule.forRoot([])],
       providers: [provideHttpClient(), provideHttpClientTesting()],
-      declarations: [Tablerocomponent]
+      declarations: [Tablerocomponent],
     });
     // No se crea el canvas Phaser ni se envían solicitudes HTTP en esta prueba básica.
-    TestBed.overrideComponent(Tablerocomponent, { set: {template: ''} });
+    TestBed.overrideComponent(Tablerocomponent, { set: { template: '' } });
     await TestBed.compileComponents();
     const fixture = TestBed.createComponent(Tablerocomponent);
     expect(fixture.componentInstance).toBeTruthy();

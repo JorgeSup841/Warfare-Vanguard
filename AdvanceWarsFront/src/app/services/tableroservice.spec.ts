@@ -7,7 +7,9 @@ describe('tableroservice', () => {
   let api: tableroservice;
   let http: HttpTestingController;
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
     api = TestBed.inject(tableroservice);
     http = TestBed.inject(HttpTestingController);
   });
@@ -21,15 +23,17 @@ describe('tableroservice', () => {
   it('consulta unidades desde la ruta real del backend', () => {
     api.getUnidades(42).subscribe();
     const r = http.expectOne(`${API_BASE_URL}/games/42/units`);
-    expect(r.request.method).toBe('GET'); r.flush([]);
+    expect(r.request.method).toBe('GET');
+    r.flush([]);
   });
   it('POST /start sin campos inventados', () => {
     api.iniciarPartida(42).subscribe();
     const r = http.expectOne(`${API_BASE_URL}/games/42/start`);
-    expect(r.request.method).toBe('POST'); r.flush({id:42,status:'IN_PROGRESS'});
+    expect(r.request.method).toBe('POST');
+    r.flush({ id: 42, status: 'IN_PROGRESS' });
   });
   it('operaciones aún no implementadas fallan explícitamente, no generan 404', () => {
-    api.getEstado(42).subscribe({ error: e => expect(e.message).toContain('pendiente') });
+    api.getEstado(42).subscribe({ error: (e) => expect(e.message).toContain('pendiente') });
     http.expectNone(`${API_BASE_URL}/games/42/state`);
   });
 });

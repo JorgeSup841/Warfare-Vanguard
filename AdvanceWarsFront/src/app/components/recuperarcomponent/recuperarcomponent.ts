@@ -1,6 +1,7 @@
 import { Component, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { usuarioservice } from '../../services/usuarioservice';
+/** Permite recuperar el acceso mediante correo. */
 @Component({
   selector: 'app-recuperarcomponent',
   standalone: false,
@@ -17,6 +18,7 @@ export class Recuperarcomponent implements OnDestroy {
     private auth: usuarioservice,
     private cdr: ChangeDetectorRef,
   ) {}
+  /** Gestiona solicitar en AURA WARS. */
   solicitar(email: string): void {
     if (this.ocupado || !email.trim()) return;
     this.ocupado = true;
@@ -43,6 +45,7 @@ export class Recuperarcomponent implements OnDestroy {
       }),
     );
   }
+  /** Gestiona restablecer en AURA WARS. */
   restablecer(id: string, codigo: string, clave: string): void {
     if (this.ocupado) return;
     this.error = '';
@@ -80,6 +83,7 @@ export class Recuperarcomponent implements OnDestroy {
       }),
     );
   }
+  /** Libera los recursos y suscripciones del componente. */
   ngOnDestroy(): void {
     this.subs.unsubscribe();
   }

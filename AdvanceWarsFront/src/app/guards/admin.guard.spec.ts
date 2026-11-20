@@ -1,10 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import {
-  provideRouter,
-  Router,
-  RouterStateSnapshot,
-  ActivatedRouteSnapshot,
-} from '@angular/router';
+import { provideRouter, RouterStateSnapshot, ActivatedRouteSnapshot } from '@angular/router';
 import { adminGuard } from './admin.guard';
 import { usuarioservice } from '../services/usuarioservice';
 

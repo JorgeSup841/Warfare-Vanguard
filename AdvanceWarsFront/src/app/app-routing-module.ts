@@ -42,5 +42,8 @@ const routes: Routes = [
   { path: 'juego', redirectTo: 'partidas', pathMatch: 'full' },
   { path: '**', redirectTo: '' },
 ];
+/** Configura la navegación y las restricciones de acceso. */
 @NgModule({ imports: [RouterModule.forRoot(routes)], exports: [RouterModule] })
-export class AppRoutingModule {}
+export class AppRoutingModule {
+  static readonly rutas = routes;
+}

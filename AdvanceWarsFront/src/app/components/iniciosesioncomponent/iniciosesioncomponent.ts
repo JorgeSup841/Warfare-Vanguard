@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { usuarioservice } from '../../services/usuarioservice';
+/** Gestiona el inicio de sesión mediante correo OTP. */
 @Component({
   selector: 'app-iniciosesioncomponent',
   standalone: false,
@@ -20,6 +21,7 @@ export class Iniciosesioncomponent implements OnDestroy {
     private router: Router,
     private cdr: ChangeDetectorRef,
   ) {}
+  /** Valida las credenciales y solicita el desafío OTP. */
   ingresar(username: string, password: string): void {
     if (this.procesando) return;
     this.error = '';
@@ -37,7 +39,10 @@ export class Iniciosesioncomponent implements OnDestroy {
           this.procesando = false;
           try {
             this.auth.prepararDesafio('login', r);
-            void this.router.navigate(['/verificar']);
+            this.router.navigate(['/verificar']).catch(() => {
+              this.error = 'No se pudo abrir la pantalla solicitada.';
+              this.cdr.markForCheck();
+            });
           } catch (e) {
             this.error = e instanceof Error ? e.message : 'Respuesta OTP inválida.';
           }
@@ -58,6 +63,7 @@ export class Iniciosesioncomponent implements OnDestroy {
       }),
     );
   }
+  /** Libera los recursos y suscripciones del componente. */
   ngOnDestroy(): void {
     this.subs.unsubscribe();
   }

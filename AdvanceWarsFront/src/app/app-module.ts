@@ -19,10 +19,13 @@ import { Resultadoscomponent } from './components/resultadoscomponent/resultados
 import { Admincomponent } from './components/admincomponent/admincomponent';
 import { Tablerocomponent } from './components/tablerocomponent/tablerocomponent';
 import { Phasercomponent } from './components/phasercomponent/phasercomponent';
+/** Módulo raíz de la aplicación AURA WARS. */
 @NgModule({
  declarations:[App,Navbarcomponent,Footercomponent,Iniciosesioncomponent,Registercomponent,Verificarcomponent,Recuperarcomponent,Panelcomponent,Partidascomponent,Crearpartidacomponent,Configurarpartidacomponent,Juegocomponent,Resultadoscomponent,Admincomponent,Tablerocomponent,Phasercomponent],
  imports:[BrowserModule,FormsModule,AppRoutingModule],
  providers:[provideBrowserGlobalErrorListeners(),provideHttpClient()],
  bootstrap:[App]
 })
-export class AppModule {}
+export class AppModule {
+  static readonly identificador = 'AURA WARS';
+}

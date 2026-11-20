@@ -4,6 +4,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, Subscription } from 'rxjs';
 import { usuarioservice } from '../../services/usuarioservice';
 
+/** Valida códigos OTP del registro y del inicio de sesión. */
 @Component({
   selector: 'app-verificarcomponent',
   standalone: false,
@@ -31,6 +32,7 @@ export class Verificarcomponent implements OnDestroy {
     return this.auth.getDesafio()?.correo ?? '';
   }
 
+  /** Comprueba el código de seis dígitos recibido por correo. */
   verificar(codigo: string): void {
     if (this.procesando) return;
     this.mensaje = '';
@@ -70,7 +72,10 @@ export class Verificarcomponent implements OnDestroy {
             this.verificado = true;
             this.auth.limpiarDesafio();
           } else {
-            void this.router.navigate(['/panel']);
+            this.router.navigate(['/panel']).catch(() => {
+              this.error = 'No se pudo abrir la pantalla solicitada.';
+              this.cdr.markForCheck();
+            });
           }
           this.cdr.markForCheck();
         },
@@ -88,6 +93,7 @@ export class Verificarcomponent implements OnDestroy {
     );
   }
 
+  /** Solicita un nuevo código de verificación. */
   reenviar(): void {
     if (this.procesando || !this.tipo) return;
     this.procesando = true;
@@ -111,6 +117,7 @@ export class Verificarcomponent implements OnDestroy {
     );
   }
 
+  /** Libera los recursos y suscripciones del componente. */
   ngOnDestroy(): void {
     this.subs.unsubscribe();
   }

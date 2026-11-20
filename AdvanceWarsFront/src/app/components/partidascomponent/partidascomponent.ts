@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { tableroservice } from '../../services/tableroservice';
 import { partidaresumen } from '../../models/tablero';
+/** Consulta y presenta las partidas registradas. */
 @Component({
   selector: 'app-partidascomponent',
   standalone: false,
@@ -17,9 +18,11 @@ export class Partidascomponent implements OnInit, OnDestroy {
     private service: tableroservice,
     private cdr: ChangeDetectorRef,
   ) {}
+  /** Inicializa y carga los datos de la pantalla. */
   ngOnInit(): void {
     this.cargar();
   }
+  /** Consulta los datos necesarios para presentar la pantalla. */
   cargar(): void {
     this.cargando = true;
     this.error = '';
@@ -39,6 +42,7 @@ export class Partidascomponent implements OnInit, OnDestroy {
       }),
     );
   }
+  /** Libera los recursos y suscripciones del componente. */
   ngOnDestroy(): void {
     this.sub.unsubscribe();
   }

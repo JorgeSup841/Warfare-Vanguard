@@ -6,6 +6,7 @@ import { unidad, unidadjuego } from '../../models/unidad';
 import { juegoservice } from '../../services/juegoservice';
 import { demopartidaservice } from '../../services/demopartidaservice';
 
+/** Gestiona la vista interactiva del tablero de demostración. */
 @Component({
   selector: 'app-tablerocomponent',
   standalone: false,
@@ -29,9 +30,11 @@ export class Tablerocomponent implements OnInit, OnDestroy {
     private demos: demopartidaservice,
     private cdr: ChangeDetectorRef,
   ) {}
+  /** Inicializa y carga los datos de la pantalla. */
   ngOnInit(): void {
     this.cargarDatos();
   }
+  /** Consulta los datos complementarios para actualizar la vista. */
   cargarDatos(): void {
     this.peticion?.unsubscribe();
     this.cargando = true;
@@ -63,6 +66,7 @@ export class Tablerocomponent implements OnInit, OnDestroy {
       },
     });
   }
+  /** Modifica la cantidad de jugadores de la demostración. */
   cambiarJugadores(cantidad: 2 | 3 | 4): void {
     if (!this.configuracion) return;
     try {
@@ -82,6 +86,7 @@ export class Tablerocomponent implements OnInit, OnDestroy {
     }
     this.cdr.markForCheck();
   }
+  /** Actualiza la casilla seleccionada en el tablero. */
   seleccionarCasilla(c: casilla | null): void {
     this.seleccion = c;
     this.cdr.markForCheck();
@@ -97,23 +102,29 @@ export class Tablerocomponent implements OnInit, OnDestroy {
       null
     );
   }
+  /** Resuelve el nombre visible del tipo de terreno. */
   nombreTerreno(codigo: string): string {
     return this.terrenos.find((t) => t.terrainType === codigo)?.name ?? codigo;
   }
+  /** Resuelve el nombre visible del tipo de unidad. */
   nombreUnidad(codigo: string): string {
     return this.unidades.find((u) => u.unitType === codigo)?.name ?? codigo;
   }
+  /** Resuelve el nombre visible del tipo de propiedad. */
   nombrePropiedad(codigo: string): string {
     return this.propiedades.find((p) => p.type === codigo)?.name ?? codigo;
   }
+  /** Resuelve el nombre visible del jugador. */
   nombreJugador(orden: number | null): string {
     return orden === null
       ? 'Neutral'
       : (this.juego?.players.find((j) => j.turnOrder === orden)?.name ?? 'Desconocido');
   }
+  /** Obtiene el color asociado a la facción del jugador. */
   colorJugador(codigoFaccion: string): string {
     return this.facciones.find((f) => f.code === codigoFaccion)?.color ?? '#ffffff';
   }
+  /** Libera los recursos y suscripciones del componente. */
   ngOnDestroy(): void {
     this.peticion?.unsubscribe();
   }
