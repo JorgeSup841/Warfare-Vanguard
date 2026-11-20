@@ -1,0 +1,50 @@
+<section class="screen">
+  <div class="wrap">
+    <header class="flex header"><h1>{{ modoDemo ? 'TABLERO DE PRUEBA' : 'PARTIDA #' + id }}</h1>
+      <a class="btn secondary" routerLink="/partidas" *ngIf="!modoDemo">VOLVER</a></header>
+    <div class="panel">
+      <div class="panel-head azul">CAMPO DE BATALLA {{ modoDemo ? '· DEMOSTRACIÓN' : '· SPRING BOOT' }}</div>
+      <div class="panel-body">
+        <p *ngIf="cargando">Cargando mapa y terrenos...</p>
+        <p *ngIf="error" class="message error" role="alert">{{ error }}</p>
+        <p *ngIf="mensaje" class="message">{{ mensaje }}</p>
+        <p *ngIf="partida">ESTADO: {{ partida.status }} · RONDA: {{ partida.currentRound }} ·
+          TURNO: {{ partida.currentPlayerOrder }}</p>
+        <div class="game-layout">
+          <div class="map-col">
+            <div class="marco">
+              <div id="contenedor-juego" class="lienzo" [style.aspect-ratio]="proporcion"></div>
+            </div>
+            <p class="muted">Pasa el cursor sobre una casilla. Phaser solo dibuja; Spring Boot controla la partida.</p>
+          </div>
+          <aside class="sidebar"><h2>INSPECTOR</h2>
+            <p *ngIf="!seleccion">Selecciona una casilla.</p>
+            <ng-container *ngIf="seleccion as c">
+              <p>POSICIÓN: {{ c.x }}, {{ c.y }}</p>
+              <p>TERRENO: {{ c.terreno?.name || '—' }}</p>
+              <p>DEFENSA: {{ c.terreno?.defenseStars ?? 0 }}</p>
+              <p *ngIf="unidadSeleccionada as u">UNIDAD: {{ u.unitType }} #{{ u.id }}<br>VIDA: {{ u.health }} ·
+                COMBUSTIBLE: {{ u.fuel }}</p>
+            </ng-container>
+            <h3>TERRENOS</h3>
+            <p *ngFor="let t of terrenos"><span class="swatch" [style.background]="t.color"></span>{{ t.name }}</p>
+            <div *ngIf="!modoDemo" class="flex">
+              <button type="button" (click)="cargarMapa()">ACTUALIZAR MAPA</button>
+              <button type="button" class="secondary" (click)="cargarDatos()">PARTIDA Y UNIDADES</button>
+              <button type="button" (click)="descargarPDF()">DESCARGAR PDF</button>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="!modoDemo" class="panel extra">
+      <div class="panel-head">ACCIONES DEL MOTOR</div>
+      <div class="panel-body">
+        <p>El backend actual permite crear e iniciar partidas y consultar mapa, unidades y PDF. Movimiento, combate,
+          capturas, producción, poderes e historial requieren implementar sus endpoints antes de habilitar
+          controles.</p>
+        <a [routerLink]="['/partidas',id,'resultados']">VER INFORME DE PARTIDA ▸</a>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,42 @@
+:host {
+  display: block
+}
+
+.demo-legacy {
+  font-family: 'Silkscreen', monospace;
+  background: #526246;
+  color: #fff0c4;
+  padding: 24px;
+  min-height: 70vh
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center
+}
+
+h1 {
+  font-size: 17px
+}
+
+a {
+  color: #ffd44f
+}
+
+.botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 18px 0
+}
+
+button {
+  font: inherit;
+  padding: 10px;
+  background: #ffd44f;
+  color: #1c292e;
+  border: 3px solid #1c292e
+}

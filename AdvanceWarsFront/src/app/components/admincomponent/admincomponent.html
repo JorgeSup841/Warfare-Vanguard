@@ -1,0 +1,36 @@
+<section class="screen">
+  <div class="wrap"><h1>CENTRO ADMINISTRATIVO</h1>
+    <div class="panel">
+      <div class="panel-head azul">ACCESO ADMIN ■</div>
+      <div class="panel-body">
+        <p>Usuarios y roles reales gestionados por Spring Boot; el servidor comprueba el rol ADMIN.</p>
+        <div class="flex">
+          <button (click)="cargar()" [disabled]="procesando">REFRESCAR</button>
+          <a class="btn secondary" routerLink="/panel">CUARTEL</a></div>
+        <p *ngIf="error" class="message error" role="alert">{{ error }}</p>
+        <p *ngIf="mensaje" class="message">{{ mensaje }}</p>
+        <h2>USUARIOS</h2>
+        <div class="usuario" *ngFor="let u of usuarios">
+          <span>#{{ u.id }} — {{ u.username }} ({{ u.email }})</span>
+          <select [ngModel]="u.role" (ngModelChange)="cambiarRol(u,$event)" [disabled]="procesando"
+                  aria-label="Rol de usuario">
+            <option value="USER">JUGADOR</option>
+            <option value="ADMIN">ADMINISTRADOR</option>
+          </select>
+          <select [ngModel]="u.enabled" (ngModelChange)="cambiarEstado(u,$event)" [disabled]="procesando"
+                  aria-label="Estado de usuario">
+            <option [ngValue]="true">HABILITADO</option>
+            <option [ngValue]="false">DESHABILITADO</option>
+          </select>
+          <span>{{ u.emailVerified ? 'CORREO VERIFICADO' : 'CORREO PENDIENTE' }}</span>
+        </div>
+        <p *ngIf="!usuarios.length">No hay usuarios para mostrar.</p>
+        <h2>INFORME PDF</h2>
+        <div class="flex"><input aria-label="ID de partida para PDF" type="number" [(ngModel)]="idPDF" min="1">
+          <button (click)="pdfPartida()">DESCARGAR PDF</button>
+        </div>
+        <p>La edición global de parámetros y catálogos requiere endpoints aún no implementados en el backend actual.</p>
+      </div>
+    </div>
+  </div>
+</section>

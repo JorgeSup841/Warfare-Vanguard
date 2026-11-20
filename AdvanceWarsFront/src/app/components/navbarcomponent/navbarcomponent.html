@@ -1,5 +1,12 @@
-<nav class="navbar">
-  <a routerLink="/" class="navbar__logo">
-    WARFARE VANGUARD
-  </a>
+<nav class="pixel-nav" aria-label="Navegación de Aura Wars">
+  <a class="brand" routerLink="/">✚ AURA WARS</a>
+  <div class="links">
+    <a routerLink="/">INICIO</a>
+    <a *ngIf="auth.estaAutenticado()" routerLink="/panel">CUARTEL</a>
+    <a *ngIf="auth.estaAutenticado()" routerLink="/partidas">PARTIDAS</a>
+    <a *ngIf="auth.isAdmin()" routerLink="/admin">ADMIN</a>
+    <a routerLink="/tablero-demo">DEMO</a>
+    <button *ngIf="auth.estaAutenticado()" type="button" (click)="salir()">SALIR</button>
+    <span class="estado">{{ auth.estaAutenticado() ? 'EN LÍNEA' : 'SIN SESIÓN' }} <i></i></span>
+  </div>
 </nav>

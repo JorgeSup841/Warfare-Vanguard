@@ -1,30 +1,19 @@
 import { TestBed } from '@angular/core/testing';
 import { RouterModule } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { App } from './app';
-
-describe('App', () => {
-  beforeEach(async () => {
+import { Navbarcomponent } from './components/navbarcomponent/navbarcomponent';
+import { Footercomponent } from './components/footercomponent/footercomponent';
+describe('App Aura Wars', () => {
+  it('crea la aplicación con navegación', async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        RouterModule.forRoot([])
-      ],
-      declarations: [
-        App
-      ],
-    })
-      .compileComponents();
-  });
-
-  it('should create the app', () => {
+      imports: [RouterModule.forRoot([])],
+      declarations: [App, Navbarcomponent, Footercomponent],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    }).compileComponents();
     const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
-  });
-
-  it('should render title', async () => {
-    const fixture = TestBed.createComponent(App);
-    await fixture.whenStable();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, AdvanceWarsFront');
+    fixture.detectChanges();
+    expect(fixture.componentInstance).toBeTruthy();
   });
 });

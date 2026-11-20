@@ -1,44 +1,40 @@
-<section class="login">
-
-  <aside class="login__side">
-    <span class="badge">CONTINUAR PARTIDA</span>
-    <h1>¡TU MISIÓN CONTINÚA!</h1>
-    <p>Identifícate, recupera el mando de tu escuadrón y continúa tu campaña desde la base.</p>
-
-    <div class="frame">
-      <img src="assets/elpepeetesech.jpg" alt="Campo de batalla" />
+<section class="screen login-screen">
+  <div class="wrap narrow">
+    <div class="logo-wrap">
+      <svg class="escudo" viewBox="0 0 64 42" shape-rendering="crispEdges" role="img" aria-label="Emblema de Aura Wars">
+        <path fill="#18282d" d="M2 12H19V7H45V12H62V26H48V31H42V36H22V31H16V26H2Z" />
+        <rect x="5" y="15" width="14" height="7" fill="#ffd44f" />
+        <rect x="45" y="15" width="14" height="7" fill="#ffd44f" />
+        <path fill="#fff0c4" d="M22 7H42V30H37V35H27V30H22Z" />
+        <rect x="30" y="10" width="4" height="17" fill="#e74b40" />
+        <rect x="25" y="16" width="14" height="6" fill="#e74b40" />
+      </svg>
+      <h1>AURA<br>WARS</h1>
+      <p>ESTRATEGIA POR TURNOS</p>
     </div>
-
-    <div class="status">
-      <span class="status__online"><i class="dot"></i> PLAYER 1 READY</span>
-      <span class="status__text">CAMPAÑA GUARDADA</span>
-    </div>
-  </aside>
-
-
-  <main class="login__main">
-    <span class="eyebrow">ACCESO DE COMANDANTE</span>
-    <h2>Bienvenido de nuevo</h2>
-    <p class="subtitle">Introduce tus credenciales para continuar la misión.</p>
-
-    <form>
-      <label for="usuario">USUARIO</label>
-      <input id="usuario" type="text" placeholder="Nombre de comandante" />
-
-      <label for="password">CONTRASEÑA</label>
-      <input id="password" type="password" placeholder="Introduce tu contraseña" />
-
-      <div class="options">
-        <label class="check">
-          <input type="checkbox" />
-          Recordar mi acceso
-        </label>
-        <a href="#">¿Olvidaste la contraseña?</a>
+    <div class="panel">
+      <div class="panel-head">INICIAR SESIÓN ■</div>
+      <div class="panel-body">
+        <form (ngSubmit)="ingresar(usuario.value,clave.value)" novalidate>
+          <div class="field"><label for="loginUsuario">USUARIO</label><input id="loginUsuario" name="usuario" #usuario
+                                                                             type="text" placeholder="NOMBRE DE USUARIO"
+                                                                             autocomplete="username" required></div>
+          <div class="field"><label for="loginClave">CONTRASEÑA</label><input id="loginClave" name="clave" #clave
+                                                                              [type]="mostrarClave?'text':'password'"
+                                                                              placeholder="CONTRASEÑA"
+                                                                              autocomplete="current-password" required>
+          </div>
+          <label class="show"><input type="checkbox" [(ngModel)]="mostrarClave" name="mostrar"> MOSTRAR
+            CONTRASEÑA</label>
+          <div *ngIf="error" class="message error" role="alert">{{ error }}</div>
+          <button type="submit" [disabled]="procesando" class="full">{{ procesando ? 'ENVIANDO...' : 'ENTRAR / JUGAR' }}
+            ▸
+          </button>
+        </form>
+        <div class="links-foot"><a routerLink="/register">CREAR CUENTA ▸</a> <a routerLink="/recuperar">RECUPERAR
+          CLAVE</a></div>
       </div>
-
-      <button type="submit" class="btn">ENTRAR A LA BASE →</button>
-    </form>
-
-    <p class="footer">¿Aún no tienes una cuenta? <button type="button" routerLink="/register" class="btn">CREAR CUENTA</button></p>
-  </main>
+    </div>
+    <p class="linea">■ CÓDIGO OTP ENVIADO POR CORREO</p>
+  </div>
 </section>

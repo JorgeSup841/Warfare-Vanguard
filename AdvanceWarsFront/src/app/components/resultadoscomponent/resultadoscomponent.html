@@ -1,0 +1,25 @@
+<section class="screen">
+  <div class="wrap"><h1>INFORME DE PARTIDA #{{ id }}</h1>
+    <div class="panel">
+      <div class="panel-head">INFORMACIÓN DESDE SPRING BOOT</div>
+      <div class="panel-body">
+        <p *ngIf="cargando">Consultando...</p>
+        <ng-container *ngIf="partida as p"><p>ESTADO: {{ p.status }} · RONDA: {{ p.currentRound }} ·
+          TURNO: {{ p.currentPlayerOrder }}</p>
+          <p>JUGADORES: {{ p.playerCount }} · MAPA: {{ p.width }} × {{ p.height }}</p>
+          <h2>PARTICIPANTES</h2>
+          <p *ngFor="let j of p.players">{{ j.turnOrder }}. {{ j.name }} — {{ j.money }} CRÉDITOS</p>
+          <h2>UNIDADES REGISTRADAS</h2>
+          <p>TOTAL: {{ unidades.length }}</p>
+        </ng-container>
+        <p>El backend aún no expone un historial de eventos ni un resultado final detallado. El PDF disponible lo genera
+          Spring Boot.</p>
+        <p *ngIf="error" class="message error" role="alert">{{ error }}</p>
+        <p *ngIf="mensaje" class="message">{{ mensaje }}</p>
+        <div class="flex">
+          <button (click)="descargar()">DESCARGAR PDF</button>
+          <a class="btn secondary" [routerLink]="['/partidas',id,'jugar']">VOLVER AL TABLERO</a></div>
+      </div>
+    </div>
+  </div>
+</section>
