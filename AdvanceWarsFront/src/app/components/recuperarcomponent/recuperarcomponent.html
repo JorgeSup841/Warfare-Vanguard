@@ -1,0 +1,35 @@
+<section class="screen">
+  <div class="wrap narrow">
+    <h1>RECUPERAR ACCESO</h1>
+    <div class="panel">
+      <div class="panel-head">RECUPERACIÓN DE CONTRASEÑA</div>
+      <div class="panel-body">
+        <form *ngIf="modo === 'solicitar'" (ngSubmit)="solicitar(correo.value)">
+          <p>Introduce tu correo para recibir instrucciones.</p>
+          <div class="field"><label for="correoRec">CORREO</label><input #correo id="correoRec" type="email"
+                                                                         placeholder="TU@CORREO.COM" required></div>
+          <button [disabled]="ocupado">{{ ocupado ? 'ENVIANDO...' : 'SOLICITAR CÓDIGO' }}</button>
+        </form>
+        <form *ngIf="modo === 'restablecer'" (ngSubmit)="restablecer(identificador.value, codigo.value, nueva.value)">
+          <p>El backend actual envía un código y un identificador en el correo de recuperación. Introduce ambos.</p>
+          <div class="field"><label for="idRec">IDENTIFICADOR DEL CORREO</label><input #identificador id="idRec"
+                                                                                       autocomplete="off" required>
+          </div>
+          <div class="field"><label for="codigoRec">CÓDIGO DE 6 DÍGITOS</label><input #codigo id="codigoRec"
+                                                                                      inputmode="numeric" maxlength="6"
+                                                                                      pattern="[0-9]{6}"
+                                                                                      autocomplete="one-time-code"
+                                                                                      required></div>
+          <div class="field"><label for="claveRec">NUEVA CONTRASEÑA</label><input #nueva id="claveRec" type="password"
+                                                                                  minlength="12"
+                                                                                  autocomplete="new-password" required>
+          </div>
+          <button [disabled]="ocupado">{{ ocupado ? 'GUARDANDO...' : 'CAMBIAR CONTRASEÑA' }}</button>
+        </form>
+        <p *ngIf="mensaje" class="message">{{ mensaje }}</p>
+        <p *ngIf="error" class="message error" role="alert">{{ error }}</p>
+        <a routerLink="/">‹ VOLVER AL INICIO</a>
+      </div>
+    </div>
+  </div>
+</section>

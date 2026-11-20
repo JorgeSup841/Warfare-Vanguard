@@ -1,0 +1,19 @@
+<section class="screen">
+  <div class="wrap"><h1>CUARTEL GENERAL</h1>
+    <div class="panel">
+      <div class="panel-head">PANEL DE MANDO ■</div>
+      <div class="panel-body">
+        <p>COMANDANTE: <strong>{{ auth.getUsuarioActual()?.username }}</strong></p>
+        <p>ACCESO: <strong>{{ auth.getRole() === 'ADMIN' ? 'ADMINISTRADOR' : 'JUGADOR' }}</strong></p>
+        <p>Cuenta verificada mediante código del correo.</p>
+        <div class="links"><a class="btn" routerLink="/partidas">MIS PARTIDAS</a><a class="btn"
+                                                                                    routerLink="/partidas/nueva">NUEVA
+          PARTIDA</a><a class="btn secondary" routerLink="/tablero-demo">TABLERO DEMO</a><a class="btn"
+                                                                                            *ngIf="auth.isAdmin()"
+                                                                                            routerLink="/admin">ADMINISTRACIÓN</a>
+        </div>
+        <p class="alerta">AURA WARS: los turnos, combates, recursos y permisos reales pertenecen al backend.</p>
+      </div>
+    </div>
+  </div>
+</section>

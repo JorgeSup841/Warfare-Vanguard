@@ -1,3 +1,4 @@
+import { partida } from './partida';
 
 export interface nuevapartida {
   playerNames: string[];
@@ -6,6 +7,12 @@ export interface nuevapartida {
   seed: number;
 }
 
+export interface jugadorservidor {
+  name: string;
+  turnOrder: number;
+  money: number;
+  status: string;
+}
 
 export interface partidaresumen {
   id: number;
@@ -14,9 +21,11 @@ export interface partidaresumen {
   width: number;
   height: number;
   seed: number;
+  currentRound: number;
+  currentPlayerOrder: number;
   playerNames: string[];
+  players: jugadorservidor[];
 }
-
 
 export interface casillatablero {
   x: number;
@@ -26,10 +35,40 @@ export interface casillatablero {
   ownerOrder: number | null;
 }
 
-
 export interface tablero {
   gameId: number;
   width: number;
   height: number;
   tiles: casillatablero[];
+}
+
+export interface unidadservidor {
+  id: number;
+  unitType: string;
+  ownerOrder: number;
+  x: number;
+  y: number;
+  health: number;
+  fuel: number;
+  movedThisTurn: boolean;
+  attackedThisTurn: boolean;
+}
+
+export type estadojuego = partida;
+
+export interface seleccionjugador {
+  factionId: number;
+  commanderId: number;
+}
+
+export interface registrarasiento {
+  name: string;
+  turnOrder?: number;
+}
+
+export interface eventojuego {
+  id?: number;
+  eventType?: string;
+  description?: string;
+  occurredAt?: string;
 }

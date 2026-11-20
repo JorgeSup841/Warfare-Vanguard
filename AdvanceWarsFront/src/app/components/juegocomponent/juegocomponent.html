@@ -1,78 +1,293 @@
-<section class="juego">
+<section class="screen juego">
+  <div class="wrap">
 
-  <header class="juego__cabecera">
-    <span class="badge">TABLERO DE BATALLA</span>
-    <h1>MAPA ALEATORIO</h1>
-  </header>
+    <header class="flex header">
+      <div>
+        <span class="badge">
+          {{ modoDemo ? 'MODO DEMOSTRACIÓN' : 'PARTIDA EN CURSO' }}
+        </span>
 
-  <!-- CONTROLES -->
-  <div class="juego__controles">
-    <div class="control">
-      <label for="semilla">SEMILLA</label>
-      <input id="semilla" type="number" [(ngModel)]="semilla" />
-      <button type="button" class="btn btn--claro" (click)="usarSemilla()">USAR</button>
+        <h1>
+          {{ modoDemo ? 'TABLERO DE PRUEBA' : 'PARTIDA #' + id }}
+        </h1>
+      </div>
+
+      <a
+        *ngIf="!modoDemo"
+        class="btn secondary"
+        routerLink="/partidas">
+        VOLVER
+      </a>
+    </header>
+
+    <div *ngIf="modoDemo" class="juego__controles">
+
+      <div class="control">
+        <label for="semilla">SEMILLA</label>
+
+        <input
+          id="semilla"
+          type="number"
+          [(ngModel)]="semilla">
+
+        <button
+          type="button"
+          class="btn btn--claro"
+          (click)="usarSemilla()">
+          USAR
+        </button>
+      </div>
+
+      <div class="control">
+        <span class="control__titulo">JUGADORES</span>
+
+        <button
+          type="button"
+          class="btn btn--chico"
+          [class.activo]="jugadores === 2"
+          (click)="fijarJugadores(2)">
+          2
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--chico"
+          [class.activo]="jugadores === 3"
+          (click)="fijarJugadores(3)">
+          3
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--chico"
+          [class.activo]="jugadores === 4"
+          (click)="fijarJugadores(4)">
+          4
+        </button>
+      </div>
+
+      <button
+        type="button"
+        class="btn"
+        (click)="nuevoMapa()">
+        NUEVO MAPA
+      </button>
+
     </div>
 
-    <div class="control">
-      <span class="control__titulo">JUGADORES</span>
-      <button type="button" class="btn btn--chico" [class.activo]="jugadores === 2" (click)="fijarJugadores(2)">2</button>
-      <button type="button" class="btn btn--chico" [class.activo]="jugadores === 3" (click)="fijarJugadores(3)">3</button>
-      <button type="button" class="btn btn--chico" [class.activo]="jugadores === 4" (click)="fijarJugadores(4)">4</button>
-    </div>
+    <div class="panel">
 
-    <button type="button" class="btn" (click)="nuevoMapa()">NUEVO MAPA</button>
-  </div>
+      <div class="panel-head azul">
+        CAMPO DE BATALLA
+        {{ modoDemo ? '· DEMOSTRACIÓN' : '· SPRING BOOT' }}
+      </div>
 
-  <!-- MENSAJE DE ERROR -->
-  <p class="juego__mensaje" *ngIf="mensaje">{{ mensaje }}</p>
+      <div class="panel-body">
 
-  <div class="juego__tablero">
+        <p *ngIf="cargando">
+          Cargando mapa y terrenos...
+        </p>
 
-    <!-- MAPA (aquí dibuja Phaser) -->
-    <div class="juego__marco">
-      <div class="juego__lienzo" id="contenedor-juego" [style.aspect-ratio]="proporcion"></div>
-    </div>
+        <p
+          *ngIf="error"
+          class="message error"
+          role="alert">
+          {{ error }}
+        </p>
 
-    <aside class="juego__panel">
+        <p
+          *ngIf="mensaje"
+          class="message">
+          {{ mensaje }}
+        </p>
 
-      <!-- CASILLA BAJO EL MOUSE -->
-      <div class="caja">
-        <h2>CASILLA</h2>
+        <p *ngIf="partida">
+          ESTADO: {{ partida.status }}
+          · RONDA: {{ partida.currentRound }}
+          · TURNO: {{ partida.currentPlayerOrder }}
+        </p>
 
-        <div *ngIf="seleccion">
-          <p class="caja__posicion">Posición: {{ seleccion.x }}, {{ seleccion.y }}</p>
+        <div class="game-layout">
 
-          <div *ngIf="seleccion.terreno">
-            <p class="caja__terreno">{{ seleccion.terreno.name }}</p>
-            <p>Defensa: {{ seleccion.terreno.defenseStars }} de 4</p>
+          <div class="map-col">
 
-            <table>
-              <thead>
-              <tr><th>Unidad</th><th>Costo</th></tr>
-              </thead>
-              <tbody>
-              <tr *ngFor="let m of tiposMovimiento">
-                <td>{{ m.nombre }}</td>
-                <td>{{ obtenerCosto(seleccion.terreno, m.codigo) }}</td>
-              </tr>
-              </tbody>
-            </table>
+            <div class="marco juego__marco">
+              <div
+                id="contenedor-juego"
+                class="lienzo juego__lienzo"
+                [style.aspect-ratio]="proporcion">
+              </div>
+            </div>
+
+            <p class="muted">
+              Pasa el cursor sobre una casilla para consultar
+              su información.
+            </p>
+
           </div>
+
+          <aside class="sidebar juego__panel">
+
+            <div class="caja">
+
+              <h2>INSPECTOR DE CASILLA</h2>
+
+              <p *ngIf="!seleccion" class="caja__vacio">
+                Selecciona una casilla del mapa.
+              </p>
+
+              <ng-container *ngIf="seleccion as c">
+
+                <p>
+                  POSICIÓN: {{ c.x }}, {{ c.y }}
+                </p>
+
+                <p class="caja__terreno">
+                  {{ c.terreno?.name || 'SIN DATOS' }}
+                </p>
+
+                <p>
+                  DEFENSA: {{ c.terreno?.defenseStars ?? 0 }}
+                </p>
+
+                <ng-container *ngIf="c.terreno as terrenoActual">
+
+                  <table>
+                    <thead>
+                    <tr>
+                      <th>UNIDAD</th>
+                      <th>COSTO</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr *ngFor="let m of tiposMovimiento">
+                      <td>{{ m.nombre }}</td>
+                      <td>
+                        {{ obtenerCosto(terrenoActual, m.codigo) }}
+                      </td>
+                    </tr>
+                    </tbody>
+                  </table>
+
+                </ng-container>
+
+                <div *ngIf="unidadSeleccionada as u">
+
+                  <h3>UNIDAD</h3>
+
+                  <p>
+                    TIPO: {{ u.unitType }}
+                  </p>
+
+                  <p>
+                    IDENTIFICADOR: #{{ u.id }}
+                  </p>
+
+                  <p>
+                    VIDA: {{ u.health }}
+                  </p>
+
+                  <p>
+                    COMBUSTIBLE: {{ u.fuel }}
+                  </p>
+
+                </div>
+
+              </ng-container>
+
+            </div>
+
+            <div class="caja">
+
+              <h2>LEYENDA</h2>
+
+              <div
+                class="leyenda"
+                *ngFor="let t of terrenos">
+
+                <span
+                  class="leyenda__color"
+                  [style.background]="t.color">
+                </span>
+
+                {{ t.name }}
+
+              </div>
+
+              <p class="caja__vacio" *ngIf="modoDemo">
+                LOS NÚMEROS DEL 1 AL 4 REPRESENTAN
+                LAS BASES DE LOS JUGADORES.
+              </p>
+
+            </div>
+
+            <div class="caja" *ngIf="!modoDemo">
+
+              <h2>CONTROLES DE PARTIDA</h2>
+
+              <div class="grid">
+
+                <button
+                  type="button"
+                  (click)="cargarMapa()">
+                  ACTUALIZAR MAPA
+                </button>
+
+                <button
+                  type="button"
+                  class="secondary"
+                  (click)="cargarDatos()">
+                  ACTUALIZAR PARTIDA
+                </button>
+
+                <button
+                  type="button"
+                  (click)="descargarPDF()">
+                  DESCARGAR PDF
+                </button>
+
+              </div>
+
+            </div>
+
+          </aside>
+
         </div>
 
-        <p class="caja__vacio" *ngIf="!seleccion">Pasa el mouse sobre el mapa para ver la casilla.</p>
+      </div>
+    </div>
+
+    <div
+      *ngIf="!modoDemo"
+      class="panel extra">
+
+      <div class="panel-head">
+        INFORMACIÓN DE LA PARTIDA
       </div>
 
-      <!-- LEYENDA -->
-      <div class="caja">
-        <h2>LEYENDA</h2>
-        <div class="leyenda" *ngFor="let t of terrenos">
-          <i class="leyenda__color" [style.background]="t.color"></i>
-          {{ t.name }}
-        </div>
-        <p class="caja__vacio">Los números 1 a 4 son las bases de cada jugador.</p>
+      <div class="panel-body">
+
+        <p>
+          El servidor Spring Boot administra los datos
+          de la partida, el mapa y las unidades.
+        </p>
+
+        <p>
+          Las acciones de movimiento, combate, captura,
+          producción y finalización de turnos se habilitarán
+          cuando sus endpoints estén implementados.
+        </p>
+
+        <a
+          class="btn secondary"
+          [routerLink]="['/partidas', id, 'resultados']">
+          VER INFORME DE PARTIDA ▸
+        </a>
+
       </div>
 
-    </aside>
+    </div>
+
   </div>
 </section>

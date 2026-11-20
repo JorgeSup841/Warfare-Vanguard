@@ -1,22 +1,58 @@
+export type rolusuario = 'USER' | 'ADMIN';
+
 export interface usuario {
   id?: number;
   username: string;
   email?: string;
-  password?: string;
-  role: 'ADMIN' | 'USER';
+  role: rolusuario;
+  emailVerified?: boolean;
+  enabled?: boolean;
   coins?: number;
   countryCode?: string;
 }
 
-export interface AuthRequest {
+export interface registro {
   username: string;
-  password?: string;
+  email: string;
+  password: string;
 }
 
-export interface AuthResponse {
-  token: string;
-  role: string;
+export interface respuestapendiente {
+  challengeId: string;
+  status?: string;
+  expiresAt?: string;
+}
+
+export interface verificacion {
+  challengeId: string;
+  code: string;
+}
+
+export interface usuarioautenticado {
+  id: number;
   username: string;
+  email: string;
+  role: rolusuario | `ROLE_${rolusuario}`;
+  emailVerified?: boolean;
+  enabled?: boolean;
+}
+
+export interface respuestalogin {
+  accessToken: string;
+  tokenType?: string;
+  expiresAt?: string;
+  user: usuarioautenticado;
+}
+
+export interface desafioautenticacion {
+  tipo: 'correo' | 'login';
+  challengeId: string;
+  correo?: string;
+  expiresAt?: string;
+}
+
+export interface respuestaMensaje {
+  message: string;
 }
 
 export interface historial {
@@ -28,34 +64,4 @@ export interface historial {
   kills: number;
   losses: number;
   opponents: string[];
-}
-
-export interface registro {
-  username: string;
-  email: string;
-  password: string;
-}
-
-
-export interface respuestapendiente {
-  status: string;
-  challengeId: string;
-  expiresAt: string;
-}
-
-
-export interface verificacion {
-  challengeId: string;
-  code: string;
-}
-
-export interface respuestalogin {
-  accessToken: string;
-  tokenType: string;
-  user: {
-    id: number;
-    username: string;
-    email: string;
-    role: string;
-  };
 }

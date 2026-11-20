@@ -1,106 +1,124 @@
-import { Component, ChangeDetectorRef, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Observable, Subscription } from 'rxjs';
 import { usuarioservice } from '../../services/usuarioservice';
 
+/** Valida códigos OTP del registro y del inicio de sesión. */
 @Component({
   selector: 'app-verificarcomponent',
   standalone: false,
-  styleUrl: './verificarcomponent.css',
   templateUrl: './verificarcomponent.html',
+  styleUrl: './verificarcomponent.css',
 })
-/**
- * Pantalla para escribir el código de 6 dígitos que llegó al correo.
- * Sirve para dos cosas:
- *  - 'correo': activar la cuenta después del registro.
- *  - 'login': confirmar el inicio de sesión y recibir el token.
- */
-export class Verificarcomponent {
-  private service = inject(usuarioservice);
-  private router = inject(Router);
-  private cd = inject(ChangeDetectorRef);
-
-  tipo = localStorage.getItem('tipoVerificacion') ?? 'correo';
-  correo = localStorage.getItem('correoVerificar') ?? '';
+export class Verificarcomponent implements OnDestroy {
   mensaje = '';
   error = '';
+  procesando = false;
   verificado = false;
+  private subs = new Subscription();
 
-  /**
-   * Envía el código al back.
-   * @param codigo código de 6 dígitos
-   */
-  verificar(codigo: string) {
+  constructor(
+    public auth: usuarioservice,
+    private router: Router,
+    private cdr: ChangeDetectorRef,
+  ) {}
+
+  get tipo(): 'correo' | 'login' | null {
+    return this.auth.getDesafio()?.tipo ?? null;
+  }
+
+  get correo(): string {
+    return this.auth.getDesafio()?.correo ?? '';
+  }
+
+  /** Comprueba el código de seis dígitos recibido por correo. */
+  verificar(codigo: string): void {
+    if (this.procesando) return;
     this.mensaje = '';
     this.error = '';
+    const limpio = codigo.trim();
 
-    if (codigo.trim().length !== 6) {
-      this.error = 'El código tiene 6 dígitos.';
+    if (!/^\d{6}$/.test(limpio)) {
+      this.error = 'Escribe el código de 6 dígitos recibido en tu correo.';
+      this.cdr.markForCheck();
       return;
     }
 
-    const datos = { challengeId: localStorage.getItem('challengeId') ?? '', code: codigo.trim() };
-
-    if (this.tipo === 'login') {
-      // LOGIN: el back devuelve el token y se guarda la sesión.
-      this.service.verificarLogin(datos).subscribe({
-        next: respuesta => {
-          localStorage.setItem('jwtToken', respuesta.accessToken);
-          localStorage.setItem('userRole', respuesta.user.role);
-          localStorage.setItem('username', respuesta.user.username);
-          this.limpiar();
-          this.router.navigate(['/juego']);
-        },
-        error: e => this.mostrarError(e.status)
-      });
-    } else {
-      // REGISTRO: se activa la cuenta.
-      this.service.verificarCorreo(datos).subscribe({
-        next: () => {
-          this.verificado = true;
-          this.limpiar();
-          this.cd.detectChanges();
-        },
-        error: e => this.mostrarError(e.status)
-      });
+    // Guardamos el tipo ANTES de suscribirnos. El servicio elimina el
+    // desafío al terminar un login correcto.
+    const tipoPendiente = this.tipo;
+    if (!tipoPendiente) {
+      this.error = 'No hay verificación pendiente. Vuelve al inicio.';
+      this.cdr.markForCheck();
+      return;
     }
+
+    this.procesando = true;
+    this.cdr.markForCheck();
+
+    // Unificamos el tipo del observable para evitar TS2349. El usuario
+    // introduce solamente el código; challengeId lo agrega usuarioservice.
+    const peticion: Observable<unknown> =
+      tipoPendiente === 'login'
+        ? this.auth.verificarLogin(limpio)
+        : this.auth.verificarCorreo(limpio);
+
+    this.subs.add(
+      peticion.subscribe({
+        next: () => {
+          this.procesando = false;
+          if (tipoPendiente === 'correo') {
+            this.verificado = true;
+            this.auth.limpiarDesafio();
+          } else {
+            this.router.navigate(['/panel']).catch(() => {
+              this.error = 'No se pudo abrir la pantalla solicitada.';
+              this.cdr.markForCheck();
+            });
+          }
+          this.cdr.markForCheck();
+        },
+        error: (e: HttpErrorResponse) => {
+          this.procesando = false;
+          this.error =
+            e.status === 429
+              ? 'Demasiados intentos. Espera antes de reintentar.'
+              : e.status === 0
+                ? 'No hay conexión con el servidor.'
+                : 'Código incorrecto o vencido.';
+          this.cdr.markForCheck();
+        },
+      }),
+    );
   }
 
-  /**
-   * Pide un código nuevo al correo.
-   */
-  reenviar() {
-    this.mensaje = '';
+  /** Solicita un nuevo código de verificación. */
+  reenviar(): void {
+    if (this.procesando || !this.tipo) return;
+    this.procesando = true;
     this.error = '';
-    const challengeId = localStorage.getItem('challengeId') ?? '';
+    this.mensaje = '';
+    this.cdr.markForCheck();
 
-    this.service.reenviarCodigo(challengeId).subscribe({
-      next: respuesta => {
-        localStorage.setItem('challengeId', respuesta.challengeId);
-        this.mensaje = 'Te enviamos un código nuevo.';
-        this.cd.detectChanges();
-      },
-      error: () => {
-        this.error = 'Espera un momento antes de pedir otro código.';
-        this.cd.detectChanges();
-      }
-    });
+    this.subs.add(
+      this.auth.reenviarCodigo().subscribe({
+        next: () => {
+          this.procesando = false;
+          this.mensaje = 'Enviamos un nuevo código a tu correo.';
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.procesando = false;
+          this.error = 'No se pudo reenviar el código. Espera antes de reintentar.';
+          this.cdr.markForCheck();
+        },
+      }),
+    );
   }
 
-  /**
-   * Muestra el mensaje de error según lo que respondió el back.
-   * @param estado código HTTP del error
-   */
-  private mostrarError(estado: number) {
-    this.error = estado === 429 ? 'Demasiados intentos. Espera un momento.' : 'Código inválido o vencido.';
-    this.cd.detectChanges();
-  }
-
-  /**
-   * Borra los datos temporales de la verificación.
-   */
-  private limpiar() {
-    localStorage.removeItem('challengeId');
-    localStorage.removeItem('correoVerificar');
-    localStorage.removeItem('tipoVerificacion');
+  /** Libera los recursos y suscripciones del componente. */
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
   }
 }

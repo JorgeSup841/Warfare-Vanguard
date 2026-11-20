@@ -1,74 +1,79 @@
-import { Component, ChangeDetectorRef, inject } from '@angular/core';
+import { Component, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Subscription } from 'rxjs';
 import { usuarioservice } from '../../services/usuarioservice';
-
+/** Registra cuentas y prepara la verificación del correo. */
 @Component({
   selector: 'app-registercomponent',
   standalone: false,
+  templateUrl: './registercomponent.html',
   styleUrl: './registercomponent.css',
-  templateUrl:'./registercomponent.html',
 })
-/**
- * Componente para el registro de nuevos usuarios en el aplicativo.
- */
-export class Registercomponent {
-  private service = inject(usuarioservice);
-  private router = inject(Router);
-  private cd = inject(ChangeDetectorRef);
-
+export class Registercomponent implements OnDestroy {
   error = '';
-
-  /**
-   * Valida los datos, registra al usuario y lo lleva a verificar su correo.
-   * @param usuario nombre de usuario
-   * @param correo correo electrónico
-   * @param password contraseña
-   * @param confirm confirmación de la contraseña
-   * @param acepta si marcó los términos
-   */
-  registrar(usuario: string, correo: string, password: string, confirm: string, acepta: boolean) {
-    if (usuario.trim().length < 3) {
-      this.error = 'El usuario debe tener mínimo 3 caracteres.';
-      return;
-    }
-    if (!correo.includes('@')) {
-      this.error = 'Escribe un correo válido.';
-      return;
-    }
-    if (password.length < 12) {
-      this.error = 'La contraseña debe tener mínimo 12 caracteres.';
-      return;
-    }
-    if (password !== confirm) {
-      this.error = 'Las contraseñas no coinciden.';
-      return;
-    }
-    if (!acepta) {
-      this.error = 'Debes aceptar los términos de la misión.';
-      return;
-    }
+  procesando = false;
+  colorVisual = 'ROJO';
+  private subs = new Subscription();
+  constructor(
+    private auth: usuarioservice,
+    private router: Router,
+    private cdr: ChangeDetectorRef,
+  ) {}
+  /** Valida el formulario y crea una cuenta en el servidor. */
+  registrar(
+    username: string,
+    email: string,
+    password: string,
+    confirm: string,
+    acepta: boolean,
+  ): void {
+    if (this.procesando) return;
     this.error = '';
-
-    this.service.registrar({ username: usuario.trim(), email: correo.trim(), password }).subscribe({
-      next: respuesta => {
-        // Se guarda lo que necesita la pantalla de verificación.
-        localStorage.setItem('challengeId', respuesta.challengeId);
-        localStorage.setItem('correoVerificar', correo.trim());
-        localStorage.setItem('tipoVerificacion', 'correo');
-        this.router.navigate(['/verificar']);
-      },
-      error: e => {
-        if (e.status === 409) {
-          this.error = 'Ese usuario o correo ya está registrado.';
-        } else if (e.status === 429) {
-          this.error = 'Demasiados intentos. Espera un momento.';
-        } else if (e.status === 503) {
-          this.error = 'No se pudo enviar el correo. Intenta de nuevo.';
-        } else {
-          this.error = 'No se pudo registrar el usuario.';
-        }
-        this.cd.detectChanges();
-      }
-    });
+    if (username.trim().length < 3) this.error = 'El usuario debe tener mínimo 3 caracteres.';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
+      this.error = 'El correo no es válido.';
+    else if (password.length < 12) this.error = 'La contraseña debe tener mínimo 12 caracteres.';
+    else if (password !== confirm) this.error = 'Las contraseñas no coinciden.';
+    else if (!acepta) this.error = 'Debes aceptar los términos del servicio.';
+    if (this.error) {
+      this.cdr.markForCheck();
+      return;
+    }
+    this.procesando = true;
+    this.cdr.markForCheck();
+    this.subs.add(
+      this.auth.registrar({ username: username.trim(), email: email.trim(), password }).subscribe({
+        next: (r) => {
+          this.procesando = false;
+          try {
+            this.auth.prepararDesafio('correo', r, email.trim());
+            this.router.navigate(['/verificar']).catch(() => {
+              this.error = 'No se pudo abrir la pantalla solicitada.';
+              this.cdr.markForCheck();
+            });
+          } catch (e) {
+            this.error = e instanceof Error ? e.message : 'Respuesta de registro inválida.';
+          }
+          this.cdr.markForCheck();
+        },
+        error: (e: HttpErrorResponse) => {
+          this.procesando = false;
+          this.error =
+            e.status === 409
+              ? 'Usuario o correo ya registrado.'
+              : e.status === 429
+                ? 'Espera antes de intentarlo de nuevo.'
+                : e.status === 0
+                  ? 'No se pudo conectar con el servidor.'
+                  : 'No fue posible registrar la cuenta.';
+          this.cdr.markForCheck();
+        },
+      }),
+    );
+  }
+  /** Libera los recursos y suscripciones del componente. */
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
   }
 }

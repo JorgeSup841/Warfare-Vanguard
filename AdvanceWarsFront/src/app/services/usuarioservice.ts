@@ -1,203 +1,321 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { usuario, AuthRequest, AuthResponse, historial, registro, respuestapendiente, verificacion, respuestalogin } from '../models/usuario';
-/**
- * Servicio de usuarios: inicio de sesión, registro, manejo de la sesión,
- * administración de usuarios e historial de partidas. Se comunica con el backend.
- */
+import { BehaviorSubject, Observable, tap, throwError } from 'rxjs';
+
+import { API_BASE_URL } from './api-config';
+
+import {
+  registro,
+  respuestapendiente,
+  verificacion,
+  respuestalogin,
+  desafioautenticacion,
+  usuario,
+  usuarioautenticado,
+  rolusuario,
+  respuestaMensaje,
+} from '../models/usuario';
+
+/** Gestiona registro, autenticación OTP, sesión JWT y recuperación de cuentas. */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class usuarioservice {
-  private baseUrl = 'http://localhost:8080';
+  private readonly api = `${API_BASE_URL}/auth`;
+  private readonly usuariosApi = `${API_BASE_URL}/users`;
 
-  private http = inject(HttpClient);
+  private token: string | null = null;
+  private usuarioActual: usuarioautenticado | null = null;
+  private expira: number | null = null;
 
-  // Nombres con los que se guardan los datos de la sesión en el navegador.
-  private claveToken = 'jwtToken';
-  private claveRol = 'userRole';
-  private claveUsuario = 'username';
+  private desafio: desafioautenticacion | null = null;
+  private recuperacionId: string | null = null;
 
+  private sesionSubject = new BehaviorSubject<usuarioautenticado | null>(null);
 
+  readonly sesion$ = this.sesionSubject.asObservable();
 
-  /**
-   * Inicia sesión en el backend.
-   * @param credentials usuario y contraseña
-   * @returns token, rol y nombre del usuario
-   */
-  login(credentials: AuthRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.baseUrl}/auth/login`, credentials);
+  constructor(private http: HttpClient) {}
+  /** Solicita el registro de una cuenta y la creación del desafío OTP. */
+  registrar(datos: registro): Observable<respuestapendiente> {
+    return this.http.post<respuestapendiente>(`${this.api}/register`, datos);
   }
 
-  /**
-   * Registra un usuario nuevo con rol USER.
-   * @param usuario datos del usuario a registrar
-   * @returns mensaje de respuesta del backend
-   */
-  register(usuario: usuario): Observable<string> {
-    const nuevoUsuario = { ...usuario, role: 'USER' as const };
-    return this.http.post(`${this.baseUrl}/auth/register`, nuevoUsuario, { responseType: 'text' });
+  /** Solicita un desafío OTP después de validar las credenciales. */
+  iniciarSesion(datos: { username: string; password: string }): Observable<respuestapendiente> {
+    return this.http.post<respuestapendiente>(`${this.api}/login`, datos);
   }
 
+  /** Conserva en memoria los datos del desafío OTP pendiente. */
+  prepararDesafio(tipo: 'correo' | 'login', respuesta: respuestapendiente, correo?: string): void {
+    if (!respuesta?.challengeId) {
+      throw new Error('El servidor no devolvió un identificador de verificación.');
+    }
 
-
-  /**
-   * Guarda en el navegador el token, el rol y el nombre del usuario que inició sesión.
-   * @param response respuesta del login
-   */
-  saveSession(response: AuthResponse): void {
-    localStorage.setItem(this.claveToken, response.token);
-    localStorage.setItem(this.claveRol, response.role);
-    localStorage.setItem(this.claveUsuario, response.username);
+    this.desafio = {
+      tipo,
+      challengeId: respuesta.challengeId,
+      correo,
+      expiresAt: respuesta.expiresAt,
+    };
   }
 
-  /**
-   * Obtiene el token de la sesión actual.
-   * @returns el token, o null si no hay sesión
-   */
+  /** Obtiene el desafío de correo o inicio de sesión activo. */
+  getDesafio(): desafioautenticacion | null {
+    return this.desafio;
+  }
+
+  /** Descarta el desafío OTP pendiente. */
+  limpiarDesafio(): void {
+    this.desafio = null;
+  }
+
+  /** Construye el cuerpo para verificar un código OTP. */
+  private datosCodigo(codigo: string, tipo: 'correo' | 'login'): verificacion {
+    if (!this.desafio || this.desafio.tipo !== tipo) {
+      throw new Error('No existe una verificación pendiente.');
+    }
+
+    return {
+      challengeId: this.desafio.challengeId,
+      code: codigo.trim(),
+    };
+  }
+
+  /** Solicita la activación del correo con el código OTP. */
+  verificarCorreo(codigo: string): Observable<respuestaMensaje> {
+    return this.http.post<respuestaMensaje>(
+      `${this.api}/verify-email`,
+      this.datosCodigo(codigo, 'correo'),
+    );
+  }
+
+  /** Verifica el código OTP e inicia la sesión JWT. */
+  verificarLogin(codigo: string): Observable<respuestalogin> {
+    return this.http
+      .post<respuestalogin>(`${this.api}/verify-otp`, this.datosCodigo(codigo, 'login'))
+      .pipe(tap((respuesta) => this.guardarSesion(respuesta)));
+  }
+
+  /** Solicita un nuevo código para el desafío actual. */
+  reenviarCodigo(): Observable<respuestapendiente> {
+    if (!this.desafio) {
+      return throwError(() => new Error('No existe una verificación pendiente.'));
+    }
+
+    return this.http
+      .post<respuestapendiente>(`${this.api}/resend-otp`, {
+        challengeId: this.desafio.challengeId,
+      })
+      .pipe(
+        tap((respuesta) => {
+          if (this.desafio) {
+            this.desafio = {
+              ...this.desafio,
+              challengeId: respuesta.challengeId,
+              expiresAt: respuesta.expiresAt,
+            };
+          }
+        }),
+      );
+  }
+
+  /** Almacena el JWT y los datos del usuario únicamente en memoria. */
+  private guardarSesion(respuesta: respuestalogin): void {
+    if (!respuesta.accessToken || !respuesta.user?.role) {
+      throw new Error('El servidor no devolvió una sesión JWT válida.');
+    }
+
+    this.token = respuesta.accessToken;
+
+    this.usuarioActual = {
+      ...respuesta.user,
+      role: usuarioservice.normalizarRol(respuesta.user.role),
+    };
+
+    this.expira = usuarioservice.leerExpiracionJWT(respuesta.accessToken);
+
+    this.desafio = null;
+
+    this.sesionSubject.next(this.usuarioActual);
+  }
+
+  /** Extrae la expiración del token JWT en milisegundos. */
+  private static leerExpiracionJWT(token: string): number | null {
+    try {
+      const contenido = token.split('.')[1];
+
+      if (!contenido) {
+        return null;
+      }
+
+      const base64 = contenido.replace(/-/g, '+').replace(/_/g, '/');
+
+      const payload = JSON.parse(atob(base64));
+
+      return typeof payload.exp === 'number' ? payload.exp * 1000 : null;
+    } catch {
+      return null;
+    }
+  }
+
+  /** Convierte los nombres de rol del backend al formato del frontend. */
+  private static normalizarRol(role: string): rolusuario {
+    return role === 'ADMIN' || role === 'ROLE_ADMIN' ? 'ADMIN' : 'USER';
+  }
+
+  /** Retorna el JWT únicamente si la sesión sigue siendo válida. */
   getToken(): string | null {
-    return localStorage.getItem(this.claveToken);
+    return this.estaAutenticado() ? this.token : null;
   }
 
-  /**
-   * Obtiene el rol del usuario de la sesión actual.
-   * @returns ADMIN o USER, o null si no hay sesión
-   */
-  getRole(): string | null {
-    return localStorage.getItem(this.claveRol);
+  /** Devuelve el usuario de la sesión activa. */
+  getUsuarioActual(): usuarioautenticado | null {
+    return this.estaAutenticado() ? this.usuarioActual : null;
   }
 
-  /**
-   * Indica si el usuario de la sesión actual es administrador.
-   * @returns true si el rol es ADMIN
-   */
+  /** Consulta el rol normalizado del usuario autenticado. */
+  getRole(): rolusuario | null {
+    const actual = this.getUsuarioActual();
+
+    return actual ? usuarioservice.normalizarRol(actual.role) : null;
+  }
+
+  /** Determina si la sesión actual tiene permisos administrativos. */
   isAdmin(): boolean {
     return this.getRole() === 'ADMIN';
   }
 
-  /**
-   * Cierra la sesión borrando los datos guardados en el navegador.
-   */
-  logout(): void {
-    localStorage.removeItem(this.claveToken);
-    localStorage.removeItem(this.claveRol);
-    localStorage.removeItem(this.claveUsuario);
+  /** Comprueba la existencia y vigencia de una sesión JWT. */
+  estaAutenticado(): boolean {
+    if (!this.token || !this.usuarioActual) {
+      return false;
+    }
+
+    if (this.expira !== null && Date.now() >= this.expira) {
+      this.logout();
+      return false;
+    }
+
+    return true;
   }
 
-  /**
-   * Arma los encabezados de las peticiones con el token de la sesión.
-   * @returns encabezados con Content-Type y Authorization
-   */
-  private getHeaders(): HttpHeaders {
+  /** Limpia la información de autenticación almacenada en memoria. */
+  logout(): void {
+    this.token = null;
+    this.usuarioActual = null;
+    this.expira = null;
+    this.desafio = null;
+    this.recuperacionId = null;
+
+    this.sesionSubject.next(null);
+  }
+
+  /** Prepara las cabeceras de autorización para llamadas protegidas. */
+  getHeaders(): HttpHeaders {
     const token = this.getToken();
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': token ? `Bearer ${token}` : ''
+
+    return token
+      ? new HttpHeaders({
+          Authorization: `Bearer ${token}`,
+        })
+      : new HttpHeaders();
+  }
+
+  /** Consulta el perfil autenticado con el servidor. */
+  getPerfil(): Observable<usuarioautenticado> {
+    return this.http.get<usuarioautenticado>(`${this.api}/me`, {
+      headers: this.getHeaders(),
     });
   }
 
-
-
-  /**
-   * Trae todos los usuarios registrados (solo administrador).
-   * @returns lista de usuarios
-   */
+  /** Consulta la lista administrativa de usuarios. */
   getUsuarios(): Observable<usuario[]> {
-    return this.http.get<usuario[]>(`${this.baseUrl}/user/getall`, { headers: this.getHeaders() });
+    return this.http.get<usuario[]>(this.usuariosApi, {
+      headers: this.getHeaders(),
+    });
   }
 
-  /**
-   * Busca un usuario por su id.
-   * @param id id del usuario
-   * @returns el usuario encontrado
-   */
+  /** Recupera los datos de un usuario por identificador. */
   getUsuarioById(id: number): Observable<usuario> {
-    return this.http.get<usuario>(`${this.baseUrl}/user/getbyid/${id}`, { headers: this.getHeaders() });
+    return this.http.get<usuario>(`${this.usuariosApi}/${id}`, {
+      headers: this.getHeaders(),
+    });
   }
 
-  /**
-   * Actualiza los datos de un usuario.
-   * @param id id del usuario a actualizar
-   * @param usuario datos nuevos
-   * @returns el usuario actualizado
-   */
-  updateUsuario(id: number, usuario: usuario): Observable<usuario> {
-    return this.http.put<usuario>(`${this.baseUrl}/user/updatejson?id=${id}`, usuario, { headers: this.getHeaders() });
+  /** Actualiza el rol de un usuario mediante PATCH. */
+  cambiarRol(id: number, role: rolusuario): Observable<usuario> {
+    return this.http.patch<usuario>(
+      `${this.usuariosApi}/${id}/role`,
+      {
+        role,
+      },
+      {
+        headers: this.getHeaders(),
+      },
+    );
   }
 
-  /**
-   * Elimina un usuario.
-   * @param id id del usuario a eliminar
-   * @returns mensaje de respuesta del backend
-   */
-  deleteUsuario(id: number): Observable<string> {
-    return this.http.delete(`${this.baseUrl}/user/deletebyid/${id}`, { headers: this.getHeaders(), responseType: 'text' });
+  /** Actualiza el estado habilitado de un usuario mediante PATCH. */
+  cambiarHabilitado(id: number, enabled: boolean): Observable<usuario> {
+    return this.http.patch<usuario>(
+      `${this.usuariosApi}/${id}/enabled`,
+      {
+        enabled,
+      },
+      {
+        headers: this.getHeaders(),
+      },
+    );
   }
 
+  /** Distribuye una actualización hacia el endpoint de rol o estado. */
+  updateUsuario(id: number, datos: Partial<usuario>): Observable<usuario> {
+    if (datos.role === 'ADMIN' || datos.role === 'USER') {
+      return this.cambiarRol(id, datos.role);
+    }
 
+    if (typeof datos.enabled === 'boolean') {
+      return this.cambiarHabilitado(id, datos.enabled);
+    }
 
-  /**
-   * Guarda el resultado de una partida terminada para el usuario de la sesión.
-   * @param resultado resumen de la partida (rondas, bajas, si ganó)
-   * @returns la partida guardada
-   */
-  guardarPartida(resultado: historial): Observable<historial> {
-    return this.http.post<historial>(`${this.baseUrl}/historial/save`, resultado, { headers: this.getHeaders() });
+    return throwError(() => new Error('Solo se permite modificar el rol o el estado del usuario.'));
   }
 
-  /**
-   * Trae el historial de partidas del usuario de la sesión.
-   * @returns lista de partidas jugadas
-   */
-  getHistorial(): Observable<historial[]> {
-    return this.http.get<historial[]>(`${this.baseUrl}/historial/mine`, { headers: this.getHeaders() });
-  }
-  // ---------- REGISTRO Y VERIFICACIÓN DE CORREO ----------
-
-  /**
-   * Registra un usuario. El back le envía un código de 6 dígitos al correo.
-   * @param datos usuario, correo y contraseña
-   * @returns el challengeId que se necesita para verificar el código
-   */
-  registrar(datos: registro): Observable<respuestapendiente> {
-    return this.http.post<respuestapendiente>(this.baseUrl + '/api/auth/register', datos);
+  /** Solicita al servidor el restablecimiento de contraseña. */
+  solicitarRecuperacion(email: string): Observable<respuestaMensaje> {
+    return this.http.post<respuestaMensaje>(`${this.api}/forgot-password`, {
+      email: email.trim(),
+    });
   }
 
-  /**
-   * Verifica el código que llegó al correo y activa la cuenta.
-   * @param datos challengeId y código
-   * @returns mensaje del back
-   */
-  verificarCorreo(datos: verificacion): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(this.baseUrl + '/api/auth/verify-email', datos);
+  /** Guarda temporalmente el identificador de recuperación. */
+  prepararRecuperacion(challengeId: string): void {
+    const limpio = challengeId.trim();
+
+    if (!limpio) {
+      throw new Error('Ingresa el identificador recibido en el correo.');
+    }
+
+    this.recuperacionId = limpio;
   }
 
-  /**
-   * Pide que se envíe un código nuevo al correo.
-   * @param challengeId identificador del código anterior
-   * @returns un challengeId nuevo
-   */
-  reenviarCodigo(challengeId: string): Observable<respuestapendiente> {
-    return this.http.post<respuestapendiente>(this.baseUrl + '/api/auth/resend-otp', { challengeId });
-  }
-  // ---------- LOGIN CON CÓDIGO ----------
+  /** Completa el restablecimiento de contraseña con código OTP. */
+  restablecerPassword(code: string, newPassword: string): Observable<respuestaMensaje> {
+    if (!this.recuperacionId) {
+      return throwError(() => new Error('Falta el identificador de recuperación.'));
+    }
 
-  /**
-   * Revisa usuario y contraseña. Si están bien, el back envía un código al correo.
-   * @param datos usuario y contraseña
-   * @returns el challengeId que se necesita para verificar el código
-   */
-  iniciarSesion(datos: { username: string; password: string }): Observable<respuestapendiente> {
-    return this.http.post<respuestapendiente>(this.baseUrl + '/api/auth/login', datos);
-  }
-
-  /**
-   * Verifica el código del login. Si es correcto, el back entrega el token.
-   * @param datos challengeId y código
-   * @returns token y datos del usuario
-   */
-  verificarLogin(datos: verificacion): Observable<respuestalogin> {
-    return this.http.post<respuestalogin>(this.baseUrl + '/api/auth/verify-otp', datos);
+    return this.http
+      .post<respuestaMensaje>(`${this.api}/reset-password`, {
+        challengeId: this.recuperacionId,
+        code: code.trim(),
+        newPassword,
+      })
+      .pipe(
+        tap(() => {
+          this.recuperacionId = null;
+        }),
+      );
   }
 }
