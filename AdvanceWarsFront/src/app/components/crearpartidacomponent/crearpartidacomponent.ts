@@ -1,110 +1,76 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
-import { configuracionmapa } from '../../models/mapa';
-import { juegoservice } from '../../services/juegoservice';
 import { tableroservice } from '../../services/tableroservice';
-/** Formulario para crear una partida en el servidor. */
+
+/** Formulario para crear una partida nueva. */
 @Component({
   selector: 'app-crearpartidacomponent',
   standalone: false,
   templateUrl: './crearpartidacomponent.html',
   styleUrl: './crearpartidacomponent.css',
 })
-export class Crearpartidacomponent implements OnInit, OnDestroy {
-  nombres = ['Comandante Rojo', 'Comandante Azul'];
+export class Crearpartidacomponent {
+  private servicio = inject(tableroservice);
+  private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
+
   cantidad = 2;
+  nombres = ['Comandante Rojo', 'Comandante Azul'];
   ancho = 20;
   alto = 15;
-  semilla = 12345;
-  ocupado = false;
-  error = '';
-  config: configuracionmapa | null = null;
-  private sub = new Subscription();
-  constructor(
-    private catalogs: juegoservice,
-    private api: tableroservice,
-    private router: Router,
-    private cdr: ChangeDetectorRef,
-  ) {}
-  /** Inicializa y carga los datos de la pantalla. */
-  ngOnInit(): void {
-    this.sub.add(
-      this.catalogs.getConfiguracionMapa().subscribe({
-        next: (c) => {
-          this.config = c;
-          this.ancho = c.width;
-          this.alto = c.height;
-          this.cdr.markForCheck();
-        },
-        error: () => {
-          this.error = 'No se pudo leer configuración local. Introduce dimensiones manualmente.';
-          this.cdr.markForCheck();
-        },
-      }),
-    );
-  }
-  /** Actualiza la lista de jugadores de la partida. */
+  semilla: number | null = null;
+  creando = false;
+  mensaje = '';
+
+  porIndice = (i: number) => i;
+
+  /** Ajusta la lista de nombres según la cantidad de jugadores. */
   cambiarCantidad(): void {
-    this.nombres = Array.from(
-      { length: this.cantidad },
-      (_, i) => this.nombres[i] || `Jugador ${i + 1}`,
-    );
-    this.cdr.markForCheck();
+    const nuevos: string[] = [];
+    for (let i = 0; i < this.cantidad; i++) {
+      nuevos.push(this.nombres[i] || `Jugador ${i + 1}`);
+    }
+    this.nombres = nuevos;
   }
-  /** Valida los jugadores y crea una partida en Spring Boot. */
+
+  /** Pone una semilla aleatoria. */
+  semillaAlAzar(): void {
+    this.semilla = Math.floor(Math.random() * 1000000);
+  }
+
+  /** Revisa los datos y pide al back crear la partida. */
   crear(): void {
-    if (this.ocupado) return;
     const nombres = this.nombres.map((n) => n.trim());
-    if (
-      nombres.length < 2 ||
-      nombres.length > 4 ||
-      nombres.some((n) => !n) ||
-      new Set(nombres.map((n) => n.toLowerCase())).size !== nombres.length
-    ) {
-      this.error = 'Usa entre 2 y 4 nombres diferentes, sin campos vacíos.';
-      this.cdr.markForCheck();
+
+    if (nombres.some((n) => n === '')) {
+      this.mensaje = 'Ningún jugador puede quedar sin nombre';
       return;
     }
-    if (
-      ![this.ancho, this.alto, this.semilla].every(Number.isSafeInteger) ||
-      this.ancho < 8 ||
-      this.alto < 8
-    ) {
-      this.error = 'Verifica dimensiones y semilla numéricas.';
-      this.cdr.markForCheck();
+    if (this.ancho < 5 || this.ancho > 50 || this.alto < 5 || this.alto > 50) {
+      this.mensaje = 'El mapa debe medir entre 5 y 50 casillas por lado';
       return;
     }
-    this.ocupado = true;
-    this.error = '';
-    this.cdr.markForCheck();
-    this.sub.add(
-      this.api
-        .crearPartida({
-          playerNames: nombres,
-          width: this.ancho,
-          height: this.alto,
-          seed: this.semilla,
-        })
-        .subscribe({
-          next: (p) => {
-            this.ocupado = false;
-            this.cdr.markForCheck();
-            this.router.navigate(['/partidas', p.id, 'configurar']).catch(() => {
-              this.error = 'No se pudo abrir la pantalla solicitada.';
-              this.cdr.markForCheck();
-            });
-          },
-          error: (e) => {
-            this.ocupado = false;
-            this.error = `No fue posible crear la partida (HTTP ${e.status || 0}). Revisa POST /api/games.`;
-            this.cdr.markForCheck();
-          },
-        }),
-    );
-  }
-  /** Libera los recursos y suscripciones del componente. */
-  ngOnDestroy(): void {
-    this.sub.unsubscribe();
+
+    this.creando = true;
+    this.mensaje = '';
+
+    const datos = {
+      playerNames: nombres,
+      width: this.ancho,
+      height: this.alto,
+      seed: this.semilla,
+    };
+
+    this.servicio.crearPartida(datos).subscribe({
+      next: (p) => {
+        this.creando = false;
+        this.router.navigate(['/partidas', p.id, 'configurar']);
+      },
+      error: (e) => {
+        this.creando = false;
+        this.mensaje = e.error?.message || 'No se pudo crear la partida';
+        this.cdr.detectChanges();
+      },
+    });
   }
 }
