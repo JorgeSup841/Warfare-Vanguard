@@ -1,9 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, RouterStateSnapshot, ActivatedRouteSnapshot } from '@angular/router';
-import { adminGuard } from './admin.guard';
+import { jugadorGuard } from './jugador-guard';
 import { usuarioservice } from '../services/usuarioservice';
 
-describe('adminGuard', () => {
+describe('jugadorGuard', () => {
   it('devuelve una redirección si no existe sesión autorizada', () => {
     TestBed.configureTestingModule({
       providers: [
@@ -15,21 +15,24 @@ describe('adminGuard', () => {
       ],
     });
     const resultado = TestBed.runInInjectionContext(() =>
-      adminGuard({} as ActivatedRouteSnapshot, { url: '/partidas' } as RouterStateSnapshot),
+      jugadorGuard({} as ActivatedRouteSnapshot, { url: '/partidas' } as RouterStateSnapshot),
     );
     expect(resultado).not.toBe(true);
     expect(resultado).toBeInstanceOf(Object);
   });
-  it('permite administración exclusivamente a ADMIN', () => {
+  it('permite partidas a USER y ADMIN autenticados', () => {
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
-        { provide: usuarioservice, useValue: { isAdmin: () => true } },
+        {
+          provide: usuarioservice,
+          useValue: { estaAutenticado: () => true, getRole: () => 'USER' },
+        },
       ],
     });
-    const resultado = TestBed.runInInjectionContext(() =>
-      adminGuard({} as ActivatedRouteSnapshot, { url: '/admin' } as RouterStateSnapshot),
+    const user = TestBed.runInInjectionContext(() =>
+      jugadorGuard({} as ActivatedRouteSnapshot, { url: '/partidas' } as RouterStateSnapshot),
     );
-    expect(resultado).toBe(true);
+    expect(user).toBe(true);
   });
 });
