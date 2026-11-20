@@ -1,40 +1,114 @@
+
 <section class="screen login-screen">
   <div class="wrap narrow">
+
     <div class="logo-wrap">
-      <svg class="escudo" viewBox="0 0 64 42" shape-rendering="crispEdges" role="img" aria-label="Emblema de Aura Wars">
-        <path fill="#18282d" d="M2 12H19V7H45V12H62V26H48V31H42V36H22V31H16V26H2Z" />
+      <svg
+        class="escudo"
+        viewBox="0 0 64 42"
+        shape-rendering="crispEdges"
+        role="img"
+        aria-label="Emblema de Aura Wars">
+
+        <path
+          fill="#18282d"
+          d="M2 12H19V7H45V12H62V26H48V31H42V36H22V31H16V26H2Z" />
+
         <rect x="5" y="15" width="14" height="7" fill="#ffd44f" />
         <rect x="45" y="15" width="14" height="7" fill="#ffd44f" />
-        <path fill="#fff0c4" d="M22 7H42V30H37V35H27V30H22Z" />
+
+        <path
+          fill="#fff0c4"
+          d="M22 7H42V30H37V35H27V30H22Z" />
+
         <rect x="30" y="10" width="4" height="17" fill="#e74b40" />
         <rect x="25" y="16" width="14" height="6" fill="#e74b40" />
       </svg>
+
       <h1>AURA<br>WARS</h1>
       <p>ESTRATEGIA POR TURNOS</p>
     </div>
+
     <div class="panel">
-      <div class="panel-head">INICIAR SESIÓN ■</div>
+      <div class="panel-head">
+        INICIAR SESIÓN ■
+      </div>
+
       <div class="panel-body">
-        <form (ngSubmit)="ingresar(usuario.value,clave.value)" novalidate>
-          <div class="field"><label for="loginUsuario">USUARIO</label><input id="loginUsuario" name="usuario" #usuario
-                                                                             type="text" placeholder="NOMBRE DE USUARIO"
-                                                                             autocomplete="username" required></div>
-          <div class="field"><label for="loginClave">CONTRASEÑA</label><input id="loginClave" name="clave" #clave
-                                                                              [type]="mostrarClave?'text':'password'"
-                                                                              placeholder="CONTRASEÑA"
-                                                                              autocomplete="current-password" required>
+
+        <form
+          (ngSubmit)="ingresar(usuario.value, clave.value)"
+          novalidate>
+
+          <div class="field">
+            <label for="loginUsuario">USUARIO</label>
+
+            <input
+              id="loginUsuario"
+              name="usuario"
+              #usuario
+              type="text"
+              placeholder="NOMBRE DE USUARIO"
+              autocomplete="username"
+              required>
           </div>
-          <label class="show"><input type="checkbox" [(ngModel)]="mostrarClave" name="mostrar"> MOSTRAR
-            CONTRASEÑA</label>
-          <div *ngIf="error" class="message error" role="alert">{{ error }}</div>
-          <button type="submit" [disabled]="procesando" class="full">{{ procesando ? 'ENVIANDO...' : 'ENTRAR / JUGAR' }}
+
+          <div class="field">
+            <label for="loginClave">CONTRASEÑA</label>
+
+            <input
+              id="loginClave"
+              name="clave"
+              #clave
+              [type]="mostrarClave ? 'text' : 'password'"
+              placeholder="CONTRASEÑA"
+              autocomplete="current-password"
+              required>
+          </div>
+
+          <label class="show">
+            <input
+              type="checkbox"
+              [(ngModel)]="mostrarClave"
+              name="mostrar">
+
+            MOSTRAR CONTRASEÑA
+          </label>
+
+          <div
+            *ngIf="error"
+            class="message error"
+            role="alert">
+            {{ error }}
+          </div>
+
+          <button
+            type="submit"
+            [disabled]="procesando"
+            class="full">
+
+            {{ procesando ? 'ENVIANDO...' : 'ENTRAR / JUGAR' }}
             ▸
           </button>
+
         </form>
-        <div class="links-foot"><a routerLink="/register">CREAR CUENTA ▸</a> <a routerLink="/recuperar">RECUPERAR
-          CLAVE</a></div>
+
+        <div class="links-foot">
+          <a routerLink="/register">
+            CREAR CUENTA ▸
+          </a>
+
+          <a routerLink="/recuperar">
+            RECUPERAR CONTRASEÑA
+          </a>
+        </div>
+
       </div>
     </div>
-    <p class="linea">■ CÓDIGO OTP ENVIADO POR CORREO</p>
+
+    <p class="linea">
+      ■ VERIFICACIÓN DE ACCESO POR CORREO
+    </p>
+
   </div>
 </section>

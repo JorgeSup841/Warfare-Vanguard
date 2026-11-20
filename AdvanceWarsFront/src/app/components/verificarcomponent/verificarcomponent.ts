@@ -1,3 +1,4 @@
+
 import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -8,19 +9,21 @@ import { usuarioservice } from '../../services/usuarioservice';
   selector: 'app-verificarcomponent',
   standalone: false,
   templateUrl: './verificarcomponent.html',
-  styleUrl: './verificarcomponent.css',
+  styleUrl: './verificarcomponent.css'
 })
 export class Verificarcomponent implements OnDestroy {
+
   mensaje = '';
   error = '';
   procesando = false;
   verificado = false;
+
   private subs = new Subscription();
 
   constructor(
     public auth: usuarioservice,
     private router: Router,
-    private cdr: ChangeDetectorRef,
+    private cdr: ChangeDetectorRef
   ) {}
 
   get tipo(): 'correo' | 'login' | null {
@@ -32,9 +35,14 @@ export class Verificarcomponent implements OnDestroy {
   }
 
   verificar(codigo: string): void {
-    if (this.procesando) return;
+
+    if (this.procesando) {
+      return;
+    }
+
     this.mensaje = '';
     this.error = '';
+
     const limpio = codigo.trim();
 
     if (!/^\d{6}$/.test(limpio)) {
@@ -43,11 +51,10 @@ export class Verificarcomponent implements OnDestroy {
       return;
     }
 
-    // Guardamos el tipo ANTES de suscribirnos. El servicio elimina el
-    // desafío al terminar un login correcto.
     const tipoPendiente = this.tipo;
+
     if (!tipoPendiente) {
-      this.error = 'No hay verificación pendiente. Vuelve al inicio.';
+      this.error = 'No hay una verificación pendiente. Vuelve al inicio.';
       this.cdr.markForCheck();
       return;
     }
@@ -55,8 +62,6 @@ export class Verificarcomponent implements OnDestroy {
     this.procesando = true;
     this.cdr.markForCheck();
 
-    // Unificamos el tipo del observable para evitar TS2349. El usuario
-    // introduce solamente el código; challengeId lo agrega usuarioservice.
     const peticion: Observable<unknown> =
       tipoPendiente === 'login'
         ? this.auth.verificarLogin(limpio)
@@ -64,50 +69,96 @@ export class Verificarcomponent implements OnDestroy {
 
     this.subs.add(
       peticion.subscribe({
+
         next: () => {
+
           this.procesando = false;
+
           if (tipoPendiente === 'correo') {
+
             this.verificado = true;
             this.auth.limpiarDesafio();
+
           } else {
-            void this.router.navigate(['/panel']);
+
+            const destino = this.auth.isAdmin()
+              ? '/admin'
+              : '/panel';
+
+            void this.router.navigate([destino]);
           }
+
           this.cdr.markForCheck();
         },
-        error: (e: HttpErrorResponse) => {
+
+        error: (error: HttpErrorResponse) => {
+
           this.procesando = false;
-          this.error =
-            e.status === 429
-              ? 'Demasiados intentos. Espera antes de reintentar.'
-              : e.status === 0
-                ? 'No hay conexión con el servidor.'
-                : 'Código incorrecto o vencido.';
+
+          switch (error.status) {
+
+            case 0:
+              this.error = 'No hay conexión con el servidor.';
+              break;
+
+            case 400:
+              this.error = 'El código ingresado no es válido.';
+              break;
+
+            case 401:
+              this.error = 'El código es incorrecto o ha vencido.';
+              break;
+
+            case 429:
+              this.error = 'Demasiados intentos. Espera antes de reintentar.';
+              break;
+
+            default:
+              this.error = 'No se pudo verificar el código.';
+          }
+
           this.cdr.markForCheck();
-        },
-      }),
+        }
+
+      })
     );
   }
 
   reenviar(): void {
-    if (this.procesando || !this.tipo) return;
+
+    if (this.procesando || !this.tipo) {
+      return;
+    }
+
     this.procesando = true;
     this.error = '';
     this.mensaje = '';
+
     this.cdr.markForCheck();
 
     this.subs.add(
       this.auth.reenviarCodigo().subscribe({
+
         next: () => {
+
           this.procesando = false;
           this.mensaje = 'Enviamos un nuevo código a tu correo.';
+
           this.cdr.markForCheck();
         },
-        error: () => {
+
+        error: (error: HttpErrorResponse) => {
+
           this.procesando = false;
-          this.error = 'No se pudo reenviar el código. Espera antes de reintentar.';
+
+          this.error = error.status === 429
+            ? 'Debes esperar antes de solicitar otro código.'
+            : 'No se pudo reenviar el código. Intenta nuevamente.';
+
           this.cdr.markForCheck();
-        },
-      }),
+        }
+
+      })
     );
   }
 
