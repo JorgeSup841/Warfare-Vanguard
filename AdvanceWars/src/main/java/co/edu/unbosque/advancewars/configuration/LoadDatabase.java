@@ -10,59 +10,65 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+/**
+ * Inicializa el catalogo del juego y configura
+ * el primer administrador si corresponde.
+ */
 @Component
 public class LoadDatabase implements CommandLineRunner {
 
-	private final UserRepository users;
-	private final GameCatalogService catalog;
-	private final String username;
+    private final UserRepository users;
+    private final GameCatalogService catalog;
+    private final String username;
 
-	public LoadDatabase(UserRepository users, GameCatalogService catalog,
-			@Value("${app.bootstrap.admin-username:}") String username) {
-		this.users = users;
-		this.catalog = catalog;
-		this.username = username;
-	}
+    public LoadDatabase(
+            UserRepository users,
+            GameCatalogService catalog,
+            @Value("${app.bootstrap.admin-username:}") String username) {
 
-	@Override
-	public void run(String... args) {
+        this.users = users;
+        this.catalog = catalog;
+        this.username = username;
+    }
 
-		System.out.println("=== LOAD DATABASE ===");
-		// Inicializa facciones, comandantes, unidades y armas aunque no haya ADMIN
-		// configurado.
-		catalog.seed();
-		System.out.println("Usuario configurado: " + username);
+    @Override
+    public void run(String... args) {
 
-		if (username == null || username.isBlank()) {
-			System.out.println("No se configuro un usuario ADMIN.");
-			return;
-		}
+        System.out.println("=== LOAD DATABASE ===");
 
-		if (users.existsByRole(Role.ADMIN)) {
-			System.out.println("Ya existe un ADMIN en la base de datos.");
-			return;
-		}
+        // Cargar facciones, comandantes, unidades y armas.
+        catalog.seed();
 
-		User user = users.findByUsername(username.trim()).orElse(null);
+        // Comprobar si se configuro un administrador.
+        if (username == null || username.isBlank()) {
+            System.out.println("No se configuro un usuario ADMIN.");
+            return;
+        }
 
-		if (user == null) {
-			System.out.println("El usuario no existe.");
-			return;
-		}
+        // Evitar crear varios administradores.
+        if (users.existsByRole(Role.ADMIN)) {
+            System.out.println("Ya existe un ADMIN en la base de datos.");
+            return;
+        }
 
-		if (!user.isEmailVerified()) {
-			System.out.println("El correo no esta verificado.");
-			return;
-		}
+        // Buscar el usuario configurado.
+        User user = users.findByUsername(username.trim()).orElse(null);
 
-		if (!user.isEnabled()) {
-			System.out.println("El usuario esta deshabilitado.");
-			return;
-		}
+        if (user == null) {
+            System.out.println("El usuario no existe.");
+            return;
+        }
 
-		user.setRole(Role.ADMIN);
-		users.save(user);
+        // Validar que pueda ser administrador.
+        if (!user.isEmailVerified() || !user.isEnabled()) {
+            System.out.println("El usuario no esta verificado o esta deshabilitado.");
+            return;
+        }
 
-		System.out.println("ADMIN creado correctamente: " + user.getUsername());
-	}
+        // Asignar rol de administrador.
+        user.setRole(Role.ADMIN);
+        users.save(user);
+
+        System.out.println("ADMIN creado correctamente: " + user.getUsername());
+    }
 }

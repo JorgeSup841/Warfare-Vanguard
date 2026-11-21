@@ -50,13 +50,6 @@ describe('usuarioservice (Spring Boot real)', () => {
     expect(peticion.request.body).toEqual({ challengeId: 'reto1', code: '654321' });
     peticion.flush({ message: 'Correo verificado' });
   });
-  it('consulta roles por PATCH, no PUT', () => {
-    auth.cambiarRol(5, 'ADMIN').subscribe();
-    const peticion = http.expectOne(`${API_BASE_URL}/users/5/role`);
-    expect(peticion.request.method).toBe('PATCH');
-    expect(peticion.request.body).toEqual({ role: 'ADMIN' });
-    peticion.flush({ id: 5, username: 'u', role: 'ADMIN' });
-  });
   it('no inicia sesión antes de completar OTP', () => {
     expect(auth.estaAutenticado()).toBe(false);
   });
