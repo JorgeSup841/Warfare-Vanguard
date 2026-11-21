@@ -14,21 +14,17 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class OpenApiConfig {
-    /**
-     * Declara metadatos de la API y el mecanismo Bearer JWT.
-     */
-    @Bean
-    public OpenAPI customOpenAPI(
-            @Value("${app.openapi.title}") String title,
-            @Value("${app.openapi.version}") String version) {
-        SecurityScheme scheme = new SecurityScheme()
-                .type(SecurityScheme.Type.HTTP)
-                .scheme("bearer")
-                .bearerFormat("JWT");
-        return new OpenAPI()
-                .info(new Info().title(title).version(version)
-                        .description("Autenticación mediante correo, OTP y JWT"))
-                .components(new Components().addSecuritySchemes("bearerAuth", scheme))
-                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
-    }
+	/**
+	 * Declara metadatos de la API y el mecanismo Bearer JWT.
+	 */
+	@Bean
+	public OpenAPI customOpenAPI(@Value("${app.openapi.title}") String title,
+			@Value("${app.openapi.version}") String version) {
+		SecurityScheme scheme = new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer")
+				.bearerFormat("JWT");
+		return new OpenAPI()
+				.info(new Info().title(title).version(version).description("Autenticación mediante correo, OTP y JWT"))
+				.components(new Components().addSecuritySchemes("bearerAuth", scheme))
+				.addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
+	}
 }

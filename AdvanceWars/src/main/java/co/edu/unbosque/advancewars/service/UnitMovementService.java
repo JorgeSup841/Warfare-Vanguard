@@ -23,6 +23,7 @@ import co.edu.unbosque.advancewars.enums.MovementType;
 import co.edu.unbosque.advancewars.enums.TerrainType;
 import co.edu.unbosque.advancewars.model.GameMap;
 import co.edu.unbosque.advancewars.model.GameState;
+import co.edu.unbosque.advancewars.model.Player;
 import co.edu.unbosque.advancewars.model.Property;
 import co.edu.unbosque.advancewars.model.Tile;
 import co.edu.unbosque.advancewars.model.Unit;
@@ -303,7 +304,7 @@ public class UnitMovementService {
 		if (unit.getOwner().getCommander() != null && unit.getOwner().isPowerActive()
 				&& "MOVE_PLUS_1".equals(unit.getOwner().getCommander().getPowerEffectCode()))
 			points++;
-		for (co.edu.unbosque.advancewars.model.Player other : unit.getOwner().getGameState().getPlayers()) {
+		for (Player other : unit.getOwner().getGameState().getPlayers()) {
 			if (other.getId() != null && !other.getId().equals(unit.getOwner().getId()) && other.isPowerActive()
 					&& other.getCommander() != null
 					&& "ENEMY_MOVE_MINUS_1".equals(other.getCommander().getPowerEffectCode()))

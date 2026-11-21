@@ -31,25 +31,24 @@ public class SessionController {
 
 	/** Registra la actividad reciente de una sesión JWT autorizada. */
 	@PostMapping("/heartbeat")
-	public Map<String, String> heartbeat(Principal principal,
-			@RequestHeader("Authorization") String authorization) {
+	public Map<String, String> heartbeat(Principal principal, @RequestHeader("Authorization") String authorization) {
 		sessions.touch(authenticatedUsers.requireUser(principal), jwt.parse(bearerToken(authorization)).getId());
 		return Map.of("status", "OK");
 	}
 
 	/** Cierra únicamente la sesión representada por el token recibido. */
 	@PostMapping("/logout")
-	public Map<String, String> logout(Principal principal,
-			@RequestHeader("Authorization") String authorization) {
+	public Map<String, String> logout(Principal principal, @RequestHeader("Authorization") String authorization) {
 		sessions.logout(authenticatedUsers.requireUser(principal), jwt.parse(bearerToken(authorization)).getId());
 		return Map.of("status", "LOGGED_OUT");
 	}
-    /** Valida el formato Bearer antes de extraer el token firmado. */
-    private String bearerToken(String authorization) {
-        if (authorization == null || !authorization.startsWith("Bearer ") || authorization.length() <= 7) {
-            throw new org.springframework.web.server.ResponseStatusException(
-                    org.springframework.http.HttpStatus.UNAUTHORIZED, "Token Bearer requerido");
-        }
-        return authorization.substring(7);
-    }
+
+	/** Valida el formato Bearer antes de extraer el token firmado. */
+	private String bearerToken(String authorization) {
+		if (authorization == null || !authorization.startsWith("Bearer ") || authorization.length() <= 7) {
+			throw new org.springframework.web.server.ResponseStatusException(
+					org.springframework.http.HttpStatus.UNAUTHORIZED, "Token Bearer requerido");
+		}
+		return authorization.substring(7);
+	}
 }
