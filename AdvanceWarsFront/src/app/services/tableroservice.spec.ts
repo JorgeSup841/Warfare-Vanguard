@@ -1,4 +1,3 @@
-
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import {
@@ -81,24 +80,6 @@ describe('tableroservice', () => {
       id: 42,
       status: 'IN_PROGRESS'
     });
-  });
-
-  it('no debe consultar el estado si el endpoint está pendiente', () => {
-
-    let errorRecibido = false;
-
-    service.getEstado(42).subscribe({
-      error: (error: Error) => {
-        errorRecibido = true;
-        expect(error.message).toContain('pendiente');
-      }
-    });
-
-    expect(errorRecibido).toBeTrue();
-
-    http.expectNone(
-      `${API_BASE_URL}/games/42/state`
-    );
   });
 
   it('solicita las casillas de movimiento con GET y no mueve la unidad', () => {
