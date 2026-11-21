@@ -6,7 +6,7 @@
   --gold: #ffd44f;
   --red: #e74b40;
   --blue: #366cb1;
-  font-family: 'Pixelify Sans', monospace;
+  font-family: 'Silkscreen', 'Pixelify Sans', monospace;
 }
 
 :host *, :host *::before, :host *::after {
@@ -89,7 +89,7 @@ label, .field-title {
 input, select, textarea {
   min-width: 0;
   width: 100%;
-  font: 16px 'Pixelify Sans', monospace;
+  font: 16px 'Silkscreen', 'Pixelify Sans', monospace;
   padding: 10px 12px;
   background: #fff8de;
   color: var(--ink);

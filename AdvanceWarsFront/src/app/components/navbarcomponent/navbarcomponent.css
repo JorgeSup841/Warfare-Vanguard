@@ -34,7 +34,7 @@
 a {
   color: #fff0c4;
   text-decoration: none;
-  font: 12px 'Pixelify Sans', monospace;
+  font: 12px 'Silkscreen', 'Pixelify Sans', monospace;
 }
 
 a:hover {
@@ -45,13 +45,13 @@ a:hover {
   background: #ffd44f;
   color: #19282d;
   border: 2px solid #19282d;
-  font: 11px 'Pixelify Sans', monospace;
+  font: 11px 'Silkscreen', 'Pixelify Sans', monospace;
   cursor: pointer;
   padding: 6px 9px;
 }
 
 .estado {
-  font: 10px 'Pixelify Sans', monospace;
+  font: 10px 'Silkscreen', 'Pixelify Sans', monospace;
   color: #ffd44f;
   white-space: nowrap;
 }
