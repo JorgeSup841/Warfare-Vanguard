@@ -1,0 +1,150 @@
+            <!-- TIENDA -->
+            <div class="caja tienda" *ngIf="juego.tiendaAbierta && juego.fabricaActiva as fabrica"
+                 [style.border-color]="juego.colorJugador(juego.partida?.currentPlayerOrder ?? 1)">
+              <div class="tienda__cabecera">
+                <h2>🛒 TIENDA</h2>
+                <button type="button" class="tienda__cerrar" (click)="juego.cerrarTienda()">✕</button>
+              </div>
+
+              <p>{{ juego.etiquetaPropiedadTienda }}</p>
+              <p class="tienda__faccion" [style.border-left-color]="juego.colorJugador(juego.partida?.currentPlayerOrder ?? 1)">
+                <img [src]="'/assets/sprites/ui/banderas/' + juego.faccionTienda + '.png'" alt="" />
+                Facción {{ juego.faccionTienda }} · {{ juego.jugadorEnTurno }}
+              </p>
+              <p class="tienda__dinero">TU DINERO: $ {{ juego.dineroActual }}</p>
+
+              <p class="message error" *ngIf="juego.fabricaOcupada">
+                Hay una tropa encima de la fábrica. Muévela para poder comprar.
+              </p>
+
+              <div class="tienda__item" *ngFor="let item of juego.tienda">
+                <img class="tienda__imagen" [src]="juego.imagenTienda(item.tipo)" [alt]="item.nombre">
+                <div class="tienda__info">
+                  <strong>{{ item.nombre }}</strong>
+                  <span>{{ item.detalle }}</span>
+                  <span class="tienda__precio" [class.tienda__precio--falta]="juego.dineroActual < item.costo">
+                    $ {{ item.costo }}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  [disabled]="juego.accionEnCurso || juego.fabricaOcupada || juego.dineroActual < item.costo"
+                  (click)="juego.producirUnidad(item.tipo)">
+                  {{ juego.produciendo ? '...' : 'COMPRAR' }}
+                </button>
+              </div>
+
+              <p class="tienda__nota">La unidad nueva aparece en el edificio seleccionado y actúa en tu próximo turno.</p>
+            </div>
+
+            <div
+              class="caja unidad-ficha__combate"
+              *ngIf="juego.resultadoCombate as combate">
+
+              <h2><img src="/assets/sprites/ui/attack.png" alt="" class="ficha-icono"> ÚLTIMO COMBATE</h2>
+
+              <p>
+                ATACANTE:
+                #{{ combate.attackerUnitId }}
+              </p>
+
+              <p>
+                OBJETIVO:
+                #{{ combate.targetUnitId }}
+              </p>
+
+              <p>
+                DAÑO CAUSADO:
+                -{{ combate.damageDealt }}
+              </p>
+
+              <p>
+                CONTRAATAQUE:
+                -{{ combate.counterattackDamage }}
+              </p>
+
+              <p>
+                VIDA ATACANTE:
+                {{ combate.attackerHealth }}
+              </p>
+
+              <p>
+                VIDA OBJETIVO:
+                {{ combate.targetHealth }}
+              </p>
+
+              <p *ngIf="combate.targetDestroyed">
+                UNIDAD ENEMIGA DESTRUIDA
+              </p>
+
+              <p *ngIf="combate.attackerDestroyed">
+                UNIDAD ATACANTE DESTRUIDA
+              </p>
+
+            </div>
+
+
+            <div class="caja">
+
+              <h2>LEYENDA</h2>
+
+              <div
+                class="leyenda"
+                *ngFor="let t of juego.terrenos">
+
+                <span
+                  class="leyenda__color"
+                  [style.background]="t.color">
+                </span>
+
+                {{ t.name }}
+
+              </div>
+
+              <p
+                class="caja__vacio"
+                *ngIf="juego.modoDemo">
+
+                LOS NÚMEROS DEL 1 AL 4 REPRESENTAN
+                LAS BASES DE LOS JUGADORES.
+
+              </p>
+
+            </div>
+
+
+            <div
+              class="caja"
+              *ngIf="!juego.modoDemo">
+
+              <h2>CONTROLES DE PARTIDA</h2>
+
+              <div class="grid">
+
+                <button
+                  type="button"
+                  [disabled]="juego.accionEnCurso"
+                  (click)="juego.cargarMapa()">
+                  ACTUALIZAR MAPA
+                </button>
+
+                <button
+                  type="button"
+                  class="secondary"
+                  [disabled]="juego.accionEnCurso"
+                  (click)="juego.cargarDatos()">
+                  ACTUALIZAR PARTIDA
+                </button>
+
+                <button type="button" (click)="juego.consultarHistorial()">{{ juego.mostrandoHistorial ? 'OCULTAR' : 'VER' }} HISTORIAL</button>
+
+                <button
+                  type="button"
+                  (click)="juego.descargarPDF()">
+                  DESCARGAR PDF
+                </button>
+
+              </div>
+
+            </div>
+

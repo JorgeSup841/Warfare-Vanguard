@@ -21,27 +21,51 @@
             SEMILLA: {{ partida.seed }}
           </p>
 
-          <h2>JUGADORES</h2>
-
-          <p *ngFor="let jugador of partida.players">
-            {{ jugador.turnOrder }}.
-            {{ jugador.name }} —
-            {{ jugador.money }} CRÉDITOS
-            <ng-container *ngIf="jugador.status">
-              ({{ jugador.status }})
-            </ng-container>
-          </p>
-
-          <div class="field">
-            <label>COMANDANTE Y FACCIÓN</label>
-            <button type="button" class="secondary" disabled>
-              PRÓXIMAMENTE
+          <div class="selecciones__controles" *ngIf="partida.status === 'SETUP'">
+            <span class="selecciones__estado">
+              {{ seleccionesCompletas ? 'EJÉRCITOS CONFIGURADOS' : 'CONFIGURA TODOS LOS EJÉRCITOS PARA INICIAR' }}
+            </span>
+            <button type="button" class="secondary" *ngIf="seleccionesCompletas"
+                    (click)="mostrarElecciones = !mostrarElecciones">
+              {{ mostrarElecciones ? 'OCULTAR CONFIGURACIÓN' : 'CAMBIAR FACCIONES Y COMANDANTES' }}
             </button>
           </div>
 
-          <p>
-            Revisa tu escuadrón antes de entrar al campo de batalla.
-          </p>
+          <div class="selecciones" *ngIf="partida.status === 'SETUP' && (mostrarElecciones || !seleccionesCompletas)">
+            <article class="seleccion-jugador" *ngFor="let jugador of partida.players"
+                     [style.border-color]="colorFaccion(jugador.factionCode)">
+              <div class="seleccion-jugador__datos">
+                <img *ngIf="jugador.factionCode" class="seleccion-jugador__retrato"
+                     [src]="retrato(jugador.factionCode)" [alt]="'Comandante ' + jugador.factionCode">
+                <strong>J{{ jugador.turnOrder }} · {{ jugador.name }}</strong>
+                <span>Facción guardada: {{ jugador.factionCode || 'Sin asignar' }}</span>
+                <span>Comandante: {{ jugador.commanderCode || 'Sin asignar' }}</span>
+              </div>
+              <div class="field">
+                <label [attr.for]="'faccion-' + jugador.turnOrder">FACCIÓN</label>
+                <select [id]="'faccion-' + jugador.turnOrder"
+                        [value]="seleccion[jugador.turnOrder]?.factionId || ''"
+                        (change)="cambiarFaccion(jugador.turnOrder, $any($event.target).value)">
+                  <option value="">Elige facción</option>
+                  <option *ngFor="let faccion of facciones" [value]="faccion.id">{{ faccion.name }}</option>
+                </select>
+              </div>
+              <div class="field">
+                <label [attr.for]="'comandante-' + jugador.turnOrder">COMANDANTE</label>
+                <select [id]="'comandante-' + jugador.turnOrder"
+                        [value]="seleccion[jugador.turnOrder]?.commanderId || ''"
+                        (change)="cambiarComandante(jugador.turnOrder, $any($event.target).value)">
+                  <option value="">Elige comandante</option>
+                  <option *ngFor="let comandante of comandantesDe(seleccion[jugador.turnOrder]?.factionId || 0)"
+                          [value]="comandante.id">{{ comandante.name }}</option>
+                </select>
+              </div>
+              <button type="button" [disabled]="guardando !== null || iniciando || !seleccion[jugador.turnOrder]?.commanderId"
+                      (click)="guardarSeleccion(jugador.turnOrder)">
+                {{ guardando === jugador.turnOrder ? 'GUARDANDO...' : 'GUARDAR ELECCIÓN' }}
+              </button>
+            </article>
+          </div>
 
           <div class="flex"
                *ngIf="partida.status === 'SETUP' && !confirmar">

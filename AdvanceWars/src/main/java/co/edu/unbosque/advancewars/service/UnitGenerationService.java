@@ -9,9 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import co.edu.unbosque.advancewars.enums.MovementType;
 import co.edu.unbosque.advancewars.enums.PropertyType;
-import co.edu.unbosque.advancewars.enums.UnitCategory;
 import co.edu.unbosque.advancewars.enums.UnitType;
 import co.edu.unbosque.advancewars.model.GameState;
 import co.edu.unbosque.advancewars.model.Player;
@@ -20,16 +18,18 @@ import co.edu.unbosque.advancewars.model.Unit;
 import co.edu.unbosque.advancewars.model.UnitDefinition;
 import co.edu.unbosque.advancewars.repository.UnitDefinitionRepository;
 
+/** Crea las tropas iniciales en las bases de los jugadores. */
 @Service
 public class UnitGenerationService {
 
 	private final UnitDefinitionRepository definitionRepository;
 
-	public UnitGenerationService(UnitDefinitionRepository definitionRepository) {
+	/** Inyecta las dependencias del servicio mediante constructor. */
+    public UnitGenerationService(UnitDefinitionRepository definitionRepository) {
 		this.definitionRepository = definitionRepository;
 	}
 
-	// Coloca una infanteria sobre el cuartel general de cada jugador.
+	/** Genera la infantería inicial de los jugadores en sus cuarteles. */
 	public List<Unit> generateInitialUnits(GameState game, List<Property> properties) {
 		Map<Integer, Property> bases = new HashMap<>();
 
@@ -53,8 +53,8 @@ public class UnitGenerationService {
 		}
 
 		UnitDefinition infantry = definitionRepository.findByUnitType(UnitType.INFANTRY)
-				.orElseGet(() -> definitionRepository.save(new UnitDefinition(UnitType.INFANTRY, "Infanteria",
-						UnitCategory.LAND, MovementType.FOOT, 1000, 10, 3, true, 99, 0, 1, true)));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                        "Catalogo de unidades no inicializado"));
 
 		List<Unit> units = new ArrayList<>();
 		for (Player player : game.getPlayers()) {
