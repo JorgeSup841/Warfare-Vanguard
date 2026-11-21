@@ -28,14 +28,17 @@ export class Navbarcomponent implements OnInit, OnDestroy {
     );
   }
 
-  /** Cierra la sesión y redirige al inicio. */
+  /** Avisa al servidor que se cierra la sesión y redirige al inicio. */
   salir(): void {
-    this.auth.logout();
-    this.cdr.markForCheck();
+    this.subs.add(
+      this.auth.cerrarSesion().subscribe(() => {
+        this.cdr.markForCheck();
 
-    this.router.navigate(['/']).catch(() => {
-      this.cdr.markForCheck();
-    });
+        this.router.navigate(['/']).catch(() => {
+          this.cdr.markForCheck();
+        });
+      })
+    );
   }
 
   /** Libera las suscripciones del componente. */
