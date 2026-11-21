@@ -489,7 +489,7 @@ td {
   color: #ffd44f;
   font-size: 28px;
   z-index: 5;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .hud {
@@ -785,3 +785,89 @@ td {
   font-size: 11px;
   color: #666;
 }
+
+
+/* F7–F9: experiencia táctica retro con identidad gráfica propia. */
+.juego { padding: 12px clamp(7px, 1vw, 22px) 45px; }
+.juego .wrap { width: min(100%, 1700px); }
+.juego .header { margin-bottom: 12px; }
+.juego h1 { font-size: clamp(15px, 1.7vw, 22px); }
+.juego .panel-body { padding: 12px; }
+.juego .panel-head { padding: 10px 15px; }
+.juego .hud { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 9px; padding: 9px;
+  background: #f4e8bd; border: 3px solid #182b34; box-shadow: 3px 3px 0 #172329; color: #182b34; }
+.juego .hud__jugadores { display: flex; flex-wrap: wrap; gap: 5px; flex: 1; }
+.juego .hud__jugador { position: relative; min-width: 96px; padding: 7px 10px; border: 2px solid #26323c; border-left-width: 6px;
+  background: linear-gradient(180deg, #fff8de 0%, #f0e1af 100%); color: #18232c; box-shadow: inset 0 0 0 2px #fff3cd; }
+.juego .hud__turno { font-size: 11px; font-weight: 700; padding: 6px 10px; background: #203641; color: #ffe17a; border: 2px solid #18232c; }
+.juego .hud button { padding: 8px 10px; font-size: 8px; }
+.juego .game-layout { display: grid; grid-template-columns: minmax(0,1fr) minmax(260px,330px); gap: 14px; }
+.juego .map-col { min-width: 0; }
+.juego .sidebar { min-width: 0; }
+.juego .marco { background: #132a35; border: 4px solid #172b34; box-shadow: 5px 5px 0 #101b21; overflow: hidden; }
+.juego__lienzo canvas { image-rendering: pixelated; display: block; }
+.juego__barra-vista { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 0; }
+.juego__barra-vista button { padding: 6px 9px; font-size: 8px; }
+.juego__barra-vista span { font-size: 12px; }
+.wrap--clasica .game-layout { max-width: 1050px; margin-inline: auto; }
+.wrap--compacta .game-layout { grid-template-columns: minmax(0,1fr); }
+.aviso-turno--bloqueo { position: absolute; z-index: 30; inset: 0; min-height: 100%; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 15px; background: rgb(18 35 48 / 96%); text-align: center; color: #fff6d0; }
+.aviso-turno--bloqueo strong { font-size: clamp(14px, 2.2vw, 26px); }
+.aviso-turno--bloqueo button { padding: 16px 20px; background: #ffda62; color: #18232c; }
+.juego__historial { margin-top: 15px; }
+.juego__historial ol { padding-inline-start: 25px; max-height: 300px; overflow: auto; }
+.juego__historial li { padding: 6px; border-bottom: 1px solid #aaa; }
+@media(max-width: 850px) { .juego .game-layout { grid-template-columns: minmax(0,1fr); } .juego .hud { align-items: stretch; } }
+@media(prefers-reduced-motion: reduce) { .juego * { scroll-behavior: auto; animation-duration: .01ms !important; } }
+
+.juego .hud__dinero { display: inline-flex; align-items: center; gap: 5px; }
+.juego .hud__dinero img, .juego .hud__icono { width: 17px; height: 17px; object-fit: contain; image-rendering: pixelated; vertical-align: middle; }
+
+/* F8.1: tablero nítido, retratos y transición de turno operativa. */
+.juego__lienzo { min-height: 0; aspect-ratio: 8 / 5; }
+.juego__lienzo canvas { width: 100%; height: auto; image-rendering: pixelated; }
+.juego .hud__jugador { display: grid; grid-template-columns: 48px minmax(0, 1fr); align-items: center; column-gap: 8px; min-width: 145px; }
+.juego .hud__retrato { grid-row: 1 / span 3; width: 46px; height: 46px; border: 2px solid #23343c; background: #f0d08b; image-rendering: pixelated; object-fit: contain; }
+.juego .hud__jugador strong { line-height: 1.4; display:block; }
+.juego .hud__dinero img { width: 15px; height: 15px; vertical-align: middle; image-rendering: pixelated; }
+.juego .aviso-turno--bloqueo { pointer-events: auto; background: rgba(12, 28, 39, .55); z-index: 40; cursor: default; padding: 18px; }
+.juego .aviso-turno--bloqueo button { pointer-events: auto; cursor: pointer; position: relative; z-index: 2; }
+.aviso-turno__tarjeta { display: flex; flex-direction: column; align-items: center; gap: 15px; background: #fff2ce; color: #1b292e; border: 5px solid #1b292e;
+  padding: clamp(16px, 3vw, 30px); box-shadow: 8px 8px 0 #0c1920; max-width: min(96%, 550px); }
+.aviso-turno__tarjeta strong { font-size: clamp(11px, 1.6vw, 16px) !important; line-height: 1.8; }
+.aviso-turno__tarjeta p { font-size: clamp(12px, 1.1vw, 16px); margin: 0; }
+.aviso-turno__retrato { width: clamp(80px, 10vw, 128px); height: clamp(80px, 10vw, 128px); image-rendering: pixelated; object-fit: contain; }
+.unidad-ficha__sprite { float: right; width: 68px; height: 68px; image-rendering: pixelated; object-fit: contain; background: #ece0b3; border: 2px solid #1b292e; }
+.ficha-icono { width: 18px; height: 18px; display: inline-block; vertical-align: middle; image-rendering: pixelated; object-fit: contain; }
+@media (max-width: 850px) { .juego .game-layout { grid-template-columns: minmax(0, 1fr); } }
+
+.hud__rostro { position:relative; grid-row: 1 / span 3; width: 46px; height: 46px; }
+.hud__rostro .hud__retrato { grid-row: auto; }
+.hud__bandera { position: absolute; right:-5px; bottom:-5px; width:19px; height:19px; image-rendering:pixelated; border:1px solid #22323a; background:#fff4d4; }
+
+.juego .hud__jugador--activo { background: linear-gradient(180deg, #fff6dc 0%, #ffe08a 100%); border-color: #162830; box-shadow: 0 0 0 2px #ffcf4b inset, 0 0 0 2px #162830; }
+.juego .hud__jugador--activo strong { color: #8f2f10 !important; }
+.juego .hud__jugador--fuera { opacity: 0.5; filter: grayscale(0.2); }
+.juego .hud__turno-flag { position: absolute; top: -10px; right: 8px; padding: 2px 6px; background: #ffcf4b; color: #18232c; border: 2px solid #18232c; font: 7px/1.6 'Press Start 2P', monospace; box-shadow: 2px 2px 0 #18232c; }
+.juego .hud__dinero { display: inline-flex; align-items: center; gap: 5px; width: fit-content; padding: 2px 6px; background: #203641; color: #fff5cf; border: 2px solid #18232c; font-weight: 700; }
+.juego .hud__dinero span { display: inline-block; }
+.juego .hud__ganancia { display: inline-block; width: fit-content; padding: 1px 4px; background: #e7ffd6; border: 1px solid #2d5a3d; }
+.juego__zoom-reset { min-width: 88px; }
+
+/* F8.4: identifica a qué facción pertenece la tienda abierta. */
+.juego .tienda__faccion {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 7px 8px;
+  border: 2px solid #1b292e;
+  border-left-width: 7px;
+  background: #f2e4bd;
+  color: #182b34;
+  font-weight: bold;
+}
+.juego .tienda__faccion img { width: 24px; height: 24px; image-rendering: pixelated; object-fit: contain; }
+
+/* F8.5: cursor real compacto; selección del mapa dibujada dentro de una casilla por Phaser. */
+.juego__lienzo canvas { cursor: crosshair; }

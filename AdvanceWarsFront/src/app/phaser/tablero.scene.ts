@@ -310,8 +310,5 @@ export class TableroScene extends Phaser.Scene {
       },
     );
 
-    this.input.keyboard?.on('keydown-ESC', () => {
-      this.notificarSeleccion(null);
-    });
   }
 }

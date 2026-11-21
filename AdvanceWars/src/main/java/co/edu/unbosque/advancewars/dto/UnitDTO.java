@@ -12,6 +12,7 @@ public class UnitDTO {
 	private int y;
 	private int health;
 	private int fuel;
+	private java.util.Map<String, Integer> ammunition;
 	private boolean movedThisTurn;
 	private boolean attackedThisTurn;
 	private boolean capturedThisTurn;
@@ -24,6 +25,7 @@ public class UnitDTO {
 		y = unit.getPosition().getY();
 		health = unit.getCurrentHealth();
 		fuel = unit.getCurrentFuel();
+		ammunition = new java.util.HashMap<>(unit.getAmmunition());
 		movedThisTurn = unit.isMovedThisTurn();
 		attackedThisTurn = unit.isAttackedThisTurn();
 		capturedThisTurn = unit.isCapturedThisTurn();
@@ -56,6 +58,8 @@ public class UnitDTO {
 	public int getFuel() {
 		return fuel;
 	}
+
+	public java.util.Map<String, Integer> getAmmunition() { return ammunition; }
 
 	public boolean isMovedThisTurn() {
 		return movedThisTurn;

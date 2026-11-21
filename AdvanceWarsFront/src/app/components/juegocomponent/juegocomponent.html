@@ -1,5 +1,5 @@
 <section class="screen juego">
-  <div class="wrap">
+  <div class="wrap" [class.wrap--clasica]="vistaClasica" [class.wrap--compacta]="ocultarDetalles">
 
     <header class="flex header">
 
@@ -128,11 +128,17 @@
             <div
               *ngFor="let j of partida.players"
               class="hud__jugador"
-              [style.border-left-color]="colores[j.turnOrder - 1]"
+              [style.border-left-color]="colorJugador(j.turnOrder)"
               [class.hud__jugador--activo]="j.turnOrder === partida.currentPlayerOrder"
               [class.hud__jugador--fuera]="j.status === 'ELIMINATED'">
-              <strong [style.color]="colores[j.turnOrder - 1]">J{{ j.turnOrder }} {{ j.name }}</strong>
-              <span>$ {{ j.money }}</span>
+              <span class="hud__turno-flag" *ngIf="j.turnOrder === partida.currentPlayerOrder">EN TURNO</span>
+              <div class="hud__rostro">
+                <img class="hud__retrato" [src]="retratoJugador(j.turnOrder)"
+                     [alt]="'Retrato del comandante de ' + j.name" loading="lazy">
+                <img *ngIf="j.factionCode" class="hud__bandera" [src]="'/assets/sprites/ui/banderas/' + j.factionCode + '.png'" alt="">
+              </div>
+              <strong [style.color]="colorJugador(j.turnOrder)">J{{ j.turnOrder }} {{ j.name }}</strong>
+              <span class="hud__dinero"><img src="/assets/sprites/ui/money.png" alt=""> <span>$ {{ j.money }}</span></span>
               <span class="hud__ganancia" *ngIf="ganancias[j.turnOrder]">+$ {{ ganancias[j.turnOrder] }}</span>
               <span *ngIf="j.status === 'WINNER'">GANADOR</span>
               <span *ngIf="j.status === 'ELIMINATED'">ELIMINADO</span>
@@ -143,8 +149,15 @@
             type="button"
             class="btn secondary"
             (click)="abrirTienda()"
-            [disabled]="accionEnCurso || partida.status !== 'IN_PROGRESS'">
+            [disabled]="accionEnCurso || partida.status !== 'IN_PROGRESS'"
+            title="Abrir tienda en una fábrica, aeropuerto o puerto propio">
             🛒 TIENDA
+          </button>
+
+          <button type="button" class="btn secondary"
+                  *ngIf="comandanteTurno?.commanderCode" [disabled]="!poderDisponible || accionEnCurso"
+                  (click)="activarPoder()">
+            PODER {{ comandanteTurno?.powerCharge ?? 0 }} ★
           </button>
 
           <button
@@ -152,7 +165,7 @@
             class="btn"
             (click)="terminarTurno()"
             [disabled]="accionEnCurso || partida.status !== 'IN_PROGRESS'">
-            {{ terminando ? 'TERMINANDO...' : 'TERMINAR TURNO' }}
+            <img src="/assets/sprites/ui/end_turn.png" alt="" class="hud__icono"> {{ terminando ? 'TERMINANDO...' : 'TERMINAR TURNO' }}
           </button>
         </div>
         <!-- /HUD -->
@@ -177,11 +190,11 @@
         </p>
 
         <div class="alcance-leyenda" *ngIf="!modoDemo && unidadActiva" role="status">
-          <span class="alcance-leyenda__muestra" aria-hidden="true"></span>
+          <img src="/assets/sprites/ui/move.png" class="ficha-icono" alt="">
           <span *ngIf="consultandoMovimientos">Consultando destinos posibles...</span>
           <span *ngIf="!consultandoMovimientos">
-            {{ movimientosDisponibles.length }} casillas disponibles (verde).
-            Clic en una casilla verde para mover.
+            {{ movimientosDisponibles.length }} casillas disponibles (azul).
+            Clic en una casilla azul para mover.
           </span>
         </div>
 
@@ -193,7 +206,16 @@
 
             <div class="marco juego__marco">
 
-              <div class="aviso-turno" *ngIf="avisoTurno">{{ avisoTurno }}</div>
+              <div class="aviso-turno aviso-turno--bloqueo" *ngIf="esperandoEntrega" role="dialog"
+                   aria-modal="true" aria-label="Cambio de jugador">
+                <div class="aviso-turno__tarjeta">
+                  <img [src]="retratoJugador(partida?.currentPlayerOrder ?? 1)"
+                       alt="Retrato del comandante que juega ahora" class="aviso-turno__retrato">
+                  <strong>{{ avisoTurno }}</strong>
+                  <p>Entrega el dispositivo al siguiente jugador.</p>
+                  <button type="button" (click)="confirmarEntrega()">LISTO, CONTINUAR ▸</button>
+                </div>
+              </div>
 
 
 
@@ -205,20 +227,22 @@
 
             </div>
 
-            <p class="muted">
-              Haz clic en una unidad propia para seleccionarla.
-              Después, selecciona una casilla vacía para intentar
-              moverla o una unidad enemiga para intentar atacarla.
-            </p>
-
-            <p class="muted">
-              Spring Boot valida todas las acciones del juego.
-            </p>
+            <div class="juego__barra-vista">
+              <button type="button" (click)="zoomCambiar(-1)" aria-label="Alejar cámara">−</button>
+              <button type="button" class="secondary juego__zoom-reset" (click)="zoomRestablecer()" aria-label="Volver a zoom 100 por ciento">ZOOM {{ zoomPorcentaje }}</button>
+              <button type="button" (click)="zoomCambiar(1)" aria-label="Acercar cámara">+</button>
+              <button type="button" class="secondary" (click)="vistaClasica = !vistaClasica">
+                {{ vistaClasica ? 'PANORÁMICO' : 'MODO CLÁSICO' }}
+              </button>
+              <button type="button" class="secondary" (click)="ocultarDetalles = !ocultarDetalles">
+                {{ ocultarDetalles ? 'MOSTRAR FICHAS' : 'OCULTAR FICHAS' }}
+              </button>
+            </div>
 
           </div>
 
 
-          <aside class="sidebar juego__panel">
+          <aside class="sidebar juego__panel" *ngIf="!ocultarDetalles">
 
 
             <div class="caja unidad-ficha">
@@ -229,7 +253,8 @@
                 *ngIf="unidadActiva as u; else sinUnidadActiva">
 
                 <div class="unidad-ficha__encabezado">
-
+                  <img class="unidad-ficha__sprite" [src]="retratoUnidad(u)"
+                       [alt]="nombreUnidad(u.unitType)">
                   <h3>
                     {{ nombreUnidad(u.unitType) }}
                   </h3>
@@ -257,13 +282,17 @@
                   </p>
 
                   <p>
-                    <strong>VIDA:</strong>
+                    <strong><img src="/assets/sprites/ui/health.png" alt="" class="ficha-icono"> VIDA:</strong>
                     {{ u.health }}
                   </p>
 
                   <p>
-                    <strong>COMBUSTIBLE:</strong>
+                    <strong><img src="/assets/sprites/ui/fuel.png" alt="" class="ficha-icono"> COMBUSTIBLE:</strong>
                     {{ u.fuel }}
+                  </p>
+                  <p *ngIf="u.ammunition">
+                    <strong><img src="/assets/sprites/ui/ammo.png" alt="" class="ficha-icono"> MUNICIÓN:</strong>
+                    <span *ngFor="let arma of u.ammunition | keyvalue">{{ arma.key }}: {{ arma.value }} </span>
                   </p>
 
                 </div>
@@ -309,7 +338,7 @@
 
                 <button type="button" class="btn" *ngIf="puedeCapturar"
                         [disabled]="accionEnCurso" (click)="capturarPropiedad()">
-                  CAPTURAR PROPIEDAD
+                  <img src="/assets/sprites/ui/capture.png" alt="" class="ficha-icono"> CAPTURAR PROPIEDAD
                 </button>
                 <p class="muted">
                   La disponibilidad final de cada acción la determina Spring Boot.
@@ -423,13 +452,18 @@
             </div>
 
             <!-- TIENDA -->
-            <div class="caja tienda" *ngIf="tiendaAbierta && fabricaActiva as fabrica">
+            <div class="caja tienda" *ngIf="tiendaAbierta && fabricaActiva as fabrica"
+                 [style.border-color]="colorJugador(partida?.currentPlayerOrder ?? 1)">
               <div class="tienda__cabecera">
                 <h2>🛒 TIENDA</h2>
                 <button type="button" class="tienda__cerrar" (click)="cerrarTienda()">✕</button>
               </div>
 
-              <p>FÁBRICA EN ({{ fabrica.x }}, {{ fabrica.y }})</p>
+              <p>{{ etiquetaPropiedadTienda }}</p>
+              <p class="tienda__faccion" [style.border-left-color]="colorJugador(partida?.currentPlayerOrder ?? 1)">
+                <img [src]="'/assets/sprites/ui/banderas/' + faccionTienda + '.png'" alt="" />
+                Facción {{ faccionTienda }} · {{ jugadorEnTurno }}
+              </p>
               <p class="tienda__dinero">TU DINERO: $ {{ dineroActual }}</p>
 
               <p class="message error" *ngIf="fabricaOcupada">
@@ -453,14 +487,14 @@
                 </button>
               </div>
 
-              <p class="tienda__nota">La tropa nueva aparece en la fábrica y se mueve en tu próximo turno.</p>
+              <p class="tienda__nota">La unidad nueva aparece en el edificio seleccionado y actúa en tu próximo turno.</p>
             </div>
 
             <div
               class="caja unidad-ficha__combate"
               *ngIf="resultadoCombate as combate">
 
-              <h2>ÚLTIMO COMBATE</h2>
+              <h2><img src="/assets/sprites/ui/attack.png" alt="" class="ficha-icono"> ÚLTIMO COMBATE</h2>
 
               <p>
                 ATACANTE:
@@ -555,6 +589,8 @@
                   ACTUALIZAR PARTIDA
                 </button>
 
+                <button type="button" (click)="consultarHistorial()">{{ mostrandoHistorial ? 'OCULTAR' : 'VER' }} HISTORIAL</button>
+
                 <button
                   type="button"
                   (click)="descargarPDF()">
@@ -573,6 +609,19 @@
 
     </div>
 
+
+    <section class="panel juego__historial" *ngIf="mostrandoHistorial && !modoDemo" aria-label="Historial de partida">
+      <div class="panel-head azul">HISTORIAL DE COMBATE</div>
+      <div class="panel-body">
+        <p *ngIf="cargandoHistorial">Cargando registros...</p>
+        <p *ngIf="!cargandoHistorial && historial.length === 0">Sin registros.</p>
+        <ol *ngIf="!cargandoHistorial">
+          <li *ngFor="let evento of historial">
+            <strong>R{{ evento.roundNumber }} · {{ evento.eventType }}</strong> — {{ evento.description }}
+          </li>
+        </ol>
+      </div>
+    </section>
 
     <div
       *ngIf="!modoDemo"

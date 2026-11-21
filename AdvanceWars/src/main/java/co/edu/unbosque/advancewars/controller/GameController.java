@@ -7,6 +7,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,6 +19,10 @@ import co.edu.unbosque.advancewars.dto.CaptureResultDTO;
 import co.edu.unbosque.advancewars.dto.CreateGameDTO;
 import co.edu.unbosque.advancewars.dto.EndTurnRequestDTO;
 import co.edu.unbosque.advancewars.dto.GameDTO;
+import co.edu.unbosque.advancewars.dto.PlayerSelectionRequestDTO;
+import co.edu.unbosque.advancewars.dto.GameLogDTO;
+import co.edu.unbosque.advancewars.service.GameHistoryService;
+import co.edu.unbosque.advancewars.service.CommanderPowerService;
 import co.edu.unbosque.advancewars.dto.MapDTO;
 import co.edu.unbosque.advancewars.dto.MoveUnitRequestDTO;
 import co.edu.unbosque.advancewars.dto.ProduceUnitRequestDTO;
@@ -40,15 +45,20 @@ public class GameController {
 	private final UnitCombatService unitCombatService;
 	private final UnitCaptureService unitCaptureService;
 	private final UnitProductionService unitProductionService;
+	private final GameHistoryService historyService;
+	private final CommanderPowerService commanderPowerService;
 
 	public GameController(GameService gameService,
 			UnitMovementService unitMovementService, UnitCombatService unitCombatService,
-			UnitCaptureService unitCaptureService, UnitProductionService unitProductionService) {
+			UnitCaptureService unitCaptureService, UnitProductionService unitProductionService,
+			GameHistoryService historyService, CommanderPowerService commanderPowerService) {
 		this.gameService = gameService;
 		this.unitMovementService = unitMovementService;
 		this.unitCombatService = unitCombatService;
 		this.unitCaptureService = unitCaptureService;
 		this.unitProductionService = unitProductionService;
+		this.historyService = historyService;
+		this.commanderPowerService = commanderPowerService;
 	}
 
 	/** Crea una partida para el usuario que inicio sesion. */
@@ -73,6 +83,24 @@ public class GameController {
 	@GetMapping("/{id}")
 	public GameDTO getMyGame(@PathVariable("id") Long id, @AuthenticationPrincipal User creator) {
 		return gameService.getMyGame(id, resolveUser(creator));
+	}
+
+	/** Actualiza la faccion y comandante de un jugador local durante SETUP. */
+	@PutMapping("/{id}/players/{order}/selection")
+	public GameDTO selectPlayer(@PathVariable("id") Long id, @PathVariable("order") int order,
+			@RequestBody PlayerSelectionRequestDTO selection, @AuthenticationPrincipal User creator) {
+		return gameService.selectPlayer(id, order, selection, resolveUser(creator));
+	}
+
+	@GetMapping("/{id}/history")
+	public List<GameLogDTO> history(@PathVariable("id") Long id, @AuthenticationPrincipal User creator) {
+		return historyService.getHistory(id, resolveUser(creator));
+	}
+
+	@PostMapping("/{id}/power")
+	public GameDTO usePower(@PathVariable("id") Long id, @RequestBody EndTurnRequestDTO request,
+			@AuthenticationPrincipal User creator) {
+		return commanderPowerService.activate(id, request, resolveUser(creator));
 	}
 
 	/** Comienza la partida y crea los soldados iniciales. */

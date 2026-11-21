@@ -104,6 +104,7 @@ export interface unidadservidor {
   y: number;
   health: number;
   fuel: number;
+  ammunition?: Record<string, number>;
   movedThisTurn: boolean;
   attackedThisTurn: boolean;
   capturedThisTurn: boolean;

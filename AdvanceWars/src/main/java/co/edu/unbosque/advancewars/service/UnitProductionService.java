@@ -55,9 +55,6 @@ public class UnitProductionService {
 				|| request.getCurrentRound() < 1 || request.getCurrentPlayerOrder() < 1) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Datos de produccion incompletos");
 		}
-		if (request.getUnitType() != UnitType.INFANTRY && request.getUnitType() != UnitType.TANK) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Por ahora solo se producen INFANTRY y TANK");
-		}
 
 		// El bloqueo de la partida evita compras simultaneas con el mismo dinero.
 		Optional<GameState> foundGame = gameRepository.findWithLockByIdAndCreatedBy_Id(gameId, creator.getId());
@@ -93,36 +90,30 @@ public class UnitProductionService {
 				|| !current.getId().equals(factory.getOwner().getId())) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "La fabrica no es de este jugador");
 		}
-		if (factory.getDefinition().getType() != PropertyType.FACTORY || !factory.isOperational()
-				|| !factory.getDefinition().getProductionCategories().contains(UnitCategory.LAND)) {
-			throw new ResponseStatusException(HttpStatus.CONFLICT,
-					"Esta propiedad no puede producir tropas terrestres");
+		if (!factory.isOperational()) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "La propiedad no esta operativa");
 		}
 		if (unitRepository.existsByTile_Id(factory.getTile().getId())) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "La casilla de la fabrica esta ocupada");
 		}
 
-		// Reutilizamos las definiciones ya guardadas. Solo creamos TANK si hace falta.
-		Optional<UnitDefinition> foundDefinition = definitionRepository.findByUnitType(request.getUnitType());
-		UnitDefinition definition;
-		boolean newTank = false;
-		if (foundDefinition.isPresent()) {
-			definition = foundDefinition.get();
-		} else if (request.getUnitType() == UnitType.TANK) {
-			definition = new UnitDefinition(UnitType.TANK, "Tanque", UnitCategory.LAND, MovementType.TREAD, 7000, 10, 6,
-					true, 70, 0, 1, false);
-			newTank = true;
-		} else {
-			throw new ResponseStatusException(HttpStatus.CONFLICT, "No existe la definicion de infanteria");
+		UnitDefinition definition = definitionRepository.findByUnitType(request.getUnitType())
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT, "Unidad no disponible en el catalogo"));
+		UnitCategory category = definition.getCategory();
+		PropertyType buildingType = factory.getDefinition().getType();
+		PropertyType required = switch (category) {
+			case LAND -> PropertyType.FACTORY;
+			case AIR -> PropertyType.AIRPORT;
+			case NAVAL -> PropertyType.PORT;
+		};
+		if (buildingType != required || !factory.getDefinition().getProductionCategories().contains(category)) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "La propiedad no produce esta categoria de unidad");
 		}
-		if (definition.getCategory() != UnitCategory.LAND || definition.getProductionCost() <= 0) {
-			throw new ResponseStatusException(HttpStatus.CONFLICT, "Definicion de unidad no valida");
+		if (definition.getProductionCost() <= 0) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "Precio de unidad invalido");
 		}
 		if (current.getMoney() < definition.getProductionCost()) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "Dinero insuficiente");
-		}
-		if (newTank) {
-			definition = definitionRepository.save(definition);
 		}
 
 		Unit unit = new Unit(definition, current, factory.getTile());

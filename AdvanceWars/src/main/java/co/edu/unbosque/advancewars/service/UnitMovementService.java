@@ -119,7 +119,7 @@ public class UnitMovementService {
         }
 
         int movementCost = shortestPathCost(tiles, occupied, startX, startY, endX, endY,
-                unit.getDefinition().getMovementType(), unit.getDefinition().getMovementPoints());
+                unit.getDefinition().getMovementType(), movementPoints(unit));
         if (movementCost < 0) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Destino inaccesible o fuera del alcance de movimiento");
@@ -191,7 +191,7 @@ public class UnitMovementService {
         }
         int[][] costs = reachableCosts(tiles, occupied, unit.getPosition().getX(),
                 unit.getPosition().getY(), unit.getDefinition().getMovementType(),
-                unit.getDefinition().getMovementPoints());
+                movementPoints(unit));
         List<ReachableTileDTO> result = new ArrayList<>();
         for (int y = 0; y < map.getHeight(); y++) {
             for (int x = 0; x < map.getWidth(); x++) {
@@ -262,6 +262,19 @@ public class UnitMovementService {
             }
         }
         return best;
+    }
+
+    /** Bonificaciones de poder autoritativas y de duracion de turno. */
+    private int movementPoints(Unit unit) {
+        int points = unit.getDefinition().getMovementPoints();
+        if (unit.getOwner().getCommander() != null && unit.getOwner().isPowerActive()
+                && "MOVE_PLUS_1".equals(unit.getOwner().getCommander().getPowerEffectCode())) points++;
+        for (co.edu.unbosque.advancewars.model.Player other : unit.getOwner().getGameState().getPlayers()) {
+            if (other.getId() != null && !other.getId().equals(unit.getOwner().getId())
+                    && other.isPowerActive() && other.getCommander() != null
+                    && "ENEMY_MOVE_MINUS_1".equals(other.getCommander().getPowerEffectCode())) points--;
+        }
+        return Math.max(1, points);
     }
 
     /** -1 significa que ese terreno es intransitable para la unidad. */

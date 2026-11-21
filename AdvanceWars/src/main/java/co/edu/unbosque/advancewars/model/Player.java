@@ -15,6 +15,8 @@ public class Player {
     private String name;
     private int turnOrder;
     private int money;
+    private int powerCharge;
+    private boolean powerActive;
 
     @Enumerated(EnumType.STRING)
     private PlayerStatus status;
@@ -92,6 +94,12 @@ public class Player {
     public boolean isActive() {
         return status == PlayerStatus.ACTIVE;
     }
+
+    public int getPowerCharge() { return powerCharge; }
+    public void chargePower(int amount) { powerCharge = Math.min(9, Math.max(0, powerCharge + amount)); }
+    public void spendPower(int amount) { powerCharge -= amount; powerActive = true; }
+    public boolean isPowerActive() { return powerActive; }
+    public void clearPowerActive() { powerActive = false; }
 
     // Getters y setters.
     public Long getId() {

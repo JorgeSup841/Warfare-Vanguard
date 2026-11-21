@@ -84,8 +84,8 @@ public class UnitCaptureService {
 		if (unit.isDestroyed() || unit.isAttackedThisTurn() || unit.isCapturedThisTurn()) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "La unidad ya ataco o capturo en este turno");
 		}
-		if (unit.getDefinition().getUnitType() != UnitType.INFANTRY) {
-			throw new ResponseStatusException(HttpStatus.CONFLICT, "Solo la infanteria puede capturar por ahora");
+		if (!unit.getDefinition().isCaptureCapable()) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "Este tipo de unidad no puede capturar");
 		}
 
 		Optional<Property> foundProperty = propertyRepository.findByTile_Id(unit.getTile().getId());
