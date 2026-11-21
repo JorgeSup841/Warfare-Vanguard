@@ -76,8 +76,8 @@ export class adminservice {
   }
 
   /** Elimina una partida, acción irreversible. */
-  eliminarPartida(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.api}/games/${id}`, { headers: this.auth.getHeaders() });
+  eliminarPartida(id: number): Observable<null> {
+    return this.http.delete<null>(`${this.api}/games/${id}`, { headers: this.auth.getHeaders() });
   }
 
   /** Consulta todas las sesiones (incluidas las terminadas). */
@@ -92,8 +92,8 @@ export class adminservice {
   }
 
   /** Revoca una sesión concreta por su identificador. */
-  revocarSesion(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.api}/sessions/${encodeURIComponent(id)}`,
+  revocarSesion(id: string): Observable<null> {
+    return this.http.delete<null>(`${this.api}/sessions/${encodeURIComponent(id)}`,
       { headers: this.auth.getHeaders() });
   }
 
