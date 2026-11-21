@@ -56,8 +56,8 @@ export class Resultadoscomponent implements OnInit {
   /** Nombre del ganador, si ya lo hay. */
   get ganador(): string {
     if (!this.partida) return '';
-    const g = this.partida.players.find((j) => j.status === 'WINNER');
-    return g ? g.name : '';
+    const winner = this.partida.players.find((player) => player.status === 'WINNER');
+    return winner ? winner.name : '';
   }
 
   /** Cuántas unidades le quedan a un jugador. */
