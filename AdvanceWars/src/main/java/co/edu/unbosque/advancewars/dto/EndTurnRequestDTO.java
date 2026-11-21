@@ -12,9 +12,11 @@ public class EndTurnRequestDTO {
     @Min(1)
     private Integer currentPlayerOrder;
 
+    /** Crea una solicitud vacía para deserialización JSON. */
     public EndTurnRequestDTO() {
     }
 
+    /** Crea una solicitud con el turno que conoce el cliente. */
     public EndTurnRequestDTO(Integer currentRound, Integer currentPlayerOrder) {
         this.currentRound = currentRound;
         this.currentPlayerOrder = currentPlayerOrder;

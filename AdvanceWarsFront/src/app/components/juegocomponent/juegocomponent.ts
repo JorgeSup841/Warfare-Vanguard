@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, ChangeDetectorRef, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, AfterViewInit, ChangeDetectorRef, OnDestroy, OnInit, ViewEncapsulation, inject } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import Phaser from 'phaser';
@@ -24,8 +24,10 @@ function costoTerrenoInspector(terrenoActual: terreno, tipo: string): string {
   standalone: false,
   templateUrl: './juegocomponent.html',
   styleUrl: './juegocomponent.css',
+  encapsulation: ViewEncapsulation.None,
 })
 export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
+  readonly vistaJuego = this;
   private readonly ruta = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly catalogos = inject(juegoservice);
@@ -110,20 +112,12 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
   get comandanteTurno() {
     return this.partida?.players.find(j => j.turnOrder === this.partida?.currentPlayerOrder) ?? null;
   }
+  /** Comprueba el poder sin acceder a un jugador o comandante nulos. */
   get poderDisponible(): boolean {
     const jugador = this.comandanteTurno;
-    if (!jugador || !jugador.commanderCode) {
-      return false;
-    }
-
-    const cost: Record<string, number> = {
-      CMD_RED: 3,
-      CMD_BLUE: 3,
-      CMD_GREEN: 4,
-      CMD_YELLOW: 4,
-    };
-    const costoPoder = cost[jugador.commanderCode] ?? 99;
-    return !jugador.powerActive && (jugador.powerCharge ?? 0) >= costoPoder;
+    if (!jugador?.commanderCode) return false;
+    const cost: Record<string, number> = { CMD_RED: 3, CMD_BLUE: 3, CMD_GREEN: 4, CMD_YELLOW: 4 };
+    return !jugador.powerActive && (jugador.powerCharge ?? 0) >= (cost[jugador.commanderCode] ?? 99);
   }
   /** Nunca modifica la carga local: sólo renderiza la respuesta del servidor. */
   activarPoder(): void {
@@ -1122,7 +1116,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
   /** Recupera el flujo antiguo: abre desde el botón y elige una propiedad propia libre. */
   abrirTienda(): void {
     if (!this.partida || !this.tableroActual || this.accionEnCurso ||
-      this.partida.status !== 'IN_PROGRESS') return;
+        this.partida.status !== 'IN_PROGRESS') return;
     const propias = this.tableroActual.tiles.filter(t =>
       ['FACTORY', 'AIRPORT', 'PORT'].includes(t.propertyType ?? '') &&
       t.ownerOrder === this.partida?.currentPlayerOrder && t.propertyId != null);

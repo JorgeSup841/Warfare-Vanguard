@@ -17,9 +17,11 @@ public class AttackUnitRequestDTO {
 	@Min(1)
 	private Integer currentPlayerOrder;
 
+	/** Crea una solicitud vacía para deserialización JSON. */
 	public AttackUnitRequestDTO() {
 	}
 
+	/** Crea una solicitud de ataque con objetivo, ronda y jugador. */
 	public AttackUnitRequestDTO(Long targetUnitId, Integer currentRound, Integer currentPlayerOrder) {
 		this.targetUnitId = targetUnitId;
 		this.currentRound = currentRound;

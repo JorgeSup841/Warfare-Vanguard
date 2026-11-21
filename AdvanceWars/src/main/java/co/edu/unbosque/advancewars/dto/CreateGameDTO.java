@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /** Datos que envia Angular para crear una partida. */
@@ -22,11 +23,11 @@ public class CreateGameDTO {
 	private Long seed;
 
 	public List<String> getPlayerNames() {
-		return playerNames;
+		return playerNames == null ? null : new ArrayList<>(playerNames);
 	}
 
 	public void setPlayerNames(List<String> playerNames) {
-		this.playerNames = playerNames;
+		this.playerNames = playerNames == null ? null : new ArrayList<>(playerNames);
 	}
 
 	public int getWidth() {

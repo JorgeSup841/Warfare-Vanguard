@@ -36,8 +36,13 @@ export class Configurarpartidacomponent implements OnInit {
   }
   private readonly colores: Record<string, string> = { RED: '#d63031', BLUE: '#0984e3', GREEN: '#00b894', YELLOW: '#fdcb6e' };
 
+  /** Directorio de los retratos propios por facción. */
+  private readonly directorioRetratos = '/assets/sprites/comandantes/';
+
   /** Ruta de retrato del paquete gráfico propio. */
-  readonly retrato = (factionCode: string): string => `/assets/sprites/comandantes/${factionCode}.png`;
+  retrato(factionCode: string): string {
+    return `${this.directorioRetratos}${factionCode}.png`;
+  }
 
   /** Recupera el color visual de la facción seleccionada. */
   colorFaccion(code: string | null | undefined): string {

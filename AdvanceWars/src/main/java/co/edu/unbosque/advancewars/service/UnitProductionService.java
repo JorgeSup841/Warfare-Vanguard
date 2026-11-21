@@ -1,6 +1,5 @@
 package co.edu.unbosque.advancewars.service;
 
-import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -11,7 +10,6 @@ import co.edu.unbosque.advancewars.dto.ProduceUnitRequestDTO;
 import co.edu.unbosque.advancewars.dto.UnitDTO;
 import co.edu.unbosque.advancewars.enums.GameStatus;
 import co.edu.unbosque.advancewars.enums.GameLogType;
-import co.edu.unbosque.advancewars.enums.MovementType;
 import co.edu.unbosque.advancewars.enums.PropertyType;
 import co.edu.unbosque.advancewars.enums.UnitCategory;
 import co.edu.unbosque.advancewars.enums.UnitType;
@@ -26,7 +24,7 @@ import co.edu.unbosque.advancewars.repository.PropertyRepository;
 import co.edu.unbosque.advancewars.repository.UnitDefinitionRepository;
 import co.edu.unbosque.advancewars.repository.UnitRepository;
 
-/** Compra infanterias y tanques en fabricas propias. */
+/** Valida la producción terrestre, aérea y naval desde propiedades propias. */
 @Service
 public class UnitProductionService {
 
@@ -36,7 +34,8 @@ public class UnitProductionService {
 	private final UnitRepository unitRepository;
 	private final GameEventService events;
 
-	public UnitProductionService(GameStateRepository gameRepository, PropertyRepository propertyRepository,
+	/** Inyecta las dependencias del servicio mediante constructor. */
+    public UnitProductionService(GameStateRepository gameRepository, PropertyRepository propertyRepository,
 			UnitDefinitionRepository definitionRepository, UnitRepository unitRepository, GameEventService events) {
 		this.gameRepository = gameRepository;
 		this.propertyRepository = propertyRepository;
@@ -45,8 +44,30 @@ public class UnitProductionService {
 		this.events = events;
 	}
 
+	/** Valida y registra una unidad comprada en el edificio propio. */
 	@Transactional
 	public UnitDTO produce(Long gameId, ProduceUnitRequestDTO request, User creator) {
+		validateRequest(request, creator);
+		GameState game = findCurrentGame(gameId, request, creator);
+		Player current = findCurrentPlayer(game);
+		Property factory = findProductionProperty(game, current, request.getPropertyId());
+		UnitDefinition definition = findProductionDefinition(factory, current, request.getUnitType());
+
+		Unit unit = new Unit(definition, current, factory.getTile());
+		unit.setMovedThisTurn(true);
+		unit.setAttackedThisTurn(true);
+		unit.setCapturedThisTurn(true);
+
+		current.subtractMoney(definition.getProductionCost());
+		Unit saved = unitRepository.save(unit);
+		events.record(game, current, GameLogType.UNIT_PRODUCED,
+				"Unidad " + definition.getUnitType() + " #" + saved.getId() + " producida en propiedad #"
+						+ factory.getId() + " por " + definition.getProductionCost());
+		return new UnitDTO(saved);
+	}
+
+	/** Rechaza solicitudes incompletas sin modificar los recursos del jugador. */
+	private void validateRequest(ProduceUnitRequestDTO request, User creator) {
 		if (creator == null || creator.getId() == null) {
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Debes iniciar sesion");
 		}
@@ -55,14 +76,12 @@ public class UnitProductionService {
 				|| request.getCurrentRound() < 1 || request.getCurrentPlayerOrder() < 1) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Datos de produccion incompletos");
 		}
+	}
 
-		// El bloqueo de la partida evita compras simultaneas con el mismo dinero.
-		Optional<GameState> foundGame = gameRepository.findWithLockByIdAndCreatedBy_Id(gameId, creator.getId());
-		if (foundGame.isEmpty()) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida no encontrada");
-		}
-		GameState game = foundGame.get();
-
+	/** Obtiene y bloquea la partida antes de validar el estado del turno. */
+	private GameState findCurrentGame(Long gameId, ProduceUnitRequestDTO request, User creator) {
+		GameState game = gameRepository.findWithLockByIdAndCreatedBy_Id(gameId, creator.getId())
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida no encontrada"));
 		if (game.getStatus() != GameStatus.IN_PROGRESS) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "La partida no esta en curso");
 		}
@@ -70,18 +89,22 @@ public class UnitProductionService {
 				|| game.getCurrentPlayerOrder() != request.getCurrentPlayerOrder()) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "El turno cambio; consulta la partida");
 		}
+		return game;
+	}
+
+	/** Busca al jugador local que tiene el turno. */
+	private Player findCurrentPlayer(GameState game) {
 		Player current = game.findPlayerByOrder(game.getCurrentPlayerOrder());
 		if (current == null || !current.isActive()) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "No hay un jugador activo en este turno");
 		}
+		return current;
+	}
 
-		Optional<Property> foundProperty = propertyRepository.findById(request.getPropertyId());
-		if (foundProperty.isEmpty()) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Propiedad no encontrada");
-		}
-		Property factory = foundProperty.get();
-
-		// La fabrica debe pertenecer al mapa y al jugador del turno actual.
+	/** Comprueba propiedad, operatividad y casilla libre antes de producir. */
+	private Property findProductionProperty(GameState game, Player current, Long propertyId) {
+		Property factory = propertyRepository.findById(propertyId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Propiedad no encontrada"));
 		if (game.getGameMap() == null || factory.getTile() == null || factory.getTile().getGameMap() == null
 				|| !game.getGameMap().getId().equals(factory.getTile().getGameMap().getId())) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Propiedad no encontrada en esta partida");
@@ -96,17 +119,21 @@ public class UnitProductionService {
 		if (unitRepository.existsByTile_Id(factory.getTile().getId())) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "La casilla de la fabrica esta ocupada");
 		}
+		return factory;
+	}
 
-		UnitDefinition definition = definitionRepository.findByUnitType(request.getUnitType()).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.CONFLICT, "Unidad no disponible en el catalogo"));
+	/** Valida categoría de producción, precio y dinero del jugador. */
+	private UnitDefinition findProductionDefinition(Property factory, Player current, UnitType unitType) {
+		UnitDefinition definition = definitionRepository.findByUnitType(unitType)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT, "Unidad no disponible en el catalogo"));
 		UnitCategory category = definition.getCategory();
-		PropertyType buildingType = factory.getDefinition().getType();
 		PropertyType required = switch (category) {
-		case LAND -> PropertyType.FACTORY;
-		case AIR -> PropertyType.AIRPORT;
-		case NAVAL -> PropertyType.PORT;
+			case LAND -> PropertyType.FACTORY;
+			case AIR -> PropertyType.AIRPORT;
+			case NAVAL -> PropertyType.PORT;
 		};
-		if (buildingType != required || !factory.getDefinition().getProductionCategories().contains(category)) {
+		if (factory.getDefinition().getType() != required
+				|| !factory.getDefinition().getProductionCategories().contains(category)) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "La propiedad no produce esta categoria de unidad");
 		}
 		if (definition.getProductionCost() <= 0) {
@@ -115,18 +142,6 @@ public class UnitProductionService {
 		if (current.getMoney() < definition.getProductionCost()) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "Dinero insuficiente");
 		}
-
-		Unit unit = new Unit(definition, current, factory.getTile());
-		// La tropa nueva puede actuar a partir de su siguiente turno.
-		unit.setMovedThisTurn(true);
-		unit.setAttackedThisTurn(true);
-		unit.setCapturedThisTurn(true);
-
-		current.subtractMoney(definition.getProductionCost());
-		Unit saved = unitRepository.save(unit);
-		events.record(game, current, GameLogType.UNIT_PRODUCED,
-				"Unidad " + definition.getUnitType() + " #" + saved.getId() + " producida en propiedad #"
-						+ factory.getId() + " por " + definition.getProductionCost());
-		return new UnitDTO(saved);
+		return definition;
 	}
 }

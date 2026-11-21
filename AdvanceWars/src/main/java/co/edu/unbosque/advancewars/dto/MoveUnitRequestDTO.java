@@ -20,9 +20,11 @@ public class MoveUnitRequestDTO {
 	@Min(1)
 	private Integer currentPlayerOrder;
 
+	/** Crea una solicitud vacía para deserialización JSON. */
 	public MoveUnitRequestDTO() {
 	}
 
+	/** Crea una solicitud con destino y versión del turno. */
 	public MoveUnitRequestDTO(Integer x, Integer y, Integer currentRound, Integer currentPlayerOrder) {
 		this.x = x;
 		this.y = y;
