@@ -1,45 +1,158 @@
 <section class="screen">
-  <div class="wrap"><h1>CENTRO ADMINISTRATIVO</h1>
+  <div class="wrap">
+    <h1>CENTRO ADMINISTRATIVO</h1>
     <div class="panel">
-      <div class="panel-head azul">ACCESO ADMIN ■</div>
+      <div class="panel-head azul">CONTROL DE AURA WARS ■</div>
       <div class="panel-body">
-        <p>Usuarios y roles reales gestionados por Spring Boot; el servidor comprueba el rol ADMIN.</p>
-        <div class="flex">
-          <button (click)="cargar()" [disabled]="procesando">REFRESCAR</button>
-          <a class="btn secondary" routerLink="/panel">CUARTEL</a></div>
+        <p>Operaciones administrativas autorizadas por Spring Boot.</p>
+        <nav class="menu-admin" aria-label="Secciones administrativas">
+          <button type="button" [class.activo]="seccion === 'resumen'" (click)="abrir('resumen')">RESUMEN</button>
+          <button type="button" [class.activo]="seccion === 'usuarios'" (click)="abrir('usuarios')">USUARIOS</button>
+          <button type="button" [class.activo]="seccion === 'partidas'" (click)="abrir('partidas')">PARTIDAS</button>
+          <button type="button" [class.activo]="seccion === 'sesiones'" (click)="abrir('sesiones')">SESIONES</button>
+          <button type="button" [class.activo]="seccion === 'actividad'" (click)="abrir('actividad')">ACTIVIDAD</button>
+        </nav>
+        <p *ngIf="procesando" class="message" role="status">CARGANDO / PROCESANDO...</p>
         <p *ngIf="error" class="message error" role="alert">{{ error }}</p>
-        <p *ngIf="mensaje" class="message">{{ mensaje }}</p>
-        <h2>USUARIOS</h2>
-        <div class="usuario" *ngFor="let u of usuarios">
-          <span>#{{ u.id }} — {{ u.username }} ({{ u.email }})</span>
-          <select [ngModel]="confirmacion?.usuario === u && confirmacion?.tipo === 'rol' ? confirmacion?.valor : u.role"
-                  (ngModelChange)="cambiarRol(u,$event)" [disabled]="procesando || !!confirmacion"
-                  aria-label="Rol de usuario">
-            <option value="USER">JUGADOR</option>
-            <option value="ADMIN">ADMINISTRADOR</option>
-          </select>
-          <select
-            [ngModel]="confirmacion?.usuario === u && confirmacion?.tipo === 'estado' ? confirmacion?.valor : u.enabled"
-            (ngModelChange)="cambiarEstado(u,$event)" [disabled]="procesando || !!confirmacion"
-            aria-label="Estado de usuario">
-            <option [ngValue]="true">HABILITADO</option>
-            <option [ngValue]="false">DESHABILITADO</option>
-          </select>
-          <span>{{ u.emailVerified ? 'CORREO VERIFICADO' : 'CORREO PENDIENTE' }}</span>
-        </div>
-        <div *ngIf="confirmacion" class="message" role="group" aria-label="Confirmar cambio de usuario">
+        <p *ngIf="mensaje" class="message" role="status">{{ mensaje }}</p>
+
+        <div *ngIf="confirmacion" class="confirmacion message" role="group" aria-label="Confirmación administrativa">
           <p>{{ confirmacion.texto }}</p>
           <div class="flex">
-            <button type="button" [disabled]="procesando" (click)="confirmarCambio()">CONFIRMAR CAMBIO</button>
-            <button type="button" class="secondary" [disabled]="procesando" (click)="cancelarCambio()">CANCELAR</button>
+            <button type="button" (click)="confirmarCambio()" [disabled]="procesando" class="danger">CONFIRMAR</button>
+            <button type="button" (click)="cancelarCambio()" [disabled]="procesando" class="secondary">CANCELAR</button>
           </div>
         </div>
-        <p *ngIf="!usuarios.length">No hay usuarios para mostrar.</p>
-        <h2>INFORME PDF</h2>
-        <div class="flex"><input aria-label="ID de partida para PDF" type="number" [(ngModel)]="idPDF" min="1">
-          <button (click)="pdfPartida()">DESCARGAR PDF</button>
+
+        <div *ngIf="seccion === 'resumen'">
+          <h2>INDICADORES DEL SERVIDOR</h2>
+          <button type="button" (click)="cargarResumen()" [disabled]="procesando">ACTUALIZAR</button>
+          <div *ngIf="resumen" class="indicadores">
+            <div><strong>{{ resumen.totalUsers }}</strong><span>USUARIOS</span></div>
+            <div><strong>{{ resumen.onlineUsers }}</strong><span>EN LÍNEA</span></div>
+            <div><strong>{{ resumen.totalGames }}</strong><span>PARTIDAS</span></div>
+            <div><strong>{{ resumen.gamesInProgress }}</strong><span>EN JUEGO</span></div>
+            <div><strong>{{ resumen.finishedGames }}</strong><span>FINALIZADAS</span></div>
+          </div>
         </div>
-        <p>La edición global de parámetros y catálogos requiere endpoints aún no implementados en el backend actual.</p>
+
+        <div *ngIf="seccion === 'usuarios'">
+          <h2>GESTIÓN DE USUARIOS</h2>
+          <div class="flex">
+            <input [(ngModel)]="busqueda" aria-label="Buscar usuarios" placeholder="Nombre, correo o ID">
+            <button type="button" (click)="cargarUsuarios()" [disabled]="procesando">REFRESCAR</button>
+          </div>
+          <div *ngFor="let u of usuariosFiltrados" class="fila-admin">
+            <div class="datos-fila">
+              <strong>#{{ u.id }} {{ u.username }}</strong>
+              <span>{{ u.email }} · {{ u.emailVerified ? 'CORREO OK' : 'SIN VERIFICAR' }}</span>
+            </div>
+            <select [ngModel]="u.role" (ngModelChange)="cambiarRol(u, $event)"
+                    [disabled]="procesando || !!confirmacion || esMiCuenta(u)" [attr.aria-label]="'Rol de ' + u.username">
+              <option value="USER">USER</option>
+              <option value="ADMIN">ADMIN</option>
+            </select>
+            <select [ngModel]="u.enabled" (ngModelChange)="cambiarEstado(u, $event)"
+                    [disabled]="procesando || !!confirmacion || esMiCuenta(u)" [attr.aria-label]="'Estado de ' + u.username">
+              <option [ngValue]="true">HABILITADO</option>
+              <option [ngValue]="false">DESHABILITADO</option>
+            </select>
+            <button type="button" class="secondary" [disabled]="procesando" (click)="idConsulta = u.id || 0; consultarUsuario()">DETALLE</button>
+          </div>
+          <p *ngIf="!usuariosFiltrados.length">Sin usuarios que coincidan.</p>
+          <h3>CONSULTAR USUARIO POR ID</h3>
+          <div class="flex">
+            <input type="number" min="1" [(ngModel)]="idConsulta" aria-label="ID de usuario">
+            <button type="button" (click)="consultarUsuario()" [disabled]="procesando">CONSULTAR</button>
+          </div>
+          <div *ngIf="detalleUsuario" class="message">
+            <strong>{{ detalleUsuario.username }}</strong> — ID #{{ detalleUsuario.id }}
+            <p>Correo: {{ detalleUsuario.email }} · Rol: {{ detalleUsuario.role }}</p>
+            <p>Habilitado: {{ detalleUsuario.enabled ? 'Sí' : 'No' }} · Verificado: {{ detalleUsuario.emailVerified ? 'Sí' : 'No' }}</p>
+          </div>
+          <h3>REGISTRAR NUEVA CUENTA</h3>
+          <p>Se crea como USER; debe verificar el código enviado al correo para activarse.</p>
+          <form (ngSubmit)="crearUsuario()" class="form-admin">
+            <label>USUARIO <input name="nuevo-usuario" [(ngModel)]="nuevo.username" minlength="3" maxlength="50" required></label>
+            <label>CORREO <input name="nuevo-correo" type="email" [(ngModel)]="nuevo.email" required></label>
+            <label>CONTRASEÑA (12 A 64) <input name="nuevo-clave" type="password" [(ngModel)]="nuevo.password" minlength="12" maxlength="64" autocomplete="new-password" required></label>
+            <button type="submit" [disabled]="procesando">REGISTRAR USUARIO</button>
+          </form>
+        </div>
+
+        <div *ngIf="seccion === 'partidas'">
+          <h2>PARTIDAS DEL SISTEMA</h2>
+          <button type="button" (click)="cargarPartidas()" [disabled]="procesando">REFRESCAR</button>
+          <div *ngFor="let p of partidas" class="fila-admin">
+            <div class="datos-fila">
+              <strong>#{{ p.game.id }} · {{ p.game.status }}</strong>
+              <span>Dueño: {{ p.creatorUsername || 'Sin propietario' }} · Jugadores: {{ p.game.playerCount }} · Ronda: {{ p.game.currentRound }}</span>
+            </div>
+            <button type="button" (click)="verPartida(p.game.id)" [disabled]="procesando">CONSULTAR</button>
+            <button type="button" class="danger" (click)="prepararEliminarPartida(p.game.id)" [disabled]="procesando">ELIMINAR</button>
+          </div>
+          <p *ngIf="!partidas.length">No hay partidas.</p>
+          <div *ngIf="partida" class="detalle-partida">
+            <h3>PARTIDA #{{ partida.game.id }} · {{ partida.game.status }}</h3>
+            <p>Creada por {{ partida.creatorUsername }} · {{ partida.createdAt | date:'short' }}</p>
+            <p>Ronda {{ partida.game.currentRound }} · Turno del jugador {{ partida.game.currentPlayerOrder }}</p>
+            <p>Mapa {{ partida.game.width }} × {{ partida.game.height }} · Semilla {{ partida.game.seed }}</p>
+            <h3>JUGADORES</h3>
+            <p *ngFor="let j of partida.game.players">#{{ j.turnOrder }} {{ j.name }} · {{ j.money }} créditos · {{ j.status }}</p>
+            <h3>MAPA</h3>
+            <div *ngIf="mapa" class="mapa-scroll" role="region" aria-label="Vista de mapa" tabindex="0">
+              <div class="mapa-grid" [style.gridTemplateColumns]="'repeat(' + mapa.width + ', 15px)'">
+                <span *ngFor="let c of mapa.tiles" class="casilla"
+                      [class.agua]="c.terrain === 'WATER'" [class.bosque]="c.terrain === 'FOREST'"
+                      [class.montana]="c.terrain === 'MOUNTAIN'" [class.camino]="c.terrain === 'ROAD'"
+                      [class.propiedad]="!!c.propertyType"
+                      [title]="'(' + c.x + ',' + c.y + ') ' + c.terrain + (c.propertyType ? ' / ' + c.propertyType : '')"></span>
+              </div>
+            </div>
+            <h3>TROPAS ({{ tropas.length }})</h3>
+            <div class="tabla-scroll"><table><thead><tr><th>ID</th><th>TIPO</th><th>JUGADOR</th><th>POSICIÓN</th><th>VIDA</th><th>COMBUSTIBLE</th></tr></thead>
+              <tbody><tr *ngFor="let t of tropas"><td>{{ t.id }}</td><td>{{ t.unitType }}</td><td>{{ t.ownerOrder }}</td><td>{{ t.x }}, {{ t.y }}</td><td>{{ t.health }}</td><td>{{ t.fuel }}</td></tr></tbody></table></div>
+            <h3>HISTORIAL ({{ historial.length }})</h3>
+            <p *ngIf="!historial.length">Sin eventos registrados.</p>
+            <div *ngFor="let evento of historial" class="evento">
+              R{{ evento.roundNumber }} · {{ evento.eventType }} · {{ evento.description }}
+            </div>
+          </div>
+          <h3>DESCARGAR INFORME PDF</h3>
+          <div class="flex"><input type="number" min="1" [(ngModel)]="idPDF" aria-label="ID de partida para PDF">
+            <button type="button" (click)="pdfPartida()" [disabled]="procesando">DESCARGAR PDF</button>
+          </div>
+        </div>
+
+        <div *ngIf="seccion === 'sesiones'">
+          <h2>SESIONES DE USUARIOS</h2>
+          <label class="flex"><input type="checkbox" [(ngModel)]="soloActivas" (ngModelChange)="cargarSesiones()"> SOLO ACTIVAS</label>
+          <button type="button" (click)="cargarSesiones()" [disabled]="procesando">ACTUALIZAR</button>
+          <div *ngFor="let s of sesiones" class="fila-admin">
+            <div class="datos-fila">
+              <strong>{{ s.username }} · {{ s.online ? 'EN LÍNEA' : 'DESCONECTADO' }}</strong>
+              <span>Última actividad: {{ s.lastSeen | date:'short' }} · {{ s.lastAction || 'Sin actividad' }}</span>
+              <span>Revocada: {{ s.revoked ? 'Sí' : 'No' }} · Expira: {{ s.expiresAt | date:'short' }}</span>
+            </div>
+            <button type="button" class="danger" *ngIf="!s.revoked" (click)="prepararRevocacion(s.id)" [disabled]="procesando">REVOCAR</button>
+          </div>
+          <p *ngIf="!sesiones.length">No hay sesiones en esta vista.</p>
+        </div>
+
+        <div *ngIf="seccion === 'actividad'">
+          <h2>REGISTRO DE ACTIVIDAD</h2>
+          <p>Deja el ID en 0 para consultar actividad general.</p>
+          <div class="flex">
+            <input type="number" min="0" [(ngModel)]="idActividad" aria-label="ID de usuario para actividad">
+            <button type="button" (click)="cargarActividad()" [disabled]="procesando">CONSULTAR</button>
+          </div>
+          <div *ngFor="let a of actividad" class="evento">
+            {{ a.createdAt | date:'short' }} · {{ a.username }} (#{{ a.userId }}) · {{ a.action }}
+          </div>
+          <p *ngIf="!actividad.length">Sin eventos en esta vista.</p>
+        </div>
+
+        <p class="pie-panel"><a routerLink="/panel">‹ VOLVER AL CUARTEL</a></p>
       </div>
     </div>
   </div>

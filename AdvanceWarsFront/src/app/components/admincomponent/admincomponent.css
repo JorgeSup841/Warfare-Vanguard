@@ -214,3 +214,37 @@ textarea {
 input[type=number] {
   max-width: 180px;
 }
+
+/* Layout del centro administrativo */
+.menu-admin { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0; }
+.menu-admin button { font-size: 8px; padding: 11px; }
+.menu-admin button.activo { background: #366cb1; color: #fff0c4; }
+.indicadores { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin: 20px 0; }
+.indicadores > div { padding: 20px 10px; border: 3px solid var(--ink); background: #dfebb8; text-align: center; }
+.indicadores strong { display: block; font-size: 29px; }
+.indicadores span { font-size: 11px; }
+.fila-admin { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 13px 0; border-bottom: 2px solid #bba97f; }
+.datos-fila { flex: 1 1 220px; min-width: 0; overflow-wrap: anywhere; }
+.datos-fila span { display: block; margin-top: 5px; font-size: 13px; }
+.fila-admin select { width: auto; max-width: 190px; }
+.fila-admin button { font-size: 8px; }
+.confirmacion { border-color: #e74b40; }
+.form-admin { display: grid; gap: 12px; margin-bottom: 20px; }
+.form-admin label { display: grid; gap: 8px; }
+.form-admin input { max-width: 460px; }
+.detalle-partida { border: 3px solid var(--ink); padding: 15px; margin: 16px 0; background: #fff8de; }
+.mapa-scroll { max-width: 100%; overflow: auto; max-height: 380px; padding: 10px; margin: 10px 0; background: #e4dfce; }
+.mapa-grid { display: grid; width: max-content; gap: 1px; }
+.casilla { width: 15px; height: 15px; background: #e6d99e; border: 1px solid #aaa; }
+.casilla.agua { background: #5287d3; }
+.casilla.bosque { background: #41815b; }
+.casilla.montana { background: #a7a7a7; }
+.casilla.camino { background: #c9a66d; }
+.casilla.propiedad { outline: 2px solid #b53040; outline-offset: -2px; }
+.tabla-scroll { overflow: auto; max-width: 100%; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+th, td { text-align: left; border: 1px solid #9e977e; padding: 8px; font-size: 12px; }
+.evento { border-bottom: 1px solid #a49b7a; padding: 7px 0; overflow-wrap: anywhere; }
+.pie-panel { margin-top: 30px; }
+input[type=checkbox] { width: auto; margin: 0 7px 0 0; }
+@media (max-width: 650px) { .fila-admin select { max-width: 100%; } .fila-admin { align-items: flex-start; } }
