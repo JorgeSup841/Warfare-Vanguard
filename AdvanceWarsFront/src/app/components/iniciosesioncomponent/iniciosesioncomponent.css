@@ -6,7 +6,7 @@
   --gold: #ffd44f;
   --red: #e74b40;
   --blue: #366cb1;
-  font-family: 'Pixelify Sans', monospace;
+  font-family: 'Silkscreen', 'Pixelify Sans', monospace;
 }
 
 :host *, :host *::before, :host *::after {
@@ -89,7 +89,7 @@ label, .field-title {
 input, select, textarea {
   min-width: 0;
   width: 100%;
-  font: 16px 'Pixelify Sans', monospace;
+  font: 16px 'Silkscreen', 'Pixelify Sans', monospace;
   padding: 10px 12px;
   background: #fff8de;
   color: var(--ink);
@@ -218,7 +218,7 @@ button:disabled {
 }
 
 .show {
-  font: 12px 'Pixelify Sans', monospace;
+  font: 12px 'Silkscreen', 'Pixelify Sans', monospace;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -246,14 +246,14 @@ button:disabled {
 }
 
 .links-foot a {
-  font: 10px 'Pixelify Sans', monospace;
+  font: 10px 'Silkscreen', 'Pixelify Sans', monospace;
   color: #1b292e;
 }
 
 .linea {
   text-align: center;
   color: #ffd44f;
-  font: 10px 'Pixelify Sans', monospace;
+  font: 10px 'Silkscreen', 'Pixelify Sans', monospace;
   margin-top: 35px;
 }
 

@@ -6,7 +6,7 @@
   --gold: #ffd44f;
   --red: #e74b40;
   --blue: #366cb1;
-  font-family: 'Pixelify Sans', monospace;
+  font-family: 'Silkscreen', 'Pixelify Sans', monospace;
 }
 
 :host *, :host *::before, :host *::after {
@@ -89,7 +89,7 @@ label, .field-title {
 input, select, textarea {
   min-width: 0;
   width: 100%;
-  font: 16px 'Pixelify Sans', monospace;
+  font: 16px 'Silkscreen', 'Pixelify Sans', monospace;
   padding: 10px 12px;
   background: #fff8de;
   color: var(--ink);
@@ -218,7 +218,7 @@ button:disabled {
   border: 0;
   box-shadow: none;
   background: transparent;
-  font: 9px 'Pixelify Sans', monospace;
+  font: 9px 'Silkscreen', 'Pixelify Sans', monospace;
   padding: 3px;
 }
 
@@ -254,14 +254,14 @@ button:disabled {
 .seleccionado {
   background: #e6d5a3;
   padding: 9px;
-  font: 11px 'Pixelify Sans', monospace;
+  font: 11px 'Silkscreen', 'Pixelify Sans', monospace;
 }
 
 .terminos {
   display: flex;
   align-items: center;
   gap: 8px;
-  font: 12px 'Pixelify Sans', monospace;
+  font: 12px 'Silkscreen', 'Pixelify Sans', monospace;
   margin: 14px 0;
 }
 
@@ -278,7 +278,7 @@ button:disabled {
 .back {
   text-align: center;
   margin-top: 28px;
-  font: 10px 'Pixelify Sans', monospace;
+  font: 10px 'Silkscreen', 'Pixelify Sans', monospace;
 }
 
 .back a {
