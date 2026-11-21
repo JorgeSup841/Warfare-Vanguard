@@ -24,6 +24,9 @@ export interface jugadorservidor {
   money: number;
   status: string;
   factionCode?: string | null;
+  commanderCode?: string | null;
+  powerCharge?: number;
+  powerActive?: boolean;
 }
 
 /**
@@ -102,6 +105,8 @@ export interface eventojuego {
   eventType?: string;
   description?: string;
   occurredAt?: string;
+  roundNumber?: number;
+  turnOrder?: number;
 }
 export interface turnoactual {
   currentRound: number;

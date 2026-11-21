@@ -12,10 +12,12 @@ public class UnitDTO {
 	private int y;
 	private int health;
 	private int fuel;
+	private java.util.Map<String, Integer> ammunition;
 	private boolean movedThisTurn;
 	private boolean attackedThisTurn;
 	private boolean capturedThisTurn;
 
+	/** Convierte una unidad persistida a un estado de lectura para Angular. */
 	public UnitDTO(Unit unit) {
 		id = unit.getId();
 		unitType = unit.getDefinition().getUnitType().name();
@@ -24,6 +26,7 @@ public class UnitDTO {
 		y = unit.getPosition().getY();
 		health = unit.getCurrentHealth();
 		fuel = unit.getCurrentFuel();
+		ammunition = new java.util.HashMap<>(unit.getAmmunition());
 		movedThisTurn = unit.isMovedThisTurn();
 		attackedThisTurn = unit.isAttackedThisTurn();
 		capturedThisTurn = unit.isCapturedThisTurn();
@@ -57,14 +60,21 @@ public class UnitDTO {
 		return fuel;
 	}
 
+	public java.util.Map<String, Integer> getAmmunition() {
+		return ammunition;
+	}
+
+	/** Indica si ya se desplazó en este turno. */
 	public boolean isMovedThisTurn() {
 		return movedThisTurn;
 	}
 
+	/** Indica si ya atacó en este turno. */
 	public boolean isAttackedThisTurn() {
 		return attackedThisTurn;
 	}
 
+	/** Indica si ya capturó en este turno. */
 	public boolean isCapturedThisTurn() {
 		return capturedThisTurn;
 	}

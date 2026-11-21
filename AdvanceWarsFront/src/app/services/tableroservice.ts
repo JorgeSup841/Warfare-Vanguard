@@ -7,7 +7,8 @@ import {
   nuevapartida, partidaresumen, tablero, unidadservidor,
   estadojuego, eventojuego, seleccionjugador, registrarasiento, turnoactual, resultadoCaptura, casillaalcanzable
 } from '../models/tablero';
-import { resultadoataque } from '../models/unidad';
+import { resultadoataque, unidad } from '../models/unidad';
+import { faccion, comandante } from '../models/partida';
 
 /**
  * Servicio principal de partidas de AURA WARS.
@@ -24,6 +25,7 @@ export class tableroservice {
   private readonly http = inject(HttpClient);
   private readonly auth = inject(usuarioservice);
   private readonly api = `${API_BASE_URL}/games`;
+  private readonly catalogos = `${API_BASE_URL}/catalog`;
 
   /** Construye las cabeceras autenticadas para el backend. */
   private headers(): HttpHeaders {
@@ -132,6 +134,7 @@ export class tableroservice {
     );
   }
 
+  /** Inicia la partida seleccionada mediante el backend. */
   iniciarPartida(
     id: number
   ): Observable<partidaresumen> {
@@ -333,7 +336,7 @@ export class tableroservice {
   }
 
   /** Produce una unidad en una fábrica propia, si el servidor lo permite. */
-  producir(id: number, propertyId: number, unitType: 'INFANTRY' | 'TANK',
+  producir(id: number, propertyId: number, unitType: string,
     turno: turnoactual): Observable<unidadservidor> {
     return this.http.post<unidadservidor>(
       `${this.api}/${id}/units/produce`, { propertyId, unitType, ...turno },
@@ -349,35 +352,39 @@ export class tableroservice {
     );
   }
 
-  /**
-   * Reserva la activación del poder de comandante.
-   *
-   * @param id Identificador de la partida.
-   * @returns Error de funcionalidad pendiente.
-   */
-  poder(
-    id: number
-  ): Observable<unknown> {
+  /** Catálogos persistidos por el backend. */
+  getFacciones(): Observable<faccion[]> {
+    return this.http.get<faccion[]>(`${this.catalogos}/factions`, { headers: this.headers() });
+  }
 
-    return this.pendiente(
-      'Activar poder de comandante',
-      { id }
+  /** Consulta los poderes y estadísticas oficiales de los comandantes. */
+  getComandantes(): Observable<comandante[]> {
+    return this.http.get<comandante[]>(`${this.catalogos}/commanders`, { headers: this.headers() });
+  }
+
+  /** Consulta el catálogo de unidades autorizado por Spring Boot. */
+  getCatalogoUnidades(): Observable<unidad[]> {
+    return this.http.get<unidad[]>(`${this.catalogos}/units`, { headers: this.headers() });
+  }
+
+  /** Actualiza la facción y comandante del jugador local; solo durante SETUP. */
+  seleccionarJugador(id: number, orden: number, seleccion: seleccionjugador): Observable<partidaresumen> {
+    return this.http.put<partidaresumen>(
+      `${this.api}/${id}/players/${orden}/selection`, seleccion,
+      { headers: this.headers() }
     );
   }
 
-  /**
-   * Reserva la consulta del historial de acciones.
-   *
-   * @param id Identificador de la partida.
-   * @returns Error de funcionalidad pendiente.
-   */
-  getLogs(
-    id: number
-  ): Observable<eventojuego[]> {
-
-    return this.pendiente(
-      'Consultar historial de acciones',
-      { id }
-    );
+  /** Activa una habilidad después de validar carga y turno en Spring Boot. */
+  poder(id: number, turno: turnoactual): Observable<partidaresumen> {
+    return this.http.post<partidaresumen>(`${this.api}/${id}/power`, turno,
+      { headers: this.headers() });
   }
+
+  /** Historial autorizado de una partida, persistido por Spring Boot. */
+  getLogs(id: number): Observable<eventojuego[]> {
+    return this.http.get<eventojuego[]>(`${this.api}/${id}/history`,
+      { headers: this.headers() });
+  }
+
 }

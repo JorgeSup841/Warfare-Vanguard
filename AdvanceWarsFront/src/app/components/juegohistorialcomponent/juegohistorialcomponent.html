@@ -1,0 +1,53 @@
+    <section class="panel juego__historial" *ngIf="juego.mostrandoHistorial && !juego.modoDemo" aria-label="Historial de partida">
+      <div class="panel-head azul">HISTORIAL DE COMBATE</div>
+      <div class="panel-body">
+        <p *ngIf="juego.cargandoHistorial">Cargando registros...</p>
+        <p *ngIf="!juego.cargandoHistorial && juego.historial.length === 0">Sin registros.</p>
+        <ol *ngIf="!juego.cargandoHistorial">
+          <li *ngFor="let evento of juego.historial">
+            <strong>R{{ evento.roundNumber }} · {{ evento.eventType }}</strong> — {{ evento.description }}
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <div
+      *ngIf="!juego.modoDemo"
+      class="panel extra">
+
+      <div class="panel-head">
+        INFORMACIÓN DE LA PARTIDA
+      </div>
+
+      <div class="panel-body">
+
+        <p>
+          El servidor Spring Boot administra los datos
+          de la partida, el mapa y las unidades.
+        </p>
+
+
+
+        <p>
+          Los movimientos y ataques se solicitan al servidor.
+          Spring Boot comprueba si cada acción es válida
+          y devuelve los resultados.
+        </p>
+
+        <p>
+          La captura de propiedades y la producción limitada de infantería y tanques
+          están disponibles cuando el backend lo permite. Los poderes de comandante
+          siguen pendientes.
+        </p>
+
+
+        <a
+          class="btn secondary"
+          [routerLink]="['/partidas', juego.id, 'resultados']">
+          VER INFORME DE PARTIDA ▸
+        </a>
+
+      </div>
+
+    </div>
+

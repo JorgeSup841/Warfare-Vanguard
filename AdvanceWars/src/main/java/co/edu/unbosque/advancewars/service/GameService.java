@@ -22,6 +22,11 @@ import co.edu.unbosque.advancewars.enums.GameLogType;
 import co.edu.unbosque.advancewars.model.GameConfiguration;
 import co.edu.unbosque.advancewars.model.GameState;
 import co.edu.unbosque.advancewars.model.Player;
+import co.edu.unbosque.advancewars.model.Faction;
+import co.edu.unbosque.advancewars.model.Commander;
+import co.edu.unbosque.advancewars.repository.FactionRepository;
+import co.edu.unbosque.advancewars.repository.CommanderRepository;
+import co.edu.unbosque.advancewars.dto.PlayerSelectionRequestDTO;
 import co.edu.unbosque.advancewars.model.Property;
 import co.edu.unbosque.advancewars.model.Unit;
 import co.edu.unbosque.advancewars.model.User;
@@ -40,12 +45,16 @@ public class GameService {
 	private final UnitGenerationService unitGenerationService;
 	private final UnitRepository unitRepository;
 	private final GameEventService events;
+	private final FactionRepository factions;
+	private final CommanderRepository commanders;
 
 	private static final int STARTING_MONEY = 5000;
 
+	/** Inyecta repositorios y servicios del motor de partidas. */
 	public GameService(GameStateRepository gameRepository, MapGenerationService mapGenerationService,
 			PropertyGenerationService propertyGenerationService, PropertyRepository propertyRepository,
-			UnitGenerationService unitGenerationService, UnitRepository unitRepository, GameEventService events) {
+			UnitGenerationService unitGenerationService, UnitRepository unitRepository, GameEventService events,
+			FactionRepository factions, CommanderRepository commanders) {
 		this.gameRepository = gameRepository;
 		this.mapGenerationService = mapGenerationService;
 		this.propertyGenerationService = propertyGenerationService;
@@ -53,6 +62,8 @@ public class GameService {
 		this.unitGenerationService = unitGenerationService;
 		this.unitRepository = unitRepository;
 		this.events = events;
+		this.factions = factions;
+		this.commanders = commanders;
 	}
 
 	/** Crea una partida, su mapa y sus propiedades en una sola transaccion. */
@@ -79,7 +90,14 @@ public class GameService {
 
 		// Asignamos el orden 1, 2, 3 o 4 a cada jugador.
 		for (int i = 0; i < names.size(); i++) {
-			game.addPlayer(new Player(names.get(i), i + 1, 0));
+			Player player = new Player(names.get(i), i + 1, 0);
+			String factionCode = new String[] {"RED", "BLUE", "GREEN", "YELLOW"}[i];
+			Faction faction = factions.findByCode(factionCode).orElseThrow(() ->
+				new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Catalogo de facciones no inicializado"));
+			Commander commander = commanders.findByCode("CMD_" + factionCode).orElseThrow(() ->
+				new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Catalogo de comandantes no inicializado"));
+			player.assignSelection(faction, commander);
+			game.addPlayer(player);
 		}
 		game.setGameMap(mapGenerationService.generateMap(data.getWidth(), data.getHeight(), seed));
 
@@ -138,6 +156,36 @@ public class GameService {
 		return new MapDTO(game, propertyRepository.findAllByTile_GameMap_Id(game.getGameMap().getId()));
 	}
 
+	/** Actualiza una seleccion unicamente durante SETUP y para el dueno de la partida. */
+	@Transactional
+	public GameDTO selectPlayer(Long gameId, int turnOrder, PlayerSelectionRequestDTO request, User creator) {
+		checkUser(creator);
+		if (request == null || request.getFactionId() == null || request.getCommanderId() == null) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Seleccion de faccion y comandante incompleta");
+		}
+		GameState game = gameRepository.findWithLockByIdAndCreatedBy_Id(gameId, creator.getId())
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida no encontrada"));
+		if (game.getStatus() != GameStatus.SETUP) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "Solo se pueden editar jugadores antes de iniciar");
+		}
+		Player player = game.findPlayerByOrder(turnOrder);
+		if (player == null) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Jugador no encontrado");
+		}
+		Faction faction = factions.findById(request.getFactionId())
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Faccion no valida"));
+		Commander commander = commanders.findByIdAndFaction_Id(request.getCommanderId(), faction.getId())
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Comandante incompatible"));
+		for (Player other : game.getPlayers()) {
+			if (other.getTurnOrder() != turnOrder && other.getFaction() != null
+					&& faction.getId().equals(other.getFaction().getId())) {
+				throw new ResponseStatusException(HttpStatus.CONFLICT, "La faccion ya pertenece a otro jugador");
+			}
+		}
+		player.assignSelection(faction, commander);
+		return new GameDTO(game);
+	}
+
 	/** Inicia una partida una sola vez y prepara sus unidades y dinero. */
 	@Transactional
 	public GameDTO startGame(Long gameId, User creator) {
@@ -171,99 +219,120 @@ public class GameService {
 	}
 
 	/**
-	 * Finaliza el turno que el cliente vio por ultima vez. Verifica el estado
-	 * enviado para evitar que un doble clic salte dos turnos. Todo ocurre dentro de
-	 * una transaccion y con bloqueo de la partida.
+	 * Finaliza el turno visto por el cliente y valida su versión bajo bloqueo.
+	 * Aplica ingresos, acciones y el siguiente jugador en una sola transacción.
 	 */
 	@Transactional
 	public GameDTO endTurn(Long gameId, EndTurnRequestDTO expected, User creator) {
 		checkUser(creator);
+		validateTurnRequest(expected);
+		GameState game = findGameForTurn(gameId, expected, creator);
+		Player previous = game.findPlayerByOrder(game.getCurrentPlayerOrder());
+		if (previous == null) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "La partida tiene un turno actual invalido");
+		}
+		endCommanderPower(previous);
+		List<Player> active = findActivePlayers(game);
+		if (active.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "No hay jugadores activos en la partida");
+		}
+		Player first = firstActivePlayer(active);
+		if (active.size() == 1) {
+			game.finishGame(first.getTurnOrder());
+			events.record(game, first, GameLogType.GAME_FINISHED,
+					"Partida terminada. Ganador: " + first.getName());
+			return new GameDTO(game);
+		}
+		Player next = nextActivePlayer(active, game.getCurrentPlayerOrder(), first);
+		advanceToNextPlayer(game, previous, next);
+		return new GameDTO(game);
+	}
 
+	/** Verifica que la solicitud aporta ronda y asiento válidos. */
+	private void validateTurnRequest(EndTurnRequestDTO expected) {
 		if (expected == null || expected.getCurrentRound() == null || expected.getCurrentPlayerOrder() == null
 				|| expected.getCurrentRound() < 1 || expected.getCurrentPlayerOrder() < 1) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
 					"Debes indicar currentRound y currentPlayerOrder validos");
 		}
+	}
 
-		// Bloqueamos la fila de la partida durante esta transaccion.
-		Optional<GameState> resultado = gameRepository.findWithLockByIdAndCreatedBy_Id(gameId, creator.getId());
-
-		if (resultado.isEmpty()) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida no encontrada");
-		}
-
-		GameState game = resultado.get();
-
+	/** Bloquea la partida y comprueba que el turno coincida con el esperado. */
+	private GameState findGameForTurn(Long gameId, EndTurnRequestDTO expected, User creator) {
+		GameState game = gameRepository.findWithLockByIdAndCreatedBy_Id(gameId, creator.getId())
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida no encontrada"));
 		if (game.getStatus() != GameStatus.IN_PROGRESS) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT,
 					"Solo se pueden terminar turnos de partidas en curso");
 		}
-
 		if (game.getCurrentRound() != expected.getCurrentRound()
 				|| game.getCurrentPlayerOrder() != expected.getCurrentPlayerOrder()) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT,
 					"El turno ya cambio; consulta la partida antes de volver a intentar");
 		}
+		return game;
+	}
 
-		if (game.findPlayerByOrder(game.getCurrentPlayerOrder()) == null) {
-			throw new ResponseStatusException(HttpStatus.CONFLICT, "La partida tiene un turno actual invalido");
+	/** Finaliza los poderes de un turno, salvo la tormenta activa hasta la próxima ronda. */
+	private void endCommanderPower(Player previous) {
+		if (previous.getCommander() == null
+				|| !"ENEMY_MOVE_MINUS_1".equals(previous.getCommander().getPowerEffectCode())) {
+			previous.clearPowerActive();
 		}
+	}
 
-		Player previous = game.findPlayerByOrder(game.getCurrentPlayerOrder());
-		// Buscamos el siguiente jugador activo sin streams ni ordenar listas.
-		Player next = null;
-		Player firstActive = null;
-		int activeCount = 0;
+	/** Enumera a los jugadores que no han sido eliminados. */
+	private List<Player> findActivePlayers(GameState game) {
+		List<Player> active = new ArrayList<>();
 		for (Player player : game.getPlayers()) {
-			if (!player.isActive()) {
-				continue;
+			if (player.isActive()) {
+				active.add(player);
 			}
-			activeCount++;
-			if (firstActive == null || player.getTurnOrder() < firstActive.getTurnOrder()) {
-				firstActive = player;
+		}
+		return active;
+	}
+
+	/** Encuentra al jugador activo de menor orden. */
+	private Player firstActivePlayer(List<Player> active) {
+		Player first = null;
+		for (Player player : active) {
+			if (first == null || player.getTurnOrder() < first.getTurnOrder()) {
+				first = player;
 			}
-			if (player.getTurnOrder() > game.getCurrentPlayerOrder()
+		}
+		return first;
+	}
+
+	/** Busca el siguiente jugador activo, regresando al primero tras el último asiento. */
+	private Player nextActivePlayer(List<Player> active, int currentOrder, Player first) {
+		Player next = null;
+		for (Player player : active) {
+			if (player.getTurnOrder() > currentOrder
 					&& (next == null || player.getTurnOrder() < next.getTurnOrder())) {
 				next = player;
 			}
 		}
+		return next == null ? first : next;
+	}
 
-		if (activeCount == 0) {
-			throw new ResponseStatusException(HttpStatus.CONFLICT, "No hay jugadores activos en la partida");
-		}
-		if (activeCount == 1) {
-			game.finishGame(firstActive.getTurnOrder());
-			events.record(game, firstActive, GameLogType.GAME_FINISHED, "Partida terminada. Ganador: " + firstActive.getName());
-			return new GameDTO(game);
-		}
-		if (next == null) {
-			next = firstActive;
-		}
-
-		// Registramos el cierre en la ronda que acaba, antes de incrementarla.
-		events.record(game, previous, GameLogType.TURN_ENDED, "Termino el turno del jugador " + previous.getName());
-		// Al volver al primer jugador disponible empieza una nueva ronda.
+	/** Actualiza ronda, jugador activo, acciones, ingresos e historial. */
+	private void advanceToNextPlayer(GameState game, Player previous, Player next) {
+		events.record(game, previous, GameLogType.TURN_ENDED,
+				"Termino el turno del jugador " + previous.getName());
 		if (next.getTurnOrder() <= game.getCurrentPlayerOrder()) {
 			game.incrementRound();
 		}
 		game.changeCurrentPlayer(next.getTurnOrder());
+		next.clearPowerActive();
 		events.record(game, next, GameLogType.TURN_STARTED, "Comenzo el turno del jugador " + next.getName());
-
-		// Solo se reactivan las unidades del jugador que empieza su turno.
 		for (Unit unit : unitRepository.findAllByOwner_Id(next.getId())) {
 			unit.resetTurnActions();
 		}
-
-		// Al comenzar su turno, el jugador recibe el ingreso de sus propiedades.
-		// El cuartel general tiene ingreso 0; las neutrales no tienen dueno.
 		for (Property property : propertyRepository.findAllByOwner_Id(next.getId())) {
 			if (property.isOperational() && property.getDefinition().getIncome() > 0) {
 				next.addMoney(property.getDefinition().getIncome());
 			}
 		}
-
-		// JPA guarda el turno, el dinero y las acciones en esta transaccion.
-		return new GameDTO(game);
 	}
 
 	/** Consulta las unidades de una partida del usuario autenticado. */

@@ -50,19 +50,39 @@ export class Iniciosesioncomponent implements OnDestroy {
         },
         error: (e: HttpErrorResponse) => {
           this.procesando = false;
-          this.error =
-            e.status === 0
-              ? 'No se pudo conectar al backend.'
-              : e.status === 429
-                ? 'Demasiados intentos.'
-                : e.status === 401
-                  ? 'Credenciales incorrectas o cuenta no verificada.'
-                  : 'No fue posible iniciar sesión.';
+          this.error = Iniciosesioncomponent.obtenerErrorInicio(e);
           this.cdr.markForCheck();
         },
       }),
     );
   }
+  /** Diferencia los límites temporales enviados por el backend sin alterar la seguridad. */
+  private static obtenerErrorInicio(e: HttpErrorResponse): string {
+    const mensajeServidor = typeof e.error?.message === 'string'
+      ? e.error.message.trim()
+      : '';
+
+    if (e.status === 0) return 'No se pudo conectar al backend.';
+    if (e.status === 429) {
+      if (mensajeServidor === 'Demasiados intentos') {
+        return 'Se alcanzó el límite de contraseñas incorrectas. Espera a que termine el bloqueo temporal de 15 minutos antes de volver a intentarlo.';
+      }
+      if (mensajeServidor.startsWith('Demasiadas solicitudes')) {
+        return 'Se alcanzó el límite de solicitudes desde esta conexión. Espera a que termine la ventana de 1 minuto.';
+      }
+      if (mensajeServidor.startsWith('Espera antes de solicitar otro código')) {
+        return 'Ya se solicitó un código de acceso recientemente. Espera al menos 1 minuto antes de solicitar otro.';
+      }
+      if (mensajeServidor.startsWith('Demasiados códigos solicitados')) {
+        return 'Se alcanzó el límite de códigos OTP. Espera a que termine la ventana de 1 hora antes de solicitar otro.';
+      }
+      return mensajeServidor || 'Demasiadas solicitudes. Espera antes de volver a intentarlo.';
+    }
+    if (e.status === 401) return 'Credenciales incorrectas o cuenta no verificada.';
+    if (e.status === 503) return 'El servidor no pudo enviar el código de verificación por correo.';
+    return 'No fue posible iniciar sesión.';
+  }
+
   /** Libera los recursos y suscripciones del componente. */
   ngOnDestroy(): void {
     this.subs.unsubscribe();

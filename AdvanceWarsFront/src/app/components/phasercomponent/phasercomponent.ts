@@ -87,6 +87,7 @@ export class Phasercomponent implements AfterViewInit, OnChanges, OnDestroy {
             width: ancho,
             height: alto,
             backgroundColor: '#14201a',
+            input: { keyboard: false },
             scale: { mode: PhaserLib.Scale.RESIZE, width: ancho, height: alto },
             scene: [],
           });

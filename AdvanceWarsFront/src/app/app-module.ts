@@ -19,6 +19,9 @@ import { Resultadoscomponent } from './components/resultadoscomponent/resultados
 import { Admincomponent } from './components/admincomponent/admincomponent';
 import { Tablerocomponent } from './components/tablerocomponent/tablerocomponent';
 import { Phasercomponent } from './components/phasercomponent/phasercomponent';
+import { Juegounidadescomponent } from './components/juegounidadescomponent/juegounidadescomponent';
+import { Juegoaccionescomponent } from './components/juegoaccionescomponent/juegoaccionescomponent';
+import { Juegohistorialcomponent } from './components/juegohistorialcomponent/juegohistorialcomponent';
 /** Módulo raíz de la aplicación AURA WARS. */
 @NgModule({
   declarations: [
@@ -38,6 +41,9 @@ import { Phasercomponent } from './components/phasercomponent/phasercomponent';
     Admincomponent,
     Tablerocomponent,
     Phasercomponent,
+    Juegounidadescomponent,
+    Juegoaccionescomponent,
+    Juegohistorialcomponent,
   ],
   imports: [BrowserModule, FormsModule, AppRoutingModule],
   providers: [provideBrowserGlobalErrorListeners(), provideHttpClient()],

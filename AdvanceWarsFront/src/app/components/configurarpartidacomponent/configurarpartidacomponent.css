@@ -197,3 +197,17 @@ button:disabled {
   grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
   margin: 20px 0;
 }
+
+/* F3: selección de ejércitos compacta e independiente de la lógica del backend. */
+.selecciones { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 18px 0 26px; }
+.seleccion-jugador { border: 4px solid #27313b; background: #fff4d8; padding: 15px; display: grid; gap: 10px; }
+.seleccion-jugador__datos { display: grid; gap: 7px; }
+.seleccion-jugador__datos span { font-size: 12px; }
+.seleccion-jugador select { width: 100%; }
+
+.seleccion-jugador__retrato { width: 78px; height: 78px; image-rendering: pixelated; object-fit: contain; float: right; }
+
+/* F8.6: la configuración ya guardada se presenta plegada, sin lista repetida. */
+.selecciones__controles { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px; margin: 14px 0; background: #e4eec6; border: 3px solid var(--ink); }
+.selecciones__estado { font: 9px/1.8 'Press Start 2P', monospace; flex: 1; }
+.selecciones__controles button { font-size: 8px; padding: 9px 12px; }

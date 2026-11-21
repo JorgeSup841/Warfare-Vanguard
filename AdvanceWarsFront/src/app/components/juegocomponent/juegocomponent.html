@@ -1,5 +1,5 @@
 <section class="screen juego">
-  <div class="wrap">
+  <div class="wrap" [class.wrap--clasica]="vistaClasica" [class.wrap--compacta]="ocultarDetalles">
 
     <header class="flex header">
 
@@ -128,11 +128,17 @@
             <div
               *ngFor="let j of partida.players"
               class="hud__jugador"
-              [style.border-left-color]="colores[j.turnOrder - 1]"
+              [style.border-left-color]="colorJugador(j.turnOrder)"
               [class.hud__jugador--activo]="j.turnOrder === partida.currentPlayerOrder"
               [class.hud__jugador--fuera]="j.status === 'ELIMINATED'">
-              <strong [style.color]="colores[j.turnOrder - 1]">J{{ j.turnOrder }} {{ j.name }}</strong>
-              <span>$ {{ j.money }}</span>
+              <span class="hud__turno-flag" *ngIf="j.turnOrder === partida.currentPlayerOrder">EN TURNO</span>
+              <div class="hud__rostro">
+                <img class="hud__retrato" [src]="retratoJugador(j.turnOrder)"
+                     [alt]="'Retrato del comandante de ' + j.name" loading="lazy">
+                <img *ngIf="j.factionCode" class="hud__bandera" [src]="'/assets/sprites/ui/banderas/' + j.factionCode + '.png'" alt="">
+              </div>
+              <strong [style.color]="colorJugador(j.turnOrder)">J{{ j.turnOrder }} {{ j.name }}</strong>
+              <span class="hud__dinero"><img src="/assets/sprites/ui/money.png" alt=""> <span>$ {{ j.money }}</span></span>
               <span class="hud__ganancia" *ngIf="ganancias[j.turnOrder]">+$ {{ ganancias[j.turnOrder] }}</span>
               <span *ngIf="j.status === 'WINNER'">GANADOR</span>
               <span *ngIf="j.status === 'ELIMINATED'">ELIMINADO</span>
@@ -143,8 +149,15 @@
             type="button"
             class="btn secondary"
             (click)="abrirTienda()"
-            [disabled]="accionEnCurso || partida.status !== 'IN_PROGRESS'">
+            [disabled]="accionEnCurso || partida.status !== 'IN_PROGRESS'"
+            title="Abrir tienda en una fábrica, aeropuerto o puerto propio">
             🛒 TIENDA
+          </button>
+
+          <button type="button" class="btn secondary"
+                  *ngIf="comandanteTurno?.commanderCode" [disabled]="!poderDisponible || accionEnCurso"
+                  (click)="activarPoder()">
+            PODER {{ comandanteTurno?.powerCharge ?? 0 }} ★
           </button>
 
           <button
@@ -152,7 +165,7 @@
             class="btn"
             (click)="terminarTurno()"
             [disabled]="accionEnCurso || partida.status !== 'IN_PROGRESS'">
-            {{ terminando ? 'TERMINANDO...' : 'TERMINAR TURNO' }}
+            <img src="/assets/sprites/ui/end_turn.png" alt="" class="hud__icono"> {{ terminando ? 'TERMINANDO...' : 'TERMINAR TURNO' }}
           </button>
         </div>
         <!-- /HUD -->
@@ -177,11 +190,11 @@
         </p>
 
         <div class="alcance-leyenda" *ngIf="!modoDemo && unidadActiva" role="status">
-          <span class="alcance-leyenda__muestra" aria-hidden="true"></span>
+          <img src="/assets/sprites/ui/move.png" class="ficha-icono" alt="">
           <span *ngIf="consultandoMovimientos">Consultando destinos posibles...</span>
           <span *ngIf="!consultandoMovimientos">
-            {{ movimientosDisponibles.length }} casillas disponibles (verde).
-            Clic en una casilla verde para mover.
+            {{ movimientosDisponibles.length }} casillas disponibles (azul).
+            Clic en una casilla azul para mover.
           </span>
         </div>
 
@@ -193,7 +206,16 @@
 
             <div class="marco juego__marco">
 
-              <div class="aviso-turno" *ngIf="avisoTurno">{{ avisoTurno }}</div>
+              <div class="aviso-turno aviso-turno--bloqueo" *ngIf="esperandoEntrega" role="dialog"
+                   aria-modal="true" aria-label="Cambio de jugador">
+                <div class="aviso-turno__tarjeta">
+                  <img [src]="retratoJugador(partida?.currentPlayerOrder ?? 1)"
+                       alt="Retrato del comandante que juega ahora" class="aviso-turno__retrato">
+                  <strong>{{ avisoTurno }}</strong>
+                  <p>Entrega el dispositivo al siguiente jugador.</p>
+                  <button type="button" (click)="confirmarEntrega()">LISTO, CONTINUAR ▸</button>
+                </div>
+              </div>
 
 
 
@@ -205,365 +227,26 @@
 
             </div>
 
-            <p class="muted">
-              Haz clic en una unidad propia para seleccionarla.
-              Después, selecciona una casilla vacía para intentar
-              moverla o una unidad enemiga para intentar atacarla.
-            </p>
-
-            <p class="muted">
-              Spring Boot valida todas las acciones del juego.
-            </p>
+            <div class="juego__barra-vista">
+              <button type="button" (click)="zoomCambiar(-1)" aria-label="Alejar cámara">−</button>
+              <button type="button" class="secondary juego__zoom-reset" (click)="zoomRestablecer()" aria-label="Volver a zoom 100 por ciento">ZOOM {{ zoomPorcentaje }}</button>
+              <button type="button" (click)="zoomCambiar(1)" aria-label="Acercar cámara">+</button>
+              <button type="button" class="secondary" (click)="vistaClasica = !vistaClasica">
+                {{ vistaClasica ? 'PANORÁMICO' : 'MODO CLÁSICO' }}
+              </button>
+              <button type="button" class="secondary" (click)="ocultarDetalles = !ocultarDetalles">
+                {{ ocultarDetalles ? 'MOSTRAR FICHAS' : 'OCULTAR FICHAS' }}
+              </button>
+            </div>
 
           </div>
 
 
-          <aside class="sidebar juego__panel">
+          <aside class="sidebar juego__panel" *ngIf="!ocultarDetalles">
 
 
-            <div class="caja unidad-ficha">
-
-              <h2>UNIDAD SELECCIONADA</h2>
-
-              <ng-container
-                *ngIf="unidadActiva as u; else sinUnidadActiva">
-
-                <div class="unidad-ficha__encabezado">
-
-                  <h3>
-                    {{ nombreUnidad(u.unitType) }}
-                  </h3>
-
-                  <p class="muted">
-                    TIPO: {{ u.unitType }}
-                  </p>
-
-                  <p>
-                    ID: #{{ u.id }}
-                  </p>
-
-                </div>
-
-                <div class="unidad-ficha__datos">
-
-                  <p>
-                    <strong>PROPIETARIO:</strong>
-                    JUGADOR {{ u.ownerOrder }}
-                  </p>
-
-                  <p>
-                    <strong>POSICIÓN:</strong>
-                    {{ u.x }}, {{ u.y }}
-                  </p>
-
-                  <p>
-                    <strong>VIDA:</strong>
-                    {{ u.health }}
-                  </p>
-
-                  <p>
-                    <strong>COMBUSTIBLE:</strong>
-                    {{ u.fuel }}
-                  </p>
-
-                </div>
-
-                <div class="unidad-ficha__estado">
-
-                  <h3>ESTADO DE LA UNIDAD</h3>
-
-                  <p>
-                    <strong>MOVIMIENTO:</strong>
-                    <span
-                      [class.unidad-ficha__agotada]="u.movedThisTurn">
-                      {{
-                        u.movedThisTurn
-                          ? 'YA SE MOVIÓ'
-                          : 'DISPONIBLE'
-                      }}
-                    </span>
-                  </p>
-
-                  <p>
-                    <strong>ATAQUE:</strong>
-                    <span
-                      [class.unidad-ficha__agotada]="u.attackedThisTurn">
-                      {{
-                        u.attackedThisTurn
-                          ? 'YA ATACÓ'
-                          : 'DISPONIBLE'
-                      }}
-                    </span>
-                  </p>
-
-                  <p>
-                    <strong>CAPTURA:</strong>
-                    {{
-                      u.capturedThisTurn
-                        ? 'YA CAPTURÓ'
-                        : 'SIN CAPTURAR'
-                    }}
-                  </p>
-
-                </div>
-
-                <button type="button" class="btn" *ngIf="puedeCapturar"
-                        [disabled]="accionEnCurso" (click)="capturarPropiedad()">
-                  CAPTURAR PROPIEDAD
-                </button>
-                <p class="muted">
-                  La disponibilidad final de cada acción la determina Spring Boot.
-                </p>
-
-              </ng-container>
-
-              <ng-template #sinUnidadActiva>
-
-                <p class="caja__vacio">
-                  NO HAY NINGUNA UNIDAD SELECCIONADA.
-                </p>
-
-                <p class="muted">
-                  Haz clic sobre una unidad propia que
-                  esté disponible para seleccionarla.
-                </p>
-
-              </ng-template>
-
-            </div>
-
-
-            <div class="caja">
-
-              <h2>INSPECTOR DE CASILLA</h2>
-
-              <p
-                *ngIf="!seleccion"
-                class="caja__vacio">
-                Pasa el cursor sobre una casilla del mapa.
-              </p>
-
-              <ng-container *ngIf="seleccion as c">
-
-                <p>
-                  POSICIÓN: {{ c.x }}, {{ c.y }}
-                </p>
-
-                <p class="caja__terreno">
-                  {{ c.terreno?.name || 'SIN DATOS' }}
-                </p>
-
-                <p>
-                  DEFENSA:
-                  {{ c.terreno?.defenseStars ?? 0 }}
-                </p>
-
-                <ng-container
-                  *ngIf="c.terreno as terrenoActual">
-
-                  <table>
-
-                    <thead>
-                    <tr>
-                      <th>UNIDAD</th>
-                      <th>COSTO</th>
-                    </tr>
-                    </thead>
-
-                    <tbody>
-
-                    <tr
-                      *ngFor="let m of tiposMovimiento">
-
-                      <td>
-                        {{ m.nombre }}
-                      </td>
-
-                      <td>
-                        {{
-                          obtenerCosto(
-                            terrenoActual,
-                            m.codigo
-                          )
-                        }}
-                      </td>
-
-                    </tr>
-
-                    </tbody>
-
-                  </table>
-
-                </ng-container>
-
-                <div *ngIf="unidadSeleccionada as u">
-
-                  <h3>UNIDAD BAJO CURSOR</h3>
-
-                  <p>
-                    TIPO: {{ u.unitType }}
-                  </p>
-
-                  <p>
-                    IDENTIFICADOR: #{{ u.id }}
-                  </p>
-
-                  <p>
-                    VIDA: {{ u.health }}
-                  </p>
-
-                  <p>
-                    COMBUSTIBLE: {{ u.fuel }}
-                  </p>
-
-                </div>
-
-              </ng-container>
-
-            </div>
-
-            <!-- TIENDA -->
-            <div class="caja tienda" *ngIf="tiendaAbierta && fabricaActiva as fabrica">
-              <div class="tienda__cabecera">
-                <h2>🛒 TIENDA</h2>
-                <button type="button" class="tienda__cerrar" (click)="cerrarTienda()">✕</button>
-              </div>
-
-              <p>FÁBRICA EN ({{ fabrica.x }}, {{ fabrica.y }})</p>
-              <p class="tienda__dinero">TU DINERO: $ {{ dineroActual }}</p>
-
-              <p class="message error" *ngIf="fabricaOcupada">
-                Hay una tropa encima de la fábrica. Muévela para poder comprar.
-              </p>
-
-              <div class="tienda__item" *ngFor="let item of tienda">
-                <img class="tienda__imagen" [src]="imagenTienda(item.tipo)" [alt]="item.nombre">
-                <div class="tienda__info">
-                  <strong>{{ item.nombre }}</strong>
-                  <span>{{ item.detalle }}</span>
-                  <span class="tienda__precio" [class.tienda__precio--falta]="dineroActual < item.costo">
-                    $ {{ item.costo }}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  [disabled]="accionEnCurso || fabricaOcupada || dineroActual < item.costo"
-                  (click)="producirUnidad(item.tipo)">
-                  {{ produciendo ? '...' : 'COMPRAR' }}
-                </button>
-              </div>
-
-              <p class="tienda__nota">La tropa nueva aparece en la fábrica y se mueve en tu próximo turno.</p>
-            </div>
-
-            <div
-              class="caja unidad-ficha__combate"
-              *ngIf="resultadoCombate as combate">
-
-              <h2>ÚLTIMO COMBATE</h2>
-
-              <p>
-                ATACANTE:
-                #{{ combate.attackerUnitId }}
-              </p>
-
-              <p>
-                OBJETIVO:
-                #{{ combate.targetUnitId }}
-              </p>
-
-              <p>
-                DAÑO CAUSADO:
-                -{{ combate.damageDealt }}
-              </p>
-
-              <p>
-                CONTRAATAQUE:
-                -{{ combate.counterattackDamage }}
-              </p>
-
-              <p>
-                VIDA ATACANTE:
-                {{ combate.attackerHealth }}
-              </p>
-
-              <p>
-                VIDA OBJETIVO:
-                {{ combate.targetHealth }}
-              </p>
-
-              <p *ngIf="combate.targetDestroyed">
-                UNIDAD ENEMIGA DESTRUIDA
-              </p>
-
-              <p *ngIf="combate.attackerDestroyed">
-                UNIDAD ATACANTE DESTRUIDA
-              </p>
-
-            </div>
-
-
-            <div class="caja">
-
-              <h2>LEYENDA</h2>
-
-              <div
-                class="leyenda"
-                *ngFor="let t of terrenos">
-
-                <span
-                  class="leyenda__color"
-                  [style.background]="t.color">
-                </span>
-
-                {{ t.name }}
-
-              </div>
-
-              <p
-                class="caja__vacio"
-                *ngIf="modoDemo">
-
-                LOS NÚMEROS DEL 1 AL 4 REPRESENTAN
-                LAS BASES DE LOS JUGADORES.
-
-              </p>
-
-            </div>
-
-
-            <div
-              class="caja"
-              *ngIf="!modoDemo">
-
-              <h2>CONTROLES DE PARTIDA</h2>
-
-              <div class="grid">
-
-                <button
-                  type="button"
-                  [disabled]="accionEnCurso"
-                  (click)="cargarMapa()">
-                  ACTUALIZAR MAPA
-                </button>
-
-                <button
-                  type="button"
-                  class="secondary"
-                  [disabled]="accionEnCurso"
-                  (click)="cargarDatos()">
-                  ACTUALIZAR PARTIDA
-                </button>
-
-                <button
-                  type="button"
-                  (click)="descargarPDF()">
-                  DESCARGAR PDF
-                </button>
-
-              </div>
-
-            </div>
+            <app-juego-unidades [juego]="vistaJuego"></app-juego-unidades>
+            <app-juego-acciones [juego]="vistaJuego"></app-juego-acciones>
 
           </aside>
 
@@ -574,45 +257,7 @@
     </div>
 
 
-    <div
-      *ngIf="!modoDemo"
-      class="panel extra">
-
-      <div class="panel-head">
-        INFORMACIÓN DE LA PARTIDA
-      </div>
-
-      <div class="panel-body">
-
-        <p>
-          El servidor Spring Boot administra los datos
-          de la partida, el mapa y las unidades.
-        </p>
-
-
-
-        <p>
-          Los movimientos y ataques se solicitan al servidor.
-          Spring Boot comprueba si cada acción es válida
-          y devuelve los resultados.
-        </p>
-
-        <p>
-          La captura de propiedades y la producción limitada de infantería y tanques
-          están disponibles cuando el backend lo permite. Los poderes de comandante
-          siguen pendientes.
-        </p>
-
-
-        <a
-          class="btn secondary"
-          [routerLink]="['/partidas', id, 'resultados']">
-          VER INFORME DE PARTIDA ▸
-        </a>
-
-      </div>
-
-    </div>
+    <app-juego-historial [juego]="vistaJuego"></app-juego-historial>
 
   </div>
 </section>

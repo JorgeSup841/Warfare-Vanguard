@@ -1,16 +1,22 @@
-import { Component, AfterViewInit, ChangeDetectorRef, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, AfterViewInit, ChangeDetectorRef, OnDestroy, OnInit, ViewEncapsulation, inject } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import Phaser from 'phaser';
-import { forkJoin, Subscription, switchMap, map } from 'rxjs';
+import { forkJoin, Subscription } from 'rxjs';
 
 import { juegoservice } from '../../services/juegoservice';
 import { tableroservice } from '../../services/tableroservice';
 import { ReporteService } from '../../services/reporte.service';
 import { EscenaMapa, DatosEscena, TAM_CASILLA } from '../../phaser/escenamapa';
 import { casilla, configuracionmapa, terreno, mapa, tipoterreno } from '../../models/mapa';
-import { tablero, partidaresumen, unidadservidor, casillatablero, turnoactual, casillaalcanzable } from '../../models/tablero';
+import { tablero, partidaresumen, unidadservidor, casillatablero, turnoactual, casillaalcanzable, eventojuego } from '../../models/tablero';
 import { unidad as unidadcatalogo, resultadoataque } from '../../models/unidad';
+
+/** Convierte el coste de desplazamiento de una casilla en una etiqueta legible. */
+function costoTerrenoInspector(terrenoActual: terreno, tipo: string): string {
+  const costo = terrenoActual.movementCost[tipo];
+  return costo === undefined || costo === null || costo === 0 ? 'No pasa' : String(costo);
+}
 
 /** Controla el tablero Phaser y las acciones solicitadas a Spring Boot. */
 @Component({
@@ -18,8 +24,10 @@ import { unidad as unidadcatalogo, resultadoataque } from '../../models/unidad';
   standalone: false,
   templateUrl: './juegocomponent.html',
   styleUrl: './juegocomponent.css',
+  encapsulation: ViewEncapsulation.None,
 })
 export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
+  readonly vistaJuego = this;
   private readonly ruta = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly catalogos = inject(juegoservice);
@@ -76,18 +84,140 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
 
   fabricaActiva: casillatablero | null = null;
   avisoTurno = '';
+  esperandoEntrega = false;
+  mostrandoHistorial = false;
+  historial: eventojuego[] = [];
+  cargandoHistorial = false;
+  vistaClasica = false;
+  ocultarDetalles = false;
+  readonly nivelesZoom = [0.8, 1, 1.25, 1.5, 1.75, 2];
+  zoom = 1;
+  /** Obtiene el color del jugador: facción persistida, comandante o convención de asiento. */
+  private faccionDeJugador(orden: number): string {
+    const jugador = this.partida?.players.find(j => j.turnOrder === orden);
+    const colores = ['RED', 'BLUE', 'GREEN', 'YELLOW'];
+    if (jugador?.factionCode && colores.includes(jugador.factionCode)) return jugador.factionCode;
+    const delComandante = jugador?.commanderCode?.replace(/^CMD_/, '');
+    if (delComandante && colores.includes(delComandante)) return delComandante;
+    return colores[Math.max(0, Math.min(3, orden - 1))];
+  }
+
+  /** Asocia el color del jugador a su facción real. */
+  colorJugador(orden: number): string {
+    const colores: Record<string, string> = {
+      RED: '#d63031', BLUE: '#0984e3', GREEN: '#00b894', YELLOW: '#fdcb6e'
+    };
+    return colores[this.faccionDeJugador(orden)] ?? '#819198';
+  }
+  get comandanteTurno() {
+    return this.partida?.players.find(j => j.turnOrder === this.partida?.currentPlayerOrder) ?? null;
+  }
+  /** Comprueba el poder sin acceder a un jugador o comandante nulos. */
+  get poderDisponible(): boolean {
+    const jugador = this.comandanteTurno;
+    if (!jugador?.commanderCode) return false;
+    const cost: Record<string, number> = { CMD_RED: 3, CMD_BLUE: 3, CMD_GREEN: 4, CMD_YELLOW: 4 };
+    return !jugador.powerActive && (jugador.powerCharge ?? 0) >= (cost[jugador.commanderCode] ?? 99);
+  }
+  /** Nunca modifica la carga local: sólo renderiza la respuesta del servidor. */
+  activarPoder(): void {
+    const turno = this.turnoActual();
+    if (!turno || !this.poderDisponible || this.accionEnCurso || this.esperaCambio) return;
+    this.terminando = true;
+    this.api.poder(this.id, turno).subscribe({
+      next: partida => { this.partida = partida; this.terminando = false; this.mensaje = 'Poder activado en el servidor.';
+        this.cargarDatos(); this.cdr.detectChanges(); },
+      error: e => { this.terminando = false; this.error = Juegocomponent.obtenerMensajeError(e, 'Poder no disponible');
+        this.cdr.detectChanges(); },
+    });
+  }
+  get esperaCambio(): boolean { return this.esperandoEntrega; }
+  /** Habilita los controles después del cambio local de turno. */
+  confirmarEntrega(): void {
+    this.esperandoEntrega = false;
+    this.avisoTurno = '';
+    this.ganancias = {};
+    this.obtenerEscenaMapa()?.centrarEnJugador(this.partida?.currentPlayerOrder ?? 1);
+    this.cdr.detectChanges();
+  }
+
+  /** Usa solamente los retratos originales incluidos en el paquete AURA WARS. */
+  retratoJugador(orden: number): string {
+    const codigo = this.partida?.players.find(j => j.turnOrder === orden)?.factionCode;
+    const faccion = ['RED','BLUE','GREEN','YELLOW'].includes(codigo ?? '') ? codigo :
+      ['RED','BLUE','GREEN','YELLOW'][(orden - 1) % 4];
+    return `/assets/sprites/comandantes/${faccion}.png`;
+  }
+
+  /** Muestra en el inspector la imagen real de la unidad. */
+  retratoUnidad(unidad: unidadservidor): string {
+    const code = this.partida?.players.find(j => j.turnOrder === unidad.ownerOrder)?.factionCode;
+    const faccion = ['RED','BLUE','GREEN','YELLOW'].includes(code ?? '') ? code :
+      ['RED','BLUE','GREEN','YELLOW'][(unidad.ownerOrder - 1) % 4];
+    return `/assets/sprites/unidades/${faccion}/${unidad.unitType}.png`;
+  }
+  /** Consulta el historial de eventos de la partida. */
+  consultarHistorial(): void {
+    if (this.modoDemo || this.cargandoHistorial) return;
+    this.mostrandoHistorial = !this.mostrandoHistorial;
+    if (!this.mostrandoHistorial) return;
+    this.cargandoHistorial = true;
+    this.api.getLogs(this.id).subscribe({
+      next: list => { this.historial = list; this.cargandoHistorial = false; this.cdr.detectChanges(); },
+      error: e => { this.cargandoHistorial = false;
+        this.error = Juegocomponent.obtenerMensajeError(e, 'No se pudo cargar historial'); this.cdr.detectChanges(); },
+    });
+  }
+  get zoomPorcentaje(): string {
+    return `${Math.round(this.zoom * 100)}%`;
+  }
+
+  /** Obtiene el nivel de zoom más cercano. */
+  private indiceZoomMasCercano(): number {
+    let mejorIndice = 0;
+    let mejorDiferencia = Number.POSITIVE_INFINITY;
+    this.nivelesZoom.forEach((nivel, indice) => {
+      const diferencia = Math.abs(nivel - this.zoom);
+      if (diferencia < mejorDiferencia) {
+        mejorDiferencia = diferencia;
+        mejorIndice = indice;
+      }
+    });
+    return mejorIndice;
+  }
+
+  /** Cambia un nivel de zoom usando los botones del mouse. */
+  zoomCambiar(delta: number): void {
+    const indiceActual = this.indiceZoomMasCercano();
+    const paso = delta < 0 ? -1 : 1;
+    const siguiente = Math.max(0, Math.min(this.nivelesZoom.length - 1, indiceActual + paso));
+    this.zoom = this.nivelesZoom[siguiente];
+    this.obtenerEscenaMapa()?.cambiarZoom(this.zoom);
+    this.cdr.markForCheck();
+  }
+
+  /** Restablece el zoom base del mapa completo. */
+  zoomRestablecer(): void {
+    this.zoom = 1;
+    this.obtenerEscenaMapa()?.cambiarZoom(this.zoom);
+    this.cdr.markForCheck();
+  }
   terminando = false;
   colores = ['#e74b40', '#366cb1', '#3f9e4d', '#e0b020'];
   ganancias: Record<number, number> = {};
   tiendaAbierta = false;
-  readonly tienda = [
-    { tipo: 'INFANTRY' as const, nombre: 'Infantería', costo: 1000, detalle: 'Barata. Puede capturar edificios.' },
-    { tipo: 'TANK' as const, nombre: 'Tanque', costo: 7000, detalle: 'Fuerte y rápido. No captura.' },
-  ];
+  get tienda(): { tipo: string; nombre: string; costo: number; detalle: string }[] {
+    const categoria: Record<string,string> = { FACTORY:'LAND', AIRPORT:'AIR', PORT:'NAVAL' };
+    const actual = categoria[this.fabricaActiva?.propertyType ?? ''];
+    return this.catalogoUnidades.filter(u => u.category === actual).map(u => ({
+      tipo: u.unitType, nombre: u.name, costo: u.productionCost,
+      detalle: `${u.category} · Movimiento ${u.movementPoints} · Vida ${u.maxHealth}`
+    }));
+  }
 
   /** Impide acciones simultáneas mientras se espera una respuesta del servidor. */
   get accionEnCurso(): boolean {
-    return this.movimientoEnCurso || this.ataqueEnCurso || this.recargandoUnidades ||
+    return this.esperandoEntrega || this.movimientoEnCurso || this.ataqueEnCurso || this.recargandoUnidades ||
       this.terminando || this.capturando || this.produciendo;
 
   }
@@ -100,7 +230,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
       forkJoin({
         terrenos: this.catalogos.getTerrenos(),
         config: this.catalogos.getConfiguracionMapa(),
-        unidadesCatalogo: this.catalogos.getUnidades(),
+        unidadesCatalogo: this.modoDemo ? this.catalogos.getUnidades() : this.api.getCatalogoUnidades(),
       }).subscribe({
         next: (respuesta) => {
           if (this.destruido) return;
@@ -149,12 +279,11 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     this.error = '';
     this.cdr.markForCheck();
     this.subs.add(
-      this.api.getPartida(this.id).pipe(
-        switchMap(partidaActual => forkJoin({
-          tableroRecibido: this.api.getTablero(this.id),
-          unidadesRecibidas: this.api.getUnidades(this.id)
-        }).pipe(map(datos => ({ ...datos, partidaActual }))))
-      ).subscribe({
+      forkJoin({
+        partidaActual: this.api.getPartida(this.id),
+        tableroRecibido: this.api.getTablero(this.id),
+        unidadesRecibidas: this.api.getUnidades(this.id)
+      }).subscribe({
         next: ({ partidaActual, tableroRecibido, unidadesRecibidas }) => {
           if (this.destruido) return;
           this.partida = partidaActual;
@@ -178,10 +307,10 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.modoDemo || !this.id || this.destruido || this.accionEnCurso) return;
     this.error = '';
     this.subs.add(
-      this.api.getPartida(this.id).pipe(
-        switchMap(partidaActual => this.api.getUnidades(this.id).pipe(
-          map(unidades => ({ partidaActual, unidades }))))
-      ).subscribe({
+      forkJoin({
+        partidaActual: this.api.getPartida(this.id),
+        unidades: this.api.getUnidades(this.id)
+      }).subscribe({
         next: ({ partidaActual, unidades }) => {
           if (this.destruido) return;
           this.partida = partidaActual;
@@ -262,6 +391,30 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     return escena instanceof EscenaMapa ? escena : null;
   }
 
+  /** Sincroniza propiedades y unidades tras una captura sin reiniciar Phaser. */
+  private sincronizarDespuesDeCaptura(): void {
+    this.subs.add(forkJoin({
+      partida: this.api.getPartida(this.id),
+      tablero: this.api.getTablero(this.id),
+      unidades: this.api.getUnidades(this.id)
+    }).subscribe({
+      next: ({ partida, tablero, unidades }) => {
+        if (this.destruido) return;
+        this.partida = partida;
+        this.tableroActual = tablero;
+        this.unidades = unidades;
+        this.obtenerEscenaMapa()?.actualizarPropiedades(tablero.tiles);
+        this.actualizarUnidadesEscena();
+        this.cdr.detectChanges();
+      },
+      error: e => {
+        if (this.destruido) return;
+        this.error = Juegocomponent.obtenerMensajeError(e, 'No se pudo sincronizar la captura.');
+        this.cdr.detectChanges();
+      }
+    }));
+  }
+
   /** Redibuja unidades y selección con los datos actuales del servidor. */
   private actualizarUnidadesEscena(): void {
     if (this.destruido) return;
@@ -287,7 +440,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     const unidadId = this.unidadActiva?.id ?? null;
     datos.unidadSeleccionadaId = unidadId;
     const escena = this.obtenerEscenaMapa();
-    if (escena && escena.sys.isActive()) {
+    if (escena?.sys.isActive()) {
       escena.marcarUnidadSeleccionada(unidadId);
       escena.marcarMovimientosDisponibles(datos.movimientosDisponibles ?? []);
     }
@@ -313,7 +466,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
         this.movimientosDisponibles = casillas;
         if (this.datosEscenaActuales) this.datosEscenaActuales.movimientosDisponibles = [...casillas];
         const escena = this.obtenerEscenaMapa();
-        if (escena && escena.sys.isActive()) escena.marcarMovimientosDisponibles(casillas);
+        if (escena?.sys.isActive()) escena.marcarMovimientosDisponibles(casillas);
         this.cdr.markForCheck();
       },
       error: (error: unknown) => {
@@ -458,13 +611,8 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
           next: (resultado: resultadoataque) => {
             if (this.destruido) return;
             this.resultadoCombate = resultado;
-            const destruccion =
-              (resultado.targetDestroyed ? ' Unidad enemiga destruida.' : '') +
-              (resultado.attackerDestroyed ? ' Unidad atacante destruida.' : '');
-            this.mensaje =
-              `Ataque confirmado. Daño: -${resultado.damageDealt}. ` +
-              `Contraataque: -${resultado.counterattackDamage}.` +
-              destruccion;
+            const destruccion = `${resultado.targetDestroyed ? ' Unidad enemiga destruida.' : ''}${resultado.attackerDestroyed ? ' Unidad atacante destruida.' : ''}`;
+            this.mensaje = `Ataque confirmado. Daño: -${resultado.damageDealt}. Contraataque: -${resultado.counterattackDamage}.${destruccion}`;
 
             // La animación representa únicamente el ataque que confirmó el servidor.
             this.obtenerEscenaMapa()?.mostrarCombate(resultado);
@@ -491,10 +639,10 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
 
             // La lista completa del back es la fuente final de verdad.
             this.subs.add(
-              this.api.getPartida(this.id).pipe(
-                switchMap(partidaActual => this.api.getUnidades(this.id).pipe(
-                  map(actualizadas => ({ partidaActual, actualizadas }))))
-              ).subscribe({
+              forkJoin({
+                partidaActual: this.api.getPartida(this.id),
+                actualizadas: this.api.getUnidades(this.id)
+              }).subscribe({
                 next: ({ partidaActual, actualizadas }) => {
                   if (this.destruido) return;
                   this.partida = partidaActual;
@@ -502,7 +650,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
                   this.actualizarUnidadesEscena();
                   this.ataqueEnCurso = false;
                   if (partidaActual.status === 'FINISHED') {
-                    void this.router.navigate(['/partidas', this.id, 'resultados']);
+                    this.router.navigate(['/partidas', this.id, 'resultados']);
                   }
                   this.cdr.detectChanges();
                 },
@@ -622,7 +770,10 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     this.cargando = false;
-    this.proporcion = `${tableroRecibido.width} / ${tableroRecibido.height}`;
+    const anchoVista = Math.min(1280, Math.max(320, tableroRecibido.width * TAM_CASILLA));
+    const altoVista = Math.min(900, Math.max(240, tableroRecibido.height * TAM_CASILLA));
+    this.zoom = 1;
+    this.proporcion = `${anchoVista} / ${altoVista}`;
     this.seleccion = null;
     this.unidadActiva = null;
     this.fabricaActiva = null;
@@ -649,16 +800,23 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
       propiedades: tableroRecibido.tiles,
       faccionesPorOrden: Object.fromEntries((this.partida?.players ?? []).map(j =>
         [j.turnOrder, j.factionCode ?? null])),
+      jugadorEnTurno: this.partida?.currentPlayerOrder ?? 1,
       unidades: [...this.unidades],
       unidadSeleccionadaId: null,
       alPasarSobre: (actual: casilla | null) => this.alPasarSobre(actual),
       alClicCasilla: (x: number, y: number) => this.alClicCasilla(x, y),
+      alCancelarSeleccion: () => {
+        if (this.accionEnCurso || !this.unidadActiva) return;
+        this.establecerUnidadActiva(null);
+        this.mensaje = 'Selección cancelada.';
+        this.cdr.detectChanges();
+      },
     };
     this.datosEscenaActuales = datos;
     this.cdr.markForCheck();
 
-    const anchoPixeles = tableroRecibido.width * TAM_CASILLA;
-    const altoPixeles = tableroRecibido.height * TAM_CASILLA;
+    const anchoPixeles = anchoVista;
+    const altoPixeles = altoVista;
     if (!this.phaser) {
       this.phaser = new Phaser.Game({
         type: Phaser.AUTO,
@@ -666,6 +824,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
         width: anchoPixeles,
         height: altoPixeles,
         backgroundColor: '#14201a',
+        input: { keyboard: false },
         scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.NO_CENTER },
         render: { pixelArt: true },
         scene: [],
@@ -720,12 +879,12 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
       const fabrica = this.tableroActual?.tiles.find(tile =>
-        tile.x === x && tile.y === y && tile.propertyType === 'FACTORY' &&
+        tile.x === x && tile.y === y && ['FACTORY', 'AIRPORT', 'PORT'].includes(tile.propertyType ?? '') &&
         tile.ownerOrder === this.partida?.currentPlayerOrder && tile.propertyId != null);
       this.fabricaActiva = fabrica ?? null;
       this.tiendaAbierta = Boolean(fabrica);
       this.mensaje = fabrica
-        ? `Fábrica propia en (${x}, ${y}). Elige qué comprar en la tienda.`
+        ? `${this.etiquetaPropiedadTienda}. Elige qué producir.`
         : `Casilla (${x}, ${y}) sin unidad.`;
       this.cdr.detectChanges();
       return;
@@ -800,11 +959,8 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     this.generarDemo();
   }
 
-  /** Consulta el costo local de un terreno para el inspector. */
-  readonly obtenerCosto = (terrenoActual: terreno, tipo: string): string => {
-    const costo = terrenoActual.movementCost[tipo];
-    return costo === undefined || costo === null || costo === 0 ? 'No pasa' : String(costo);
-  };
+  /** Función pura que utiliza el inspector; no modifica el estado de la partida. */
+  readonly obtenerCosto = costoTerrenoInspector;
 
   /** Descarga el reporte PDF desde el servicio ya existente. */
   descargarPDF(): void {
@@ -857,8 +1013,9 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
         this.terminando = false;
         this.establecerUnidadActiva(null);
         this.fabricaActiva = null;
+        this.tiendaAbierta = false;
         if (actualizada.status === 'FINISHED') {
-          void this.router.navigate(['/partidas', this.id, 'resultados']);
+          this.router.navigate(['/partidas', this.id, 'resultados']);
           return;
         }
         this.ganancias = {};
@@ -891,7 +1048,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
   /** Permite capturar únicamente si la casilla tiene una propiedad ajena y la unidad es INFANTRY. */
   get puedeCapturar(): boolean {
     const unidad = this.unidadActiva;
-    if (!unidad || unidad.unitType !== 'INFANTRY' || unidad.attackedThisTurn ||
+    if (!unidad || !this.catalogoUnidades.find(u => u.unitType === unidad.unitType)?.captureCapable || unidad.attackedThisTurn ||
       unidad.capturedThisTurn || this.partida?.status !== 'IN_PROGRESS') return false;
     return Boolean(this.tableroActual?.tiles.some(tile =>
       tile.x === unidad.x && tile.y === unidad.y &&
@@ -913,7 +1070,8 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
         this.mensaje = resultado.captured
           ? 'Propiedad capturada. Control actualizado desde el servidor.'
           : `Captura en progreso: ${resultado.captureProgress}/${resultado.requiredProgress}.`;
-        this.cargarMapa();
+        this.obtenerEscenaMapa()?.mostrarCaptura(unidad.id);
+        this.sincronizarDespuesDeCaptura();
         this.cdr.detectChanges();
       },
       error: (error: unknown) => {
@@ -931,11 +1089,14 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     return actual ? actual.money : 0;
   }
 
-  /** Imagen de la unidad con el color del jugador en turno. */
+  /** Muestra los sprites de la facción del jugador activo, sin forzar rojo. */
   imagenTienda(tipo: string): string {
-    const facciones = ['RED', 'BLUE', 'GREEN', 'YELLOW'];
-    const faccion = facciones[(this.partida?.currentPlayerOrder ?? 1) - 1] ?? 'RED';
+    const faccion = this.faccionDeJugador(this.partida?.currentPlayerOrder ?? 1);
     return `/assets/sprites/unidades/${faccion}/${tipo}.png`;
+  }
+
+  get faccionTienda(): string {
+    return this.faccionDeJugador(this.partida?.currentPlayerOrder ?? 1);
   }
 
   /** Indica si hay una tropa encima de la fábrica elegida. */
@@ -945,17 +1106,29 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     return this.unidades.some((u) => u.x === fabrica.x && u.y === fabrica.y && u.health > 0);
   }
 
-  /** Abre la tienda en la primera fábrica propia que esté libre. */
+  get etiquetaPropiedadTienda(): string {
+    const propiedad = this.fabricaActiva;
+    if (!propiedad) return '';
+    const nombres: Record<string, string> = { FACTORY: 'FÁBRICA', AIRPORT: 'AEROPUERTO', PORT: 'PUERTO' };
+    return `${nombres[propiedad.propertyType ?? ''] ?? 'PROPIEDAD'} EN (${propiedad.x}, ${propiedad.y})`;
+  }
+
+  /** Recupera el flujo antiguo: abre desde el botón y elige una propiedad propia libre. */
   abrirTienda(): void {
-    if (!this.partida || !this.tableroActual) return;
-    const propias = this.tableroActual.tiles.filter((t) =>
-      t.propertyType === 'FACTORY' && t.ownerOrder === this.partida?.currentPlayerOrder && t.propertyId != null);
+    if (!this.partida || !this.tableroActual || this.accionEnCurso ||
+        this.partida.status !== 'IN_PROGRESS') return;
+    const propias = this.tableroActual.tiles.filter(t =>
+      ['FACTORY', 'AIRPORT', 'PORT'].includes(t.propertyType ?? '') &&
+      t.ownerOrder === this.partida?.currentPlayerOrder && t.propertyId != null);
     if (propias.length === 0) {
-      this.error = 'No tienes fábricas. Captura una con tu infantería.';
+      this.tiendaAbierta = false;
+      this.fabricaActiva = null;
+      this.error = 'No tienes fábricas, aeropuertos ni puertos conquistados. Captura uno antes de comprar.';
       this.cdr.detectChanges();
       return;
     }
-    const libre = propias.find((t) => !this.unidades.some((u) => u.x === t.x && u.y === t.y && u.health > 0));
+    const libre = propias.find(t => !this.unidades.some(u =>
+      u.x === t.x && u.y === t.y && u.health > 0));
     this.establecerUnidadActiva(null);
     this.fabricaActiva = libre ?? propias[0];
     this.tiendaAbierta = true;
@@ -971,7 +1144,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /** Compra una tropa en la fábrica elegida. El back valida el costo y el turno. */
-  producirUnidad(tipo: 'INFANTRY' | 'TANK'): void {
+  producirUnidad(tipo: string): void {
     const turno = this.turnoActual();
     const propiedad = this.fabricaActiva;
     if (!turno || !propiedad?.propertyId || this.accionEnCurso ||
@@ -997,15 +1170,10 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     }));
   }
 
-  /** Muestra "Turno de X" y lo que ganó durante 2 segundos. */
+  /** Transición hot-seat: sólo se desbloquea por confirmación explícita. */
   private mostrarAviso(): void {
     this.avisoTurno = `TURNO DE ${this.jugadorEnTurno}`;
-    setTimeout(() => {
-      if (this.destruido) return;
-      this.avisoTurno = '';
-      this.ganancias = {};
-      this.cdr.detectChanges();
-    }, 2000);
+    this.esperandoEntrega = true;
   }
 
   /** Libera peticiones, suscripciones y recursos gráficos al salir. */
