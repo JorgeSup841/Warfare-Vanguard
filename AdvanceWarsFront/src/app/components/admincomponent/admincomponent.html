@@ -4,7 +4,7 @@
     <div class="panel">
       <div class="panel-head azul">CONTROL DE AURA WARS ■</div>
       <div class="panel-body">
-        <p>Operaciones administrativas autorizadas por Spring Boot.</p>
+        <p>Operaciones administrativas.</p>
         <nav class="menu-admin" aria-label="Secciones administrativas">
           <button type="button" [class.activo]="seccion === 'resumen'" (click)="abrir('resumen')">RESUMEN</button>
           <button type="button" [class.activo]="seccion === 'usuarios'" (click)="abrir('usuarios')">USUARIOS</button>
@@ -13,7 +13,7 @@
           <button type="button" [class.activo]="seccion === 'actividad'" (click)="abrir('actividad')">ACTIVIDAD</button>
         </nav>
         <p *ngIf="procesando" class="message" role="status">CARGANDO / PROCESANDO...</p>
-        <p *ngIf="error" class="message error" role="alert">{{ error }}</p>
+        <p *ngIf="error" id="aviso-admin" class="message error" role="alert">{{ error }}</p>
         <p *ngIf="mensaje" class="message" role="status">{{ mensaje }}</p>
 
         <div *ngIf="confirmacion" class="confirmacion message" role="group" aria-label="Confirmación administrativa">
@@ -92,7 +92,7 @@
             <button type="button" class="danger" (click)="prepararEliminarPartida(p.game.id)" [disabled]="procesando">ELIMINAR</button>
           </div>
           <p [hidden]="partidas.length > 0">No hay partidas.</p>
-          <div *ngIf="partida" class="detalle-partida">
+          <div *ngIf="partida" id="detalle-partida" class="detalle-partida">
             <h3>PARTIDA #{{ partida.game.id }} · {{ partida.game.status }}</h3>
             <p>Creada por {{ partida.creatorUsername }} · {{ partida.createdAt | date:'short' }}</p>
             <p>Ronda {{ partida.game.currentRound }} · Turno del jugador {{ partida.game.currentPlayerOrder }}</p>
