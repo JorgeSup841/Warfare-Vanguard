@@ -62,6 +62,6 @@ public class LoadDatabase implements CommandLineRunner {
         user.setRole(Role.ADMIN);
         users.save(user);
 
-        System.out.println("ADMIN creado correctamente: " + user.getUsername());
+        System.out.println("ADMIN creado correctamente el pepepepepepeppepepeppepeppeppepeppepeppeppepeppepepp: " + user.getUsername());
     }
 }
