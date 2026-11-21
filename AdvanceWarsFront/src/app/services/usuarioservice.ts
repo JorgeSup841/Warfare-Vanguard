@@ -10,7 +10,6 @@ import {
   verificacion,
   respuestalogin,
   desafioautenticacion,
-  usuario,
   usuarioautenticado,
   rolusuario,
   respuestaMensaje,
@@ -22,7 +21,6 @@ import {
 })
 export class usuarioservice {
   private readonly api = `${API_BASE_URL}/auth`;
-  private readonly usuariosApi = `${API_BASE_URL}/users`;
 
   private token: string | null = null;
   private usuarioActual: usuarioautenticado | null = null;
@@ -217,8 +215,8 @@ export class usuarioservice {
 
     return token
       ? new HttpHeaders({
-          Authorization: `Bearer ${token}`,
-        })
+        Authorization: `Bearer ${token}`,
+      })
       : new HttpHeaders();
   }
 
@@ -227,59 +225,6 @@ export class usuarioservice {
     return this.http.get<usuarioautenticado>(`${this.api}/me`, {
       headers: this.getHeaders(),
     });
-  }
-
-  /** Consulta la lista administrativa de usuarios. */
-  getUsuarios(): Observable<usuario[]> {
-    return this.http.get<usuario[]>(this.usuariosApi, {
-      headers: this.getHeaders(),
-    });
-  }
-
-  /** Recupera los datos de un usuario por identificador. */
-  getUsuarioById(id: number): Observable<usuario> {
-    return this.http.get<usuario>(`${this.usuariosApi}/${id}`, {
-      headers: this.getHeaders(),
-    });
-  }
-
-  /** Actualiza el rol de un usuario mediante PATCH. */
-  cambiarRol(id: number, role: rolusuario): Observable<usuario> {
-    return this.http.patch<usuario>(
-      `${this.usuariosApi}/${id}/role`,
-      {
-        role,
-      },
-      {
-        headers: this.getHeaders(),
-      },
-    );
-  }
-
-  /** Actualiza el estado habilitado de un usuario mediante PATCH. */
-  cambiarHabilitado(id: number, enabled: boolean): Observable<usuario> {
-    return this.http.patch<usuario>(
-      `${this.usuariosApi}/${id}/enabled`,
-      {
-        enabled,
-      },
-      {
-        headers: this.getHeaders(),
-      },
-    );
-  }
-
-  /** Distribuye una actualización hacia el endpoint de rol o estado. */
-  updateUsuario(id: number, datos: Partial<usuario>): Observable<usuario> {
-    if (datos.role === 'ADMIN' || datos.role === 'USER') {
-      return this.cambiarRol(id, datos.role);
-    }
-
-    if (typeof datos.enabled === 'boolean') {
-      return this.cambiarHabilitado(id, datos.enabled);
-    }
-
-    return throwError(() => new Error('Solo se permite modificar el rol o el estado del usuario.'));
   }
 
   /** Solicita al servidor el restablecimiento de contraseña. */
