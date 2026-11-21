@@ -10,19 +10,35 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+
+/**
+ * Inicializa los datos del catálogo del videojuego al arrancar
+ * la aplicación y configura el primer administrador cuando
+ * existe un usuario válido y todavía no hay otro administrador.
+ */
 @Component
 public class LoadDatabase implements CommandLineRunner {
+
 
     private final UserRepository users;
     private final GameCatalogService catalog;
     private final String username;
 
-    public LoadDatabase(UserRepository users, GameCatalogService catalog,
-            @Value("${app.bootstrap.admin-username:}") String username) {
-        this.users = users;
-        this.catalog = catalog;
-        this.username = username;
-    }
+
+/**
+ * Inicializa las dependencias necesarias para cargar los datos.
+ *
+ * @param users repositorio de usuarios registrados
+ * @param catalog servicio encargado de inicializar el catálogo del juego
+ * @param username nombre del usuario configurado como administrador
+ */
+public LoadDatabase(UserRepository users, GameCatalogService catalog,
+        @Value("${app.bootstrap.admin-username:}") String username) {
+    this.users = users;
+    this.catalog = catalog;
+    this.username = username;
+}
+
 
     @Override
     public void run(String... args) {
@@ -62,6 +78,6 @@ public class LoadDatabase implements CommandLineRunner {
         user.setRole(Role.ADMIN);
         users.save(user);
 
-        System.out.println("ADMIN creado correctamente el pepepepepepeppepepeppepeppeppepeppepeppeppepeppepepp: " + user.getUsername());
+        System.out.println("ADMIN creado correctamente: " + user.getUsername());
     }
 }
