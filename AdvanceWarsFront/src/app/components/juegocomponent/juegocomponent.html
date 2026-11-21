@@ -157,7 +157,7 @@
           <button type="button" class="btn secondary"
                   *ngIf="comandanteTurno?.commanderCode" [disabled]="!poderDisponible || accionEnCurso"
                   (click)="activarPoder()">
-            PODER {{ comandanteTurno?.powerCharge ?? 0 }} ★
+            PODER {{ comandanteTurno.powerCharge ?? 0 }} ★
           </button>
 
           <button

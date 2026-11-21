@@ -4,7 +4,7 @@
     <div class="panel">
       <div class="panel-head azul">CONTROL DE AURA WARS ■</div>
       <div class="panel-body">
-        <p>Operaciones administrativas autorizadas por Spring Boot.</p>
+        <p>Operaciones administrativas.</p>
         <nav class="menu-admin" aria-label="Secciones administrativas">
           <button type="button" [class.activo]="seccion === 'resumen'" (click)="abrir('resumen')">RESUMEN</button>
           <button type="button" [class.activo]="seccion === 'usuarios'" (click)="abrir('usuarios')">USUARIOS</button>
@@ -13,7 +13,7 @@
           <button type="button" [class.activo]="seccion === 'actividad'" (click)="abrir('actividad')">ACTIVIDAD</button>
         </nav>
         <p *ngIf="procesando" class="message" role="status">CARGANDO / PROCESANDO...</p>
-        <p *ngIf="error" class="message error" role="alert">{{ error }}</p>
+        <p *ngIf="error" id="aviso-admin" class="message error" role="alert">{{ error }}</p>
         <p *ngIf="mensaje" class="message" role="status">{{ mensaje }}</p>
 
         <div *ngIf="confirmacion" class="confirmacion message" role="group" aria-label="Confirmación administrativa">
@@ -59,7 +59,7 @@
             </select>
             <button type="button" class="secondary" [disabled]="procesando" (click)="idConsulta = u.id || 0; consultarUsuario()">DETALLE</button>
           </div>
-          <p *ngIf="!usuariosFiltrados.length">Sin usuarios que coincidan.</p>
+          <p [hidden]="usuariosFiltrados.length > 0">Sin usuarios que coincidan.</p>
           <h3>CONSULTAR USUARIO POR ID</h3>
           <div class="flex">
             <input type="number" min="1" [(ngModel)]="idConsulta" aria-label="ID de usuario">
@@ -91,8 +91,8 @@
             <button type="button" (click)="verPartida(p.game.id)" [disabled]="procesando">CONSULTAR</button>
             <button type="button" class="danger" (click)="prepararEliminarPartida(p.game.id)" [disabled]="procesando">ELIMINAR</button>
           </div>
-          <p *ngIf="!partidas.length">No hay partidas.</p>
-          <div *ngIf="partida" class="detalle-partida">
+          <p [hidden]="partidas.length > 0">No hay partidas.</p>
+          <div *ngIf="partida" id="detalle-partida" class="detalle-partida">
             <h3>PARTIDA #{{ partida.game.id }} · {{ partida.game.status }}</h3>
             <p>Creada por {{ partida.creatorUsername }} · {{ partida.createdAt | date:'short' }}</p>
             <p>Ronda {{ partida.game.currentRound }} · Turno del jugador {{ partida.game.currentPlayerOrder }}</p>
@@ -113,7 +113,7 @@
             <div class="tabla-scroll"><table><thead><tr><th>ID</th><th>TIPO</th><th>JUGADOR</th><th>POSICIÓN</th><th>VIDA</th><th>COMBUSTIBLE</th></tr></thead>
               <tbody><tr *ngFor="let t of tropas"><td>{{ t.id }}</td><td>{{ t.unitType }}</td><td>{{ t.ownerOrder }}</td><td>{{ t.x }}, {{ t.y }}</td><td>{{ t.health }}</td><td>{{ t.fuel }}</td></tr></tbody></table></div>
             <h3>HISTORIAL ({{ historial.length }})</h3>
-            <p *ngIf="!historial.length">Sin eventos registrados.</p>
+            <p [hidden]="historial.length > 0">Sin eventos registrados.</p>
             <div *ngFor="let evento of historial" class="evento">
               R{{ evento.roundNumber }} · {{ evento.eventType }} · {{ evento.description }}
             </div>
@@ -136,7 +136,7 @@
             </div>
             <button type="button" class="danger" *ngIf="!s.revoked" (click)="prepararRevocacion(s.id)" [disabled]="procesando">REVOCAR</button>
           </div>
-          <p *ngIf="!sesiones.length">No hay sesiones en esta vista.</p>
+          <p [hidden]="sesiones.length > 0">No hay sesiones en esta vista.</p>
         </div>
 
         <div *ngIf="seccion === 'actividad'">
@@ -149,7 +149,7 @@
           <div *ngFor="let a of actividad" class="evento">
             {{ a.createdAt | date:'short' }} · {{ a.username }} (#{{ a.userId }}) · {{ a.action }}
           </div>
-          <p *ngIf="!actividad.length">Sin eventos en esta vista.</p>
+          <p [hidden]="actividad.length > 0">Sin eventos en esta vista.</p>
         </div>
 
         <p class="pie-panel"><a routerLink="/panel">‹ VOLVER AL CUARTEL</a></p>
