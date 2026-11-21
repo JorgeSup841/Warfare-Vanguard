@@ -186,20 +186,21 @@ export class Admincomponent implements OnInit, OnDestroy {
   }
 
   /** Ejecuta una acción únicamente después de la confirmación. */
+
   confirmarCambio(): void {
-    const c = this.confirmacion;
-    if (!c || this.procesando) return;
+    const cambio = this.confirmacion;
+    if (!cambio || this.procesando) return;
     this.confirmacion = null;
     this.procesando = true;
     this.mensaje = '';
     this.error = '';
 
-    if (c.tipo === 'rol' || c.tipo === 'estado') {
-      const id = c.usuario.id;
+    if (cambio.tipo === 'rol' || cambio.tipo === 'estado') {
+      const id = cambio.usuario.id;
       if (id == null) { this.procesando = false; return; }
-      const accion = c.tipo === 'rol'
-        ? this.admin.cambiarRol(id, c.valor)
-        : this.admin.cambiarEstado(id, c.valor);
+      const accion = cambio.tipo === 'rol'
+        ? this.admin.cambiarRol(id, cambio.valor)
+        : this.admin.cambiarEstado(id, cambio.valor);
       this.subs.add(accion.subscribe({
         next: usuarioActualizado => {
           this.usuarios = this.usuarios.map(u => u.id === id ? usuarioActualizado : u);
@@ -210,11 +211,11 @@ export class Admincomponent implements OnInit, OnDestroy {
         },
         error: e => this.fallo(e, 'No se pudo actualizar el usuario')
       }));
-    } else if (c.tipo === 'partida') {
-      this.subs.add(this.admin.eliminarPartida(c.id).subscribe({
+    } else if (cambio.tipo === 'partida') {
+      this.subs.add(this.admin.eliminarPartida(cambio.id).subscribe({
         next: () => {
-          this.partidas = this.partidas.filter(p => p.game.id !== c.id);
-          if (this.partida?.game.id === c.id) { this.partida = null; this.mapa = null; this.tropas = []; this.historial = []; }
+          this.partidas = this.partidas.filter(p => p.game.id !== cambio.id);
+          if (this.partida?.game.id === cambio.id) { this.partida = null; this.mapa = null; this.tropas = []; this.historial = []; }
           this.procesando = false;
           this.mensaje = 'Partida eliminada.';
           this.cdr.detectChanges();
@@ -222,7 +223,7 @@ export class Admincomponent implements OnInit, OnDestroy {
         error: e => this.fallo(e, 'No se pudo eliminar la partida')
       }));
     } else {
-      this.subs.add(this.admin.revocarSesion(c.id).subscribe({
+      this.subs.add(this.admin.revocarSesion(cambio.id).subscribe({
         next: () => {
           this.procesando = false;
           this.mensaje = 'Sesión revocada.';

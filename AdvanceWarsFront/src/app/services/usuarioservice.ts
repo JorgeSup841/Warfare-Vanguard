@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap, throwError } from 'rxjs';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { BehaviorSubject, Observable, catchError, of, tap, throwError } from 'rxjs';
 
 import { API_BASE_URL } from './api-config';
 
@@ -21,6 +21,7 @@ import {
 })
 export class usuarioservice {
   private readonly api = `${API_BASE_URL}/auth`;
+  private readonly apiSesiones = `${API_BASE_URL}/sessions`;
 
   private token: string | null = null;
   private usuarioActual: usuarioautenticado | null = null;
@@ -28,6 +29,9 @@ export class usuarioservice {
 
   private desafio: desafioautenticacion | null = null;
   private recuperacionId: string | null = null;
+
+  /** Temporizador del latido; null cuando no hay sesión. */
+  private latido: ReturnType<typeof setInterval> | null = null;
 
   private sesionSubject = new BehaviorSubject<usuarioautenticado | null>(null);
 
@@ -136,6 +140,8 @@ export class usuarioservice {
     this.desafio = null;
 
     this.sesionSubject.next(this.usuarioActual);
+
+    this.iniciarLatido();
   }
 
   /** Extrae la expiración del token JWT en milisegundos. */
@@ -200,6 +206,8 @@ export class usuarioservice {
 
   /** Limpia la información de autenticación almacenada en memoria. */
   logout(): void {
+    this.detenerLatido();
+
     this.token = null;
     this.usuarioActual = null;
     this.expira = null;
@@ -207,6 +215,57 @@ export class usuarioservice {
     this.recuperacionId = null;
 
     this.sesionSubject.next(null);
+  }
+
+  /**
+   * Avisa al servidor que la sesión terminó y limpia la sesión local.
+   * Si el servidor no responde, la sesión local se cierra de todas formas.
+   * @returns observable que emite una vez cuando ya se cerró la sesión
+   */
+  cerrarSesion(): Observable<unknown> {
+    if (!this.token) {
+      this.logout();
+      return of(null);
+    }
+
+    return this.http
+      .post(`${this.apiSesiones}/logout`, {}, { headers: this.getHeaders() })
+      .pipe(
+        catchError(() => of(null)),
+        tap(() => this.logout()),
+      );
+  }
+
+  /** Empieza a avisar al servidor cada 60 segundos que la sesión sigue activa. */
+  private iniciarLatido(): void {
+    this.detenerLatido();
+
+    this.latido = setInterval(() => this.enviarLatido(), 60000);
+  }
+
+  /** Detiene el aviso periódico al servidor. */
+  private detenerLatido(): void {
+    if (this.latido !== null) {
+      clearInterval(this.latido);
+      this.latido = null;
+    }
+  }
+
+  /** Envía un latido; si el servidor responde 401 la sesión ya no es válida. */
+  private enviarLatido(): void {
+    if (!this.token) {
+      return;
+    }
+
+    this.http
+      .post(`${this.apiSesiones}/heartbeat`, {}, { headers: this.getHeaders() })
+      .subscribe({
+        error: (e: HttpErrorResponse) => {
+          if (e.status === 401) {
+            this.logout();
+          }
+        },
+      });
   }
 
   /** Prepara las cabeceras de autorización para llamadas protegidas. */
