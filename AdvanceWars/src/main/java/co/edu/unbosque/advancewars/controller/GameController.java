@@ -49,11 +49,10 @@ public class GameController {
 	private final AuthenticatedUserService authenticatedUsers;
 
 	/** Inyecta servicios del motor y el resolvedor de la cuenta autenticada. */
-	public GameController(GameService gameService,
-			UnitMovementService unitMovementService, UnitCombatService unitCombatService,
-			UnitCaptureService unitCaptureService, UnitProductionService unitProductionService,
-			GameHistoryService historyService, CommanderPowerService commanderPowerService,
-			AuthenticatedUserService authenticatedUsers) {
+	public GameController(GameService gameService, UnitMovementService unitMovementService,
+			UnitCombatService unitCombatService, UnitCaptureService unitCaptureService,
+			UnitProductionService unitProductionService, GameHistoryService historyService,
+			CommanderPowerService commanderPowerService, AuthenticatedUserService authenticatedUsers) {
 		this.gameService = gameService;
 		this.unitMovementService = unitMovementService;
 		this.unitCombatService = unitCombatService;
@@ -129,8 +128,8 @@ public class GameController {
 
 	/** Vista previa autorizada y de solo lectura de las casillas alcanzables. */
 	@GetMapping("/{id}/units/{unitId}/reachable")
-	public List<ReachableTileDTO> reachableTiles(@PathVariable("id") Long id,
-			@PathVariable("unitId") Long unitId, Principal principal) {
+	public List<ReachableTileDTO> reachableTiles(@PathVariable("id") Long id, @PathVariable("unitId") Long unitId,
+			Principal principal) {
 		return unitMovementService.reachableTiles(id, unitId, authenticatedUsers.requireUser(principal));
 	}
 

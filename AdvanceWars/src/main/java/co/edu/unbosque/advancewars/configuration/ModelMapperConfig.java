@@ -10,13 +10,13 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class ModelMapperConfig {
-    /**
-     * Crea un ModelMapper con estrategia estricta de correspondencia.
-     */
-    @Bean
-    public ModelMapper modelMapper() {
-        ModelMapper modelMapper = new ModelMapper();
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-        return modelMapper;
-    }
+	/**
+	 * Crea un ModelMapper con estrategia estricta de correspondencia.
+	 */
+	@Bean
+	public ModelMapper modelMapper() {
+		ModelMapper modelMapper = new ModelMapper();
+		modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+		return modelMapper;
+	}
 }

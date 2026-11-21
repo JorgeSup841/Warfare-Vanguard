@@ -18,6 +18,7 @@ import co.edu.unbosque.advancewars.model.Property;
 import co.edu.unbosque.advancewars.model.Unit;
 import co.edu.unbosque.advancewars.model.Weapon;
 import co.edu.unbosque.advancewars.enums.TerrainType;
+import co.edu.unbosque.advancewars.enums.UnitCategory;
 import co.edu.unbosque.advancewars.model.User;
 import co.edu.unbosque.advancewars.repository.GameStateRepository;
 import co.edu.unbosque.advancewars.repository.PropertyRepository;
@@ -230,7 +231,7 @@ public class UnitCombatService {
 			attack *= 1.10;
 		}
 		if ("AIR_ATTACK_15".equals(passive)
-				&& attacker.getDefinition().getCategory() == co.edu.unbosque.advancewars.enums.UnitCategory.AIR) {
+				&& attacker.getDefinition().getCategory() == UnitCategory.AIR) {
 			attack *= 1.15;
 		}
 		if (owner.isPowerActive() && "RANGED_ATTACK_20".equals(owner.getCommander().getPowerEffectCode())
@@ -242,7 +243,7 @@ public class UnitCombatService {
 
 	/** Obtiene cobertura de terreno y edificio sin aplicarla a unidades aéreas. */
 	private int defenseCover(Unit defender) {
-		if (defender.getDefinition().getCategory() == co.edu.unbosque.advancewars.enums.UnitCategory.AIR) {
+		if (defender.getDefinition().getCategory() == UnitCategory.AIR) {
 			return 0;
 		}
 		int cover = switch (defender.getTile().getTerrainType()) {
