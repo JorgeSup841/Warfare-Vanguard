@@ -1,0 +1,45 @@
+
+<div class="carga" *ngIf="visible">
+
+  <img
+    class="carga__fondo"
+    src="/assets/imagen/fondopantalla.PNG"
+    alt=""
+    aria-hidden="true">
+
+  <div class="carga__sombra"></div>
+
+  <div class="tarjeta">
+
+    <div class="tarjeta__cabecera">
+      <i></i>
+    </div>
+
+    <div class="tarjeta__cuerpo">
+
+      <h1 class="tarjeta__titulo">AURA WARS</h1>
+
+      <p class="tarjeta__lema">
+        ESTRATEGIA POR TURNOS
+      </p>
+
+      <p class="tarjeta__texto">
+        CARGANDO EL CAMPO DE BATALLA
+      </p>
+
+      <div class="barra">
+        <div class="barra__relleno"></div>
+      </div>
+
+      <button
+        type="button"
+        class="boton"
+        (click)="entrar()">
+        IR A JUGAR
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
