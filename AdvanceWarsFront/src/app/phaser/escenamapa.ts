@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { mapa, casilla, terreno, tipoterreno } from '../models/mapa';
+import { mapa, casilla, terreno } from '../models/mapa';
 import { casillaalcanzable, casillatablero } from '../models/tablero';
 import { resultadoataque, unidadservidor } from '../models/unidad';
 
@@ -169,7 +169,7 @@ export class EscenaMapa extends Phaser.Scene {
     }
     // No se descargan las casi dos mil imágenes animadas por cada inicio.
     const presentes = new Set((this.datos.unidades ?? [])
-      .filter(u => this.faccion(u.ownerOrder) !== null && this.tipoConocido(u.unitType))
+      .filter(u => this.faccion(u.ownerOrder) !== null && EscenaMapa.tipoConocido(u.unitType))
       .map(u => `${this.faccion(u.ownerOrder)}:${u.unitType}`));
     for (const presente of presentes) {
       const [faccion, tipo] = presente.split(':');
@@ -224,6 +224,7 @@ export class EscenaMapa extends Phaser.Scene {
     this.activarMouse();
   }
 
+  /** Busca la facción de un asiento en los datos de la partida. */
   private faccion(orden: number | null | undefined): string | null {
     if (!Number.isInteger(orden) || orden === null || orden === undefined || orden < 1 || orden > 4) {
       return null;
@@ -234,19 +235,21 @@ export class EscenaMapa extends Phaser.Scene {
     return FACCIONES[orden - 1];
   }
 
-  private tipoConocido(tipo: string): boolean {
+  /** Comprueba que el código de unidad pertenece al catálogo gráfico. */
+  private static tipoConocido(tipo: string): boolean {
     return (TIPOS as readonly string[]).includes(tipo);
   }
 
+  /** Resuelve la clave gráfica de la unidad y su facción. */
   private claveUnidad(unidad: unidadservidor): string | null {
     const faccion = this.faccion(unidad.ownerOrder);
-    if (!faccion || !this.tipoConocido(unidad.unitType)) return null;
+    if (!faccion || !EscenaMapa.tipoConocido(unidad.unitType)) return null;
     const clave = `unidad-${faccion}-${unidad.unitType}`;
     return this.textures.exists(clave) ? clave : null;
   }
 
   /** Los PNG y sus fotogramas ya fueron diseñados en 40 × 40: no deben reducirse a 24 px. */
-  private ajustarTamanoSpriteUnidad(sprite: Phaser.GameObjects.Sprite): void {
+  private static ajustarTamanoSpriteUnidad(sprite: Phaser.GameObjects.Sprite): void {
     const original = sprite.texture.getSourceImage() as { width?: number; height?: number } | undefined;
     const ancho = original?.width || sprite.width || TAM_CASILLA;
     const alto = original?.height || sprite.height || TAM_CASILLA;
@@ -254,6 +257,7 @@ export class EscenaMapa extends Phaser.Scene {
     sprite.setDisplaySize(Math.round(ancho * factor), Math.round(alto * factor));
   }
 
+  /** Dibuja las casillas usando las texturas originales del proyecto. */
   private dibujarTerrenos(): void {
     const cuadricula = this.add.graphics().setDepth(1);
     for (const actual of this.datos.mapa.tiles) {
@@ -274,6 +278,7 @@ export class EscenaMapa extends Phaser.Scene {
     }
   }
 
+  /** Superpone los edificios y su progreso de captura al terreno. */
   private dibujarPropiedades(): void {
     this.capaEdificios.removeAll(true);
     const propiedades = (this.datos.propiedades ?? [])
@@ -376,7 +381,7 @@ export class EscenaMapa extends Phaser.Scene {
   /** Al producir un tipo nuevo, sus secuencias se cargan sin reiniciar el tablero. */
   private cargarAnimacionesCuandoAparezca(unidad: unidadservidor): void {
     const faction = this.faccion(unidad.ownerOrder);
-    if (!faction || !this.tipoConocido(unidad.unitType)) return;
+    if (!faction || !EscenaMapa.tipoConocido(unidad.unitType)) return;
     const id = `${faction}-${unidad.unitType}`;
     if (this.animacionesPendientes.has(id)) return;
     this.animacionesPendientes.add(id);
@@ -404,7 +409,7 @@ export class EscenaMapa extends Phaser.Scene {
     if (count === 0) return;
     this.load.once(Phaser.Loader.Events.COMPLETE, () => {
       const view = this.vistas.get(unidad.id);
-      if (view && view.sprite.active) this.reproducir(view, 'idle');
+      if (view?.sprite.active) this.reproducir(view, 'idle');
     });
     this.load.start();
   }
@@ -422,12 +427,13 @@ export class EscenaMapa extends Phaser.Scene {
       this.anims.create({ key, frames: frames.map(frame => ({ key: frame })), frameRate: 12, repeat: 0 });
     }
     const ghost = this.add.sprite(vista.grupo.x, vista.grupo.y, vista.sprite.texture.key).setDepth(11);
-    this.ajustarTamanoSpriteUnidad(ghost);
+    EscenaMapa.ajustarTamanoSpriteUnidad(ghost);
     ghost.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => ghost.destroy());
     ghost.play(key);
     this.time.delayedCall(900, () => { if (ghost.active) ghost.destroy(); });
   }
 
+  /** Crea un sprite de tropa con la vida y el color del propietario. */
   private crearVista(unidad: unidadservidor): VistaUnidad {
     const px = unidad.x * TAM_CASILLA + 20;
     const py = unidad.y * TAM_CASILLA + 20;
@@ -456,8 +462,8 @@ export class EscenaMapa extends Phaser.Scene {
       }
       sprite = this.add.sprite(0, 0, 'unidad-desconocida');
     }
-    this.ajustarTamanoSpriteUnidad(sprite);
-    sprite.on(Phaser.Animations.Events.ANIMATION_UPDATE, () => this.ajustarTamanoSpriteUnidad(sprite));
+    EscenaMapa.ajustarTamanoSpriteUnidad(sprite);
+    sprite.on(Phaser.Animations.Events.ANIMATION_UPDATE, () => EscenaMapa.ajustarTamanoSpriteUnidad(sprite));
     const salud = this.add.text(15, 13, unidad.health >= 100 ? '' : `${Math.ceil(unidad.health / 10)}`, {
       fontFamily: 'monospace', fontSize: '11px', color: '#ffffff',
       backgroundColor: '#14201a', stroke: '#14201a', strokeThickness: 1
@@ -495,7 +501,7 @@ export class EscenaMapa extends Phaser.Scene {
         if (vista.sprite.active) {
           const base = `unidad-${faccion}-${vista.tipo}`;
           if (this.textures.exists(base)) vista.sprite.setTexture(base);
-          this.ajustarTamanoSpriteUnidad(vista.sprite);
+          EscenaMapa.ajustarTamanoSpriteUnidad(vista.sprite);
           this.reproducir(vista, 'idle');
         }
       });
@@ -543,6 +549,7 @@ export class EscenaMapa extends Phaser.Scene {
     }
   }
 
+  /** Reproduce el efecto de explosión después del daño confirmado. */
   private explosion(x: number, y: number): void {
     const clave = 'aura-explosion';
     if (!this.anims.exists(clave)) {

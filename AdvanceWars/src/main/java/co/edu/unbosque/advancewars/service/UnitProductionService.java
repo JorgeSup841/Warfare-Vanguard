@@ -97,14 +97,14 @@ public class UnitProductionService {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "La casilla de la fabrica esta ocupada");
 		}
 
-		UnitDefinition definition = definitionRepository.findByUnitType(request.getUnitType())
-			.orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT, "Unidad no disponible en el catalogo"));
+		UnitDefinition definition = definitionRepository.findByUnitType(request.getUnitType()).orElseThrow(
+				() -> new ResponseStatusException(HttpStatus.CONFLICT, "Unidad no disponible en el catalogo"));
 		UnitCategory category = definition.getCategory();
 		PropertyType buildingType = factory.getDefinition().getType();
 		PropertyType required = switch (category) {
-			case LAND -> PropertyType.FACTORY;
-			case AIR -> PropertyType.AIRPORT;
-			case NAVAL -> PropertyType.PORT;
+		case LAND -> PropertyType.FACTORY;
+		case AIR -> PropertyType.AIRPORT;
+		case NAVAL -> PropertyType.PORT;
 		};
 		if (buildingType != required || !factory.getDefinition().getProductionCategories().contains(category)) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "La propiedad no produce esta categoria de unidad");

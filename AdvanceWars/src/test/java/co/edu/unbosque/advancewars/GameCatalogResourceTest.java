@@ -10,15 +10,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import co.edu.unbosque.advancewars.enums.UnitType;
 
+/** Comprueba que los recursos de catálogo coinciden con los tipos del juego. */
 class GameCatalogResourceTest {
     private final ObjectMapper parser = new ObjectMapper();
 
+    /** Lee un recurso de catálogo sin utilizar la base de datos. */
     private JsonNode read(String filename) throws IOException {
         try (var input = new ClassPathResource("game-catalog/" + filename).getInputStream()) {
             return parser.readTree(input);
         }
     }
 
+    /** Verifica cuatro facciones, cuatro comandantes y los 16 tipos de unidad. */
     @Test
     void coversAllUnitsAndFourFactions() throws IOException {
         var factions = read("Facciones.json");

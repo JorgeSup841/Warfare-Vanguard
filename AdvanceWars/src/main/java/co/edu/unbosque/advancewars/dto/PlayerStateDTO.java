@@ -13,6 +13,7 @@ public class PlayerStateDTO {
 	private int powerCharge;
 	private boolean powerActive;
 
+	/** Construye el estado público del jugador desde el modelo persistido. */
 	public PlayerStateDTO(Player player) {
 		name = player.getName();
 		turnOrder = player.getTurnOrder();
@@ -42,6 +43,7 @@ public class PlayerStateDTO {
 
 	public String getCommanderCode() { return commanderCode; }
 	public int getPowerCharge() { return powerCharge; }
+	/** Indica si el poder del comandante está en efecto. */
 	public boolean isPowerActive() { return powerActive; }
 
 	public String getStatus() {

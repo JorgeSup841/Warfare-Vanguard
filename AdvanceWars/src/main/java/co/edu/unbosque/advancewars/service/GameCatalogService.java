@@ -3,17 +3,17 @@ package co.edu.unbosque.advancewars.service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.LinkedHashMap;
 import org.springframework.context.event.EventListener;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import co.edu.unbosque.advancewars.dto.FactionCatalogDTO;
+import co.edu.unbosque.advancewars.dto.CommanderCatalogDTO;
+import co.edu.unbosque.advancewars.dto.UnitCatalogDTO;
+import co.edu.unbosque.advancewars.dto.WeaponCatalogDTO;
 import co.edu.unbosque.advancewars.enums.MovementType;
 import co.edu.unbosque.advancewars.enums.UnitCategory;
 import co.edu.unbosque.advancewars.enums.UnitType;
@@ -26,6 +26,7 @@ import co.edu.unbosque.advancewars.repository.FactionRepository;
 import co.edu.unbosque.advancewars.repository.UnitDefinitionRepository;
 import co.edu.unbosque.advancewars.repository.WeaponRepository;
 
+/** Gestiona el contenido de facciones, comandantes y unidades del servidor. */
 @Service
 public class GameCatalogService {
     private final ObjectMapper json = new ObjectMapper();
@@ -34,6 +35,7 @@ public class GameCatalogService {
     private final UnitDefinitionRepository units;
     private final WeaponRepository weapons;
 
+    /** Inyecta las dependencias del servicio mediante constructor. */
     public GameCatalogService(FactionRepository factions,
             CommanderRepository commanders, UnitDefinitionRepository units, WeaponRepository weapons) {
         this.factions = factions;
@@ -41,6 +43,8 @@ public class GameCatalogService {
         this.units = units;
         this.weapons = weapons;
     }
+
+    /** Lee un archivo JSON del catálogo incluido en los recursos. */
 
     private JsonNode read(String name) {
         try (var input = new ClassPathResource("game-catalog/" + name).getInputStream()) {
@@ -114,66 +118,51 @@ public class GameCatalogService {
     }
 
     @Transactional(readOnly = true)
-    public List<Map<String, Object>> getFactions() {
-        List<Map<String, Object>> result = new ArrayList<>();
+    public List<FactionCatalogDTO> getFactions() {
+        List<FactionCatalogDTO> result = new ArrayList<>();
         for (Faction faction : factions.findAllByOrderByNameAsc()) {
-            Map<String, Object> row = new LinkedHashMap<>();
-            row.put("id", faction.getId()); row.put("code", faction.getCode());
-            row.put("name", faction.getName()); row.put("description", faction.getDescription());
-            row.put("color", switch (faction.getCode()) {
-                case "RED" -> "#d63031"; case "BLUE" -> "#0984e3";
-                case "GREEN" -> "#00b894"; case "YELLOW" -> "#fdcb6e";
+            String color = switch (faction.getCode()) {
+                case "RED" -> "#d63031";
+                case "BLUE" -> "#0984e3";
+                case "GREEN" -> "#00b894";
+                case "YELLOW" -> "#fdcb6e";
                 default -> "#819198";
-            });
-            result.add(row);
+            };
+            result.add(new FactionCatalogDTO(faction.getId(), faction.getCode(), faction.getName(),
+                    faction.getDescription(), color));
         }
         return result;
     }
 
+    /** Devuelve los comandantes como DTO, conservando los mismos nombres JSON. */
     @Transactional(readOnly = true)
-    public List<Map<String, Object>> getCommanders() {
-        List<Map<String, Object>> result = new ArrayList<>();
+    public List<CommanderCatalogDTO> getCommanders() {
+        List<CommanderCatalogDTO> result = new ArrayList<>();
         for (Commander commander : commanders.findAllByOrderByNameAsc()) {
-            Map<String, Object> row = new LinkedHashMap<>();
-            row.put("id", commander.getId()); row.put("code", commander.getCode());
-            row.put("name", commander.getName()); row.put("description", commander.getDescription());
-            row.put("factionCode", commander.getFaction().getCode());
-            row.put("powerName", commander.getPowerName()); row.put("powerCost", commander.getPowerCost());
-            row.put("powerDescription", commander.getPowerDescription());
-            row.put("powerEffectCode", commander.getPowerEffectCode());
-            row.put("passiveEffectCode", commander.getPassiveEffectCode());
-            row.put("passiveAbilityName", commander.getPassiveAbilityName());
-            row.put("passiveAbilityDescription", commander.getPassiveAbilityDescription());
-            result.add(row);
+            result.add(new CommanderCatalogDTO(commander.getId(), commander.getCode(),
+                    commander.getName(), commander.getDescription(), commander.getFaction().getCode(),
+                    commander.getPowerName(), commander.getPowerCost(), commander.getPowerDescription(),
+                    commander.getPowerEffectCode(), commander.getPassiveEffectCode(),
+                    commander.getPassiveAbilityName(), commander.getPassiveAbilityDescription()));
         }
         return result;
     }
 
+    /** Devuelve unidades y armas como DTO, sin exponer relaciones JPA. */
     @Transactional(readOnly = true)
-    public List<Map<String, Object>> getUnits() {
-        List<Map<String, Object>> result = new ArrayList<>();
+    public List<UnitCatalogDTO> getUnits() {
+        List<UnitCatalogDTO> result = new ArrayList<>();
         for (UnitDefinition unit : units.findAllByOrderByNameAsc()) {
-            Map<String, Object> row = new LinkedHashMap<>();
-            row.put("unitType", unit.getUnitType().name()); row.put("name", unit.getName());
-            row.put("category", unit.getCategory().name()); row.put("movementType", unit.getMovementType().name());
-            row.put("productionCost", unit.getProductionCost()); row.put("movementPoints", unit.getMovementPoints());
-            row.put("maxHealth", unit.getMaxHealth()); row.put("maxFuel", unit.getMaxFuel());
-            row.put("captureCapable", unit.isCaptureCapable());
-            row.put("usesFuel", unit.isUsesFuel());
-            row.put("fuelConsumptionPerTurn", unit.getFuelConsumptionPerTurn());
-            row.put("fuelPerMovementPoint", unit.getFuelPerMovementPoint());
-            List<Map<String, Object>> armament = new ArrayList<>();
+            List<WeaponCatalogDTO> armament = new ArrayList<>();
             for (Weapon weapon : unit.getWeapons()) {
-                Map<String, Object> arm = new LinkedHashMap<>();
-                arm.put("code", weapon.getCode()); arm.put("name", weapon.getName());
-                arm.put("minRange", weapon.getMinRange()); arm.put("maxRange", weapon.getMaxRange());
-                arm.put("usesAmmunition", weapon.isUsesAmmunition());
-                arm.put("ammunitionCapacity", weapon.getAmmunitionCapacity());
-                arm.put("damageByTarget", weapon.getDamageByTarget());
-                armament.add(arm);
+                armament.add(new WeaponCatalogDTO(weapon.getCode(), weapon.getName(),
+                        weapon.getMinRange(), weapon.getMaxRange(), weapon.isUsesAmmunition(),
+                        weapon.getAmmunitionCapacity(), weapon.getDamageByTarget()));
             }
-            row.put("weapons", armament);
-            result.add(row);
+            result.add(new UnitCatalogDTO(unit.getUnitType().name(), unit.getName(),
+                    unit.getCategory().name(), unit.getMovementType().name(), unit.getProductionCost(),
+                    unit.getMovementPoints(), unit.getMaxHealth(), unit.getMaxFuel(), unit.isCaptureCapable(),
+                    unit.isUsesFuel(), unit.getFuelConsumptionPerTurn(), unit.getFuelPerMovementPoint(), armament));
         }
         return result;
     }

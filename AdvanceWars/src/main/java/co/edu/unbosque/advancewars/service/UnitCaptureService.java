@@ -118,9 +118,8 @@ public class UnitCaptureService {
 			events.record(game, player, GameLogType.PROPERTY_CAPTURED,
 					"Propiedad #" + property.getId() + " (" + property.getDefinition().getType() + ") capturada");
 		} else {
-			events.record(game, player, GameLogType.UNIT_CAPTURE_STARTED,
-					"Unidad #" + unit.getId() + " captura propiedad #" + property.getId()
-					+ ": " + progress + " puntos");
+			events.record(game, player, GameLogType.UNIT_CAPTURE_STARTED, "Unidad #" + unit.getId()
+					+ " captura propiedad #" + property.getId() + ": " + progress + " puntos");
 		}
 		if (completed && property.getDefinition().getType() == PropertyType.HEADQUARTERS) {
 			victoryService.checkHeadquartersCapture(game, property, player);

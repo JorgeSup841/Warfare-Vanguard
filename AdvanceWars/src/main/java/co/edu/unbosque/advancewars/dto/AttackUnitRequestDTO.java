@@ -1,10 +1,20 @@
 package co.edu.unbosque.advancewars.dto;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+
 /** Envia la unidad enemiga y el turno actual para atacar. */
 public class AttackUnitRequestDTO {
 
+	@NotNull
+	@Min(1)
+
 	private Long targetUnitId;
+	@NotNull
+	@Min(1)
 	private Integer currentRound;
+	@NotNull
+	@Min(1)
 	private Integer currentPlayerOrder;
 
 	public AttackUnitRequestDTO() {

@@ -14,11 +14,9 @@ import co.edu.unbosque.advancewars.dto.UnitDTO;
 import co.edu.unbosque.advancewars.dto.UserActivityDTO;
 import co.edu.unbosque.advancewars.dto.UserResponseDTO;
 import co.edu.unbosque.advancewars.dto.UserSessionDTO;
-import co.edu.unbosque.advancewars.enums.GameStatus;
-import co.edu.unbosque.advancewars.model.User;
-import co.edu.unbosque.advancewars.repository.GameStateRepository;
-import co.edu.unbosque.advancewars.repository.UserRepository;
 import co.edu.unbosque.advancewars.service.AdminGameService;
+import co.edu.unbosque.advancewars.service.AdminDashboardService;
+import co.edu.unbosque.advancewars.service.AuthenticatedUserService;
 import co.edu.unbosque.advancewars.service.AuthService;
 import co.edu.unbosque.advancewars.service.UserService;
 import co.edu.unbosque.advancewars.service.UserSessionService;
@@ -27,7 +25,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -47,24 +44,23 @@ public class AdminController {
 	private final AuthService auth;
 	private final AdminGameService games;
 	private final UserSessionService sessions;
-	private final UserRepository users;
-	private final GameStateRepository gameRepository;
+	private final AdminDashboardService dashboardService;
+	private final AuthenticatedUserService authenticatedUsers;
 
 	public AdminController(UserService userService, AuthService auth, AdminGameService games,
-			UserSessionService sessions, UserRepository users, GameStateRepository gameRepository) {
+			UserSessionService sessions, AdminDashboardService dashboardService,
+			AuthenticatedUserService authenticatedUsers) {
 		this.userService = userService;
 		this.auth = auth;
 		this.games = games;
 		this.sessions = sessions;
-		this.users = users;
-		this.gameRepository = gameRepository;
+		this.dashboardService = dashboardService;
+		this.authenticatedUsers = authenticatedUsers;
 	}
 
 	@GetMapping("/dashboard")
 	public AdminDashboardDTO dashboard() {
-		return new AdminDashboardDTO(users.count(), sessions.countOnlineUsers(), gameRepository.count(),
-				gameRepository.countByStatus(GameStatus.IN_PROGRESS),
-				gameRepository.countByStatus(GameStatus.FINISHED));
+		return dashboardService.summary();
 	}
 
 	@GetMapping("/users")
@@ -137,8 +133,8 @@ public class AdminController {
 	}
 
 	@DeleteMapping("/sessions/{id}")
-	public ResponseEntity<Void> revoke(@PathVariable String id, @AuthenticationPrincipal User admin) {
-		sessions.revoke(admin, id);
+	public ResponseEntity<Void> revoke(@PathVariable String id, Principal principal) {
+		sessions.revoke(authenticatedUsers.requireUser(principal), id);
 		return ResponseEntity.noContent().build();
 	}
 

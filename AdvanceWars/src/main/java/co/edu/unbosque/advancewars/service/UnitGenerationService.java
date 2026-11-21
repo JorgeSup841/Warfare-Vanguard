@@ -53,8 +53,8 @@ public class UnitGenerationService {
 		}
 
 		UnitDefinition infantry = definitionRepository.findByUnitType(UnitType.INFANTRY)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
-                        "Catalogo de unidades no inicializado"));
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+						"Catalogo de unidades no inicializado"));
 
 		List<Unit> units = new ArrayList<>();
 		for (Player player : game.getPlayers()) {

@@ -30,26 +30,27 @@ export class Configurarpartidacomponent implements OnInit {
   mostrarElecciones = false;
 
   get seleccionesCompletas(): boolean {
-    return !!this.partida?.players.length && this.partida.players.every(
-      jugador => !!jugador.factionCode && !!jugador.commanderCode
+    return Boolean(this.partida?.players.length) && (this.partida?.players ?? []).every(
+      jugador => Boolean(jugador.factionCode) && Boolean(jugador.commanderCode)
     );
   }
   private readonly colores: Record<string, string> = { RED: '#d63031', BLUE: '#0984e3', GREEN: '#00b894', YELLOW: '#fdcb6e' };
 
   /** Ruta de retrato del paquete gráfico propio. */
-  retrato(factionCode: string): string {
-    return `/assets/sprites/comandantes/${factionCode}.png`;
-  }
+  readonly retrato = (factionCode: string): string => `/assets/sprites/comandantes/${factionCode}.png`;
 
+  /** Recupera el color visual de la facción seleccionada. */
   colorFaccion(code: string | null | undefined): string {
     return this.colores[code ?? ''] ?? '#879b90';
   }
 
+  /** Filtra los comandantes que pertenecen a la facción elegida. */
   comandantesDe(id: number): comandante[] {
-    const faction = this.facciones.find(f => f.id === +id);
+    const faction = this.facciones.find(f => f.id === id);
     return this.comandantes.filter(c => c.factionCode === faction?.code);
   }
 
+  /** Actualiza las opciones locales al elegir otra facción. */
   cambiarFaccion(orden: number, value: string): void {
     const factionId = Number(value);
     const commanderId = this.comandantesDe(factionId)[0]?.id ?? 0;
@@ -57,6 +58,7 @@ export class Configurarpartidacomponent implements OnInit {
     this.cdr.markForCheck();
   }
 
+  /** Actualiza la elección del comandante antes de guardar. */
   cambiarComandante(orden: number, value: string): void {
     if (this.seleccion[orden]) this.seleccion[orden].commanderId = Number(value);
   }
@@ -73,6 +75,7 @@ export class Configurarpartidacomponent implements OnInit {
     });
   }
 
+  /** Reconcilia los selectores con las elecciones guardadas por Spring Boot. */
   private sincronizarSeleccion(): void {
     for (const p of this.partida?.players ?? []) {
       const faction = this.facciones.find(f => f.code === p.factionCode);

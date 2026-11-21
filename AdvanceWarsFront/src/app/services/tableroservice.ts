@@ -134,6 +134,7 @@ export class tableroservice {
     );
   }
 
+  /** Inicia la partida seleccionada mediante el backend. */
   iniciarPartida(
     id: number
   ): Observable<partidaresumen> {
@@ -356,10 +357,12 @@ export class tableroservice {
     return this.http.get<faccion[]>(`${this.catalogos}/factions`, { headers: this.headers() });
   }
 
+  /** Consulta los poderes y estadísticas oficiales de los comandantes. */
   getComandantes(): Observable<comandante[]> {
     return this.http.get<comandante[]>(`${this.catalogos}/commanders`, { headers: this.headers() });
   }
 
+  /** Consulta el catálogo de unidades autorizado por Spring Boot. */
   getCatalogoUnidades(): Observable<unidad[]> {
     return this.http.get<unidad[]>(`${this.catalogos}/units`, { headers: this.headers() });
   }

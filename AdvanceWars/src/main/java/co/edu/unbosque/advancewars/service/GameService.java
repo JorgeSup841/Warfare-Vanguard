@@ -90,11 +90,13 @@ public class GameService {
 		// Asignamos el orden 1, 2, 3 o 4 a cada jugador.
 		for (int i = 0; i < names.size(); i++) {
 			Player player = new Player(names.get(i), i + 1, 0);
-			String factionCode = new String[] {"RED", "BLUE", "GREEN", "YELLOW"}[i];
-			Faction faction = factions.findByCode(factionCode).orElseThrow(() ->
-				new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Catalogo de facciones no inicializado"));
-			Commander commander = commanders.findByCode("CMD_" + factionCode).orElseThrow(() ->
-				new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Catalogo de comandantes no inicializado"));
+			String factionCode = new String[] { "RED", "BLUE", "GREEN", "YELLOW" }[i];
+			Faction faction = factions.findByCode(factionCode)
+					.orElseThrow(() -> new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+							"Catalogo de facciones no inicializado"));
+			Commander commander = commanders.findByCode("CMD_" + factionCode)
+					.orElseThrow(() -> new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+							"Catalogo de comandantes no inicializado"));
 			player.assignSelection(faction, commander);
 			game.addPlayer(player);
 		}
@@ -155,7 +157,10 @@ public class GameService {
 		return new MapDTO(game, propertyRepository.findAllByTile_GameMap_Id(game.getGameMap().getId()));
 	}
 
-	/** Actualiza una seleccion unicamente durante SETUP y para el dueno de la partida. */
+	/**
+	 * Actualiza una seleccion unicamente durante SETUP y para el dueno de la
+	 * partida.
+	 */
 	@Transactional
 	public GameDTO selectPlayer(Long gameId, int turnOrder, PlayerSelectionRequestDTO request, User creator) {
 		checkUser(creator);
@@ -163,7 +168,7 @@ public class GameService {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Seleccion de faccion y comandante incompleta");
 		}
 		GameState game = gameRepository.findWithLockByIdAndCreatedBy_Id(gameId, creator.getId())
-			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida no encontrada"));
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida no encontrada"));
 		if (game.getStatus() != GameStatus.SETUP) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "Solo se pueden editar jugadores antes de iniciar");
 		}
@@ -172,9 +177,9 @@ public class GameService {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Jugador no encontrado");
 		}
 		Faction faction = factions.findById(request.getFactionId())
-			.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Faccion no valida"));
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Faccion no valida"));
 		Commander commander = commanders.findByIdAndFaction_Id(request.getCommanderId(), faction.getId())
-			.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Comandante incompatible"));
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Comandante incompatible"));
 		for (Player other : game.getPlayers()) {
 			if (other.getTurnOrder() != turnOrder && other.getFaction() != null
 					&& faction.getId().equals(other.getFaction().getId())) {
@@ -257,10 +262,10 @@ public class GameService {
 		}
 
 		Player previous = game.findPlayerByOrder(game.getCurrentPlayerOrder());
-        if (previous.getCommander() == null ||
-                !"ENEMY_MOVE_MINUS_1".equals(previous.getCommander().getPowerEffectCode())) {
-            previous.clearPowerActive();
-        }
+		if (previous.getCommander() == null
+				|| !"ENEMY_MOVE_MINUS_1".equals(previous.getCommander().getPowerEffectCode())) {
+			previous.clearPowerActive();
+		}
 		// Buscamos el siguiente jugador activo sin streams ni ordenar listas.
 		Player next = null;
 		Player firstActive = null;
@@ -284,7 +289,8 @@ public class GameService {
 		}
 		if (activeCount == 1) {
 			game.finishGame(firstActive.getTurnOrder());
-			events.record(game, firstActive, GameLogType.GAME_FINISHED, "Partida terminada. Ganador: " + firstActive.getName());
+			events.record(game, firstActive, GameLogType.GAME_FINISHED,
+					"Partida terminada. Ganador: " + firstActive.getName());
 			return new GameDTO(game);
 		}
 		if (next == null) {
@@ -298,7 +304,7 @@ public class GameService {
 			game.incrementRound();
 		}
 		game.changeCurrentPlayer(next.getTurnOrder());
-        next.clearPowerActive();
+		next.clearPowerActive();
 		events.record(game, next, GameLogType.TURN_STARTED, "Comenzo el turno del jugador " + next.getName());
 
 		// Solo se reactivan las unidades del jugador que empieza su turno.

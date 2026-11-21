@@ -12,6 +12,12 @@ import { casilla, configuracionmapa, terreno, mapa, tipoterreno } from '../../mo
 import { tablero, partidaresumen, unidadservidor, casillatablero, turnoactual, casillaalcanzable, eventojuego } from '../../models/tablero';
 import { unidad as unidadcatalogo, resultadoataque } from '../../models/unidad';
 
+/** Convierte el coste de desplazamiento de una casilla en una etiqueta legible. */
+function costoTerrenoInspector(terrenoActual: terreno, tipo: string): string {
+  const costo = terrenoActual.movementCost[tipo];
+  return costo === undefined || costo === null || costo === 0 ? 'No pasa' : String(costo);
+}
+
 /** Controla el tablero Phaser y las acciones solicitadas a Spring Boot. */
 @Component({
   selector: 'app-juegocomponent',
@@ -94,6 +100,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     return colores[Math.max(0, Math.min(3, orden - 1))];
   }
 
+  /** Asocia el color del jugador a su facción real. */
   colorJugador(orden: number): string {
     const colores: Record<string, string> = {
       RED: '#d63031', BLUE: '#0984e3', GREEN: '#00b894', YELLOW: '#fdcb6e'
@@ -105,9 +112,18 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
   }
   get poderDisponible(): boolean {
     const jugador = this.comandanteTurno;
-    const cost: Record<string,number> = { CMD_RED:3,CMD_BLUE:3,CMD_GREEN:4,CMD_YELLOW:4 };
-    return !!jugador?.commanderCode && !jugador.powerActive &&
-      (jugador.powerCharge ?? 0) >= (cost[jugador.commanderCode] ?? 99);
+    if (!jugador || !jugador.commanderCode) {
+      return false;
+    }
+
+    const cost: Record<string, number> = {
+      CMD_RED: 3,
+      CMD_BLUE: 3,
+      CMD_GREEN: 4,
+      CMD_YELLOW: 4,
+    };
+    const costoPoder = cost[jugador.commanderCode] ?? 99;
+    return !jugador.powerActive && (jugador.powerCharge ?? 0) >= costoPoder;
   }
   /** Nunca modifica la carga local: sólo renderiza la respuesta del servidor. */
   activarPoder(): void {
@@ -122,6 +138,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
   get esperaCambio(): boolean { return this.esperandoEntrega; }
+  /** Habilita los controles después del cambio local de turno. */
   confirmarEntrega(): void {
     this.esperandoEntrega = false;
     this.avisoTurno = '';
@@ -145,6 +162,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
       ['RED','BLUE','GREEN','YELLOW'][(unidad.ownerOrder - 1) % 4];
     return `/assets/sprites/unidades/${faccion}/${unidad.unitType}.png`;
   }
+  /** Consulta el historial de eventos de la partida. */
   consultarHistorial(): void {
     if (this.modoDemo || this.cargandoHistorial) return;
     this.mostrandoHistorial = !this.mostrandoHistorial;
@@ -160,6 +178,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     return `${Math.round(this.zoom * 100)}%`;
   }
 
+  /** Obtiene el nivel de zoom más cercano. */
   private indiceZoomMasCercano(): number {
     let mejorIndice = 0;
     let mejorDiferencia = Number.POSITIVE_INFINITY;
@@ -173,6 +192,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     return mejorIndice;
   }
 
+  /** Cambia un nivel de zoom usando los botones del mouse. */
   zoomCambiar(delta: number): void {
     const indiceActual = this.indiceZoomMasCercano();
     const paso = delta < 0 ? -1 : 1;
@@ -182,6 +202,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
+  /** Restablece el zoom base del mapa completo. */
   zoomRestablecer(): void {
     this.zoom = 1;
     this.obtenerEscenaMapa()?.cambiarZoom(this.zoom);
@@ -425,7 +446,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     const unidadId = this.unidadActiva?.id ?? null;
     datos.unidadSeleccionadaId = unidadId;
     const escena = this.obtenerEscenaMapa();
-    if (escena && escena.sys.isActive()) {
+    if (escena?.sys.isActive()) {
       escena.marcarUnidadSeleccionada(unidadId);
       escena.marcarMovimientosDisponibles(datos.movimientosDisponibles ?? []);
     }
@@ -451,7 +472,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
         this.movimientosDisponibles = casillas;
         if (this.datosEscenaActuales) this.datosEscenaActuales.movimientosDisponibles = [...casillas];
         const escena = this.obtenerEscenaMapa();
-        if (escena && escena.sys.isActive()) escena.marcarMovimientosDisponibles(casillas);
+        if (escena?.sys.isActive()) escena.marcarMovimientosDisponibles(casillas);
         this.cdr.markForCheck();
       },
       error: (error: unknown) => {
@@ -596,13 +617,8 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
           next: (resultado: resultadoataque) => {
             if (this.destruido) return;
             this.resultadoCombate = resultado;
-            const destruccion =
-              (resultado.targetDestroyed ? ' Unidad enemiga destruida.' : '') +
-              (resultado.attackerDestroyed ? ' Unidad atacante destruida.' : '');
-            this.mensaje =
-              `Ataque confirmado. Daño: -${resultado.damageDealt}. ` +
-              `Contraataque: -${resultado.counterattackDamage}.` +
-              destruccion;
+            const destruccion = `${resultado.targetDestroyed ? ' Unidad enemiga destruida.' : ''}${resultado.attackerDestroyed ? ' Unidad atacante destruida.' : ''}`;
+            this.mensaje = `Ataque confirmado. Daño: -${resultado.damageDealt}. Contraataque: -${resultado.counterattackDamage}.${destruccion}`;
 
             // La animación representa únicamente el ataque que confirmó el servidor.
             this.obtenerEscenaMapa()?.mostrarCombate(resultado);
@@ -640,7 +656,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
                   this.actualizarUnidadesEscena();
                   this.ataqueEnCurso = false;
                   if (partidaActual.status === 'FINISHED') {
-                    void this.router.navigate(['/partidas', this.id, 'resultados']);
+                    this.router.navigate(['/partidas', this.id, 'resultados']);
                   }
                   this.cdr.detectChanges();
                 },
@@ -949,11 +965,8 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     this.generarDemo();
   }
 
-  /** Consulta el costo local de un terreno para el inspector. */
-  readonly obtenerCosto = (terrenoActual: terreno, tipo: string): string => {
-    const costo = terrenoActual.movementCost[tipo];
-    return costo === undefined || costo === null || costo === 0 ? 'No pasa' : String(costo);
-  };
+  /** Función pura que utiliza el inspector; no modifica el estado de la partida. */
+  readonly obtenerCosto = costoTerrenoInspector;
 
   /** Descarga el reporte PDF desde el servicio ya existente. */
   descargarPDF(): void {
@@ -1008,7 +1021,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
         this.fabricaActiva = null;
         this.tiendaAbierta = false;
         if (actualizada.status === 'FINISHED') {
-          void this.router.navigate(['/partidas', this.id, 'resultados']);
+          this.router.navigate(['/partidas', this.id, 'resultados']);
           return;
         }
         this.ganancias = {};
@@ -1109,7 +1122,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
   /** Recupera el flujo antiguo: abre desde el botón y elige una propiedad propia libre. */
   abrirTienda(): void {
     if (!this.partida || !this.tableroActual || this.accionEnCurso ||
-        this.partida.status !== 'IN_PROGRESS') return;
+      this.partida.status !== 'IN_PROGRESS') return;
     const propias = this.tableroActual.tiles.filter(t =>
       ['FACTORY', 'AIRPORT', 'PORT'].includes(t.propertyType ?? '') &&
       t.ownerOrder === this.partida?.currentPlayerOrder && t.propertyId != null);

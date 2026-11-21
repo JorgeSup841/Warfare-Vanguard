@@ -1,12 +1,23 @@
 package co.edu.unbosque.advancewars.dto;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 import java.util.List;
 
 /** Datos que envia Angular para crear una partida. */
 public class CreateGameDTO {
 
+	@NotNull
+	@Size(min = 2, max = 4)
 	private List<String> playerNames;
+	@Min(5)
+	@Max(50)
 	private int width = 20;
+	@Min(5)
+	@Max(50)
 	private int height = 15;
 	private Long seed;
 

@@ -3,6 +3,7 @@ package co.edu.unbosque.advancewars.dto;
 import java.time.LocalDateTime;
 import co.edu.unbosque.advancewars.model.GameLog;
 
+/** DTO público del historial de partida, sin exponer la entidad JPA. */
 public class GameLogDTO {
     private final Long id;
     private final String eventType;
@@ -10,6 +11,7 @@ public class GameLogDTO {
     private final LocalDateTime occurredAt;
     private final int roundNumber;
     private final int turnOrder;
+    /** Copia los campos públicos de un evento persistido. */
     public GameLogDTO(GameLog log) {
         this.id = log.getId(); this.eventType = log.getEventType().name();
         this.description = log.getDescription(); this.occurredAt = log.getCreatedAt();

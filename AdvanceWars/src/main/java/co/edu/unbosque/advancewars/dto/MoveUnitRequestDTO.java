@@ -1,11 +1,23 @@
 package co.edu.unbosque.advancewars.dto;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+
 /** Coordenadas de destino y turno que ve el jugador en pantalla. */
 public class MoveUnitRequestDTO {
 
+	@NotNull
+	@Min(0)
+
 	private Integer x;
+	@NotNull
+	@Min(0)
 	private Integer y;
+	@NotNull
+	@Min(1)
 	private Integer currentRound;
+	@NotNull
+	@Min(1)
 	private Integer currentPlayerOrder;
 
 	public MoveUnitRequestDTO() {
