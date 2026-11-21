@@ -17,8 +17,6 @@ import { Configurarpartidacomponent } from './components/configurarpartidacompon
 import { Juegocomponent } from './components/juegocomponent/juegocomponent';
 import { Resultadoscomponent } from './components/resultadoscomponent/resultadoscomponent';
 import { Admincomponent } from './components/admincomponent/admincomponent';
-import { Tablerocomponent } from './components/tablerocomponent/tablerocomponent';
-import { Phasercomponent } from './components/phasercomponent/phasercomponent';
 import { Juegounidadescomponent } from './components/juegounidadescomponent/juegounidadescomponent';
 import { Juegoaccionescomponent } from './components/juegoaccionescomponent/juegoaccionescomponent';
 import { Juegohistorialcomponent } from './components/juegohistorialcomponent/juegohistorialcomponent';
@@ -39,8 +37,6 @@ import { Juegohistorialcomponent } from './components/juegohistorialcomponent/ju
     Juegocomponent,
     Resultadoscomponent,
     Admincomponent,
-    Tablerocomponent,
-    Phasercomponent,
     Juegounidadescomponent,
     Juegoaccionescomponent,
     Juegohistorialcomponent,

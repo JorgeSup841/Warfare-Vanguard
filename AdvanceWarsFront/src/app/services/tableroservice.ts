@@ -1,11 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
 import { API_BASE_URL } from './api-config';
 import { usuarioservice } from './usuarioservice';
 import {
   nuevapartida, partidaresumen, tablero, unidadservidor,
-  estadojuego, eventojuego, seleccionjugador, registrarasiento, turnoactual, resultadoCaptura, casillaalcanzable
+  eventojuego, seleccionjugador, turnoactual, resultadoCaptura, casillaalcanzable
 } from '../models/tablero';
 import { resultadoataque, unidad } from '../models/unidad';
 import { faccion, comandante } from '../models/partida';
@@ -168,86 +168,6 @@ export class tableroservice {
   }
 
   /**
-   * Devuelve un error explícito para funciones
-   * que todavía no están implementadas en Spring Boot.
-   *
-   * @param accion Nombre de la operación.
-   * @param parametros Parámetros de la operación.
-   * @returns Observable que emite un error.
-   */
-  private pendiente(
-    accion: string,
-    parametros: Record<string, unknown>
-  ): Observable<never> {
-
-    return throwError(
-      () => new Error(
-        `${accion}: pendiente de implementar en Spring Boot ` +
-        `(${this.api}; parámetros: ` +
-        `${Object.keys(parametros).join(', ')}).`
-      )
-    );
-  }
-
-  /**
-   * Reserva la consulta del estado completo.
-   *
-   * @param id Identificador de la partida.
-   * @returns Error de funcionalidad pendiente.
-   */
-  getEstado(
-    id: number
-  ): Observable<estadojuego> {
-
-    return this.pendiente(
-      'Consultar estado de partida',
-      { id }
-    );
-  }
-
-  /**
-   * Reserva el registro de jugadores adicionales.
-   *
-   * @param id Identificador de la partida.
-   * @param datos Información del jugador.
-   * @returns Error de funcionalidad pendiente.
-   */
-  agregarJugador(
-    id: number,
-    datos: registrarasiento
-  ): Observable<unknown> {
-
-    return this.pendiente(
-      'Agregar jugador',
-      { id, datos }
-    );
-  }
-
-  /**
-   * Reserva la selección de comandante y facción.
-   *
-   * @param id Identificador de la partida.
-   * @param jugadorId Identificador del jugador.
-   * @param datos Selección del comandante.
-   * @returns Error de funcionalidad pendiente.
-   */
-  seleccionarComandante(
-    id: number,
-    jugadorId: number,
-    datos: seleccionjugador
-  ): Observable<unknown> {
-
-    return this.pendiente(
-      'Seleccionar comandante',
-      {
-        id,
-        jugadorId,
-        datos
-      }
-    );
-  }
-
-  /**
    * Solicita mover una unidad dentro de la partida.
    *
    * Spring Boot valida:
@@ -337,7 +257,7 @@ export class tableroservice {
 
   /** Produce una unidad en una fábrica propia, si el servidor lo permite. */
   producir(id: number, propertyId: number, unitType: string,
-    turno: turnoactual): Observable<unidadservidor> {
+           turno: turnoactual): Observable<unidadservidor> {
     return this.http.post<unidadservidor>(
       `${this.api}/${id}/units/produce`, { propertyId, unitType, ...turno },
       { headers: this.headers() }
