@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { forkJoin } from 'rxjs'; //Ejecuta varias peticiones al mismo tiempo, en vez de esperar en fila una por una
 import { tableroservice } from '../../services/tableroservice';
 import { ReporteService } from '../../services/reporte.service';
 import { partidaresumen, unidadservidor } from '../../models/tablero';
