@@ -15,6 +15,7 @@ import { authGuard } from './guards/auth-guard';
 import { adminGuard } from './guards/admin-guard';
 import { jugadorGuard } from './guards/jugador-guard';
 import { invitadoGuard } from './guards/invitado-guard';
+import { Noencontradocomponent } from './components/noencontradocomponent/noencontradocomponent';
 
 const routes: Routes = [
   { path: '', component: Iniciosesioncomponent, canActivate: [invitadoGuard] },
@@ -42,7 +43,7 @@ const routes: Routes = [
   },
   { path: 'admin', component: Admincomponent, canActivate: [authGuard, adminGuard] },
   { path: 'juego', redirectTo: 'partidas', pathMatch: 'full' },
-  { path: '**', redirectTo: '' },
+  { path: '**', component: Noencontradocomponent },
 ];
 /** Configura la navegación y las restricciones de acceso. */
 @NgModule({ imports: [RouterModule.forRoot(routes)], exports: [RouterModule] })

@@ -21,6 +21,7 @@ import { Juegounidadescomponent } from './components/juegounidadescomponent/jueg
 import { Juegoaccionescomponent } from './components/juegoaccionescomponent/juegoaccionescomponent';
 import { Juegohistorialcomponent } from './components/juegohistorialcomponent/juegohistorialcomponent';
 import { Cargacomponent } from './components/cargacomponent/cargacomponent';
+import { Noencontradocomponent } from './components/noencontradocomponent/noencontradocomponent';
 /** Módulo raíz de la aplicación AURA WARS. */
 @NgModule({
   declarations: [
@@ -42,6 +43,7 @@ import { Cargacomponent } from './components/cargacomponent/cargacomponent';
     Juegoaccionescomponent,
     Juegohistorialcomponent,
     Cargacomponent,
+    Noencontradocomponent,
   ],
   imports: [BrowserModule, FormsModule, AppRoutingModule],
   providers: [provideBrowserGlobalErrorListeners(), provideHttpClient()],
