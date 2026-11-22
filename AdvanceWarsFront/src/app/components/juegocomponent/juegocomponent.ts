@@ -8,6 +8,8 @@ import { juegoservice } from '../../services/juegoservice';
 import { tableroservice } from '../../services/tableroservice';
 import { ReporteService } from '../../services/reporte.service';
 import { EscenaMapa, DatosEscena, TAM_CASILLA } from '../../phaser/escenamapa';
+import { calcularAlcanceAtaque } from '../../phaser/alcanceataque';
+import type { CasillaAlcanceAtaque } from '../../phaser/alcanceataque';
 import { casilla, configuracionmapa, terreno, mapa, tipoterreno } from '../../models/mapa';
 import { tablero, partidaresumen, unidadservidor, casillatablero, turnoactual, casillaalcanzable, eventojuego } from '../../models/tablero';
 import { unidad as unidadcatalogo, resultadoataque } from '../../models/unidad';
@@ -83,6 +85,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
   recargandoUnidades = false;
   consultandoMovimientos = false;
   movimientosDisponibles: casillaalcanzable[] = [];
+  alcancesAtaque: CasillaAlcanceAtaque[] = [];
 
   semilla = 12345;
   jugadores = 4;
@@ -443,6 +446,23 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     }));
   }
 
+  /** Obtiene la zona de ataque del catálogo y señala enemigos compatibles. */
+  private sincronizarAlcanceAtaque(): void {
+    const datos = this.datosEscenaActuales;
+    const atacante = this.unidadActiva;
+    this.alcancesAtaque = calcularAlcanceAtaque(
+      atacante, this.catalogoUnidades, this.unidades, this.partida,
+      datos?.mapa.width ?? 0, datos?.mapa.height ?? 0,
+    );
+    if (datos) datos.alcancesAtaque = [...this.alcancesAtaque];
+    const escena = this.obtenerEscenaMapa();
+    if (escena?.sys.isActive()) escena.marcarAlcanceAtaque(this.alcancesAtaque);
+  }
+
+  get objetivosEnRango(): number {
+    return this.alcancesAtaque.filter(c => c.objetivoAtacable).length;
+  }
+
   /** Redibuja unidades y selección con los datos actuales del servidor. */
   private actualizarUnidadesEscena(): void {
     if (this.destruido) return;
@@ -453,6 +473,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     datos.unidades = [...this.unidades];
     datos.unidadSeleccionadaId = this.unidadActiva?.id ?? null;
     datos.movimientosDisponibles = this.unidadActiva ? [...this.movimientosDisponibles] : [];
+    this.sincronizarAlcanceAtaque();
     const escena = this.obtenerEscenaMapa();
     if (!escena || !escena.sys.isActive()) return;
 
@@ -467,6 +488,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     if (!datos || this.destruido) return;
     const unidadId = this.unidadActiva?.id ?? null;
     datos.unidadSeleccionadaId = unidadId;
+    this.sincronizarAlcanceAtaque();
     const escena = this.obtenerEscenaMapa();
     if (escena?.sys.isActive()) {
       escena.marcarUnidadSeleccionada(unidadId);
@@ -833,6 +855,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
       jugadorEnTurno: this.partida?.currentPlayerOrder ?? 1,
       unidades: [...this.unidades],
       unidadSeleccionadaId: null,
+      alcancesAtaque: [],
       alPasarSobre: (actual: casilla | null) => {
         // Solo reentrar en Angular cuando cambia la casilla inspeccionada.
         if (actual?.x === this.seleccion?.x && actual?.y === this.seleccion?.y) return;
@@ -1226,6 +1249,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     this.recargandoUnidades = false;
     this.consultandoMovimientos = false;
     this.movimientosDisponibles = [];
+    this.alcancesAtaque = [];
     this.capturando = false;
     this.produciendo = false;
     if (this.phaser) {

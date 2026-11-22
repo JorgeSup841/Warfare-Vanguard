@@ -677,27 +677,47 @@ app-juegocomponent *, app-juegocomponent *::before, app-juegocomponent *::after{
 
 }
 
-/* El indicador explica el color de las casillas calculadas en el backend. */
+/* Indicadores de movimiento, alcance ofensivo y objetivos atacables. */
 .juego .alcance-leyenda{
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
+  gap: 10px 18px;
+  padding: 10px 12px;
   margin: 9px 0;
-  border: 1px solid rgba(90, 243, 147, .65);
-  background: rgba(19, 75, 49, .68);
-  color: #e6ffef;
+  border: 1px solid rgba(141, 166, 189, .60);
+  background: rgba(18, 40, 52, .85);
+  color: #f0f7ff;
   font-size: 13px;
   line-height: 1.45;
 }
+.juego .alcance-leyenda__item{
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
 .juego .alcance-leyenda__muestra{
   display: inline-block;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   flex: 0 0 auto;
-  border: 2px solid #52ffae;
   border-radius: 4px;
-  background: rgba(66, 255, 146, .31);
+}
+.juego .alcance-leyenda__muestra--movimiento{
+  border: 2px solid #c9edff;
+  background: rgba(78, 172, 255, .34);
+}
+.juego .alcance-leyenda__muestra--ataque{
+  border: 2px solid #ff657b;
+  background: rgba(255, 83, 104, .20);
+}
+.juego .alcance-leyenda__muestra--objetivo{
+  border: 3px solid #ffcc65;
+  background: rgba(255, 83, 104, .26);
+}
+.juego .alcance-leyenda__nota{
+  color: #c4d5e1;
+  font-size: 12px;
 }
 
 /* ===== TIENDA ===== */

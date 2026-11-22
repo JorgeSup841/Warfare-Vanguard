@@ -190,12 +190,20 @@
         </p>
 
         <div class="alcance-leyenda" *ngIf="!modoDemo && unidadActiva" role="status">
-          <img src="/assets/sprites/ui/move.png" class="ficha-icono" alt="">
-          <span *ngIf="consultandoMovimientos">Consultando destinos posibles...</span>
-          <span *ngIf="!consultandoMovimientos">
-            {{ movimientosDisponibles.length }} casillas disponibles (azul).
-            Clic en una casilla azul para mover.
+          <span class="alcance-leyenda__item">
+            <span class="alcance-leyenda__muestra alcance-leyenda__muestra--movimiento" aria-hidden="true"></span>
+            <span *ngIf="consultandoMovimientos">Calculando movimientos...</span>
+            <span *ngIf="!consultandoMovimientos">Movimiento: {{ movimientosDisponibles.length }} casillas</span>
           </span>
+          <span class="alcance-leyenda__item">
+            <span class="alcance-leyenda__muestra alcance-leyenda__muestra--ataque" aria-hidden="true"></span>
+            <span>Alcance de ataque: {{ alcancesAtaque.length }} casillas</span>
+          </span>
+          <span class="alcance-leyenda__item">
+            <span class="alcance-leyenda__muestra alcance-leyenda__muestra--objetivo" aria-hidden="true"></span>
+            <span>Enemigos atacables: {{ objetivosEnRango }}</span>
+          </span>
+          <span class="alcance-leyenda__nota">Azul: mover · Rojo: alcance del arma · Ámbar: objetivo atacable.</span>
         </div>
 
 
