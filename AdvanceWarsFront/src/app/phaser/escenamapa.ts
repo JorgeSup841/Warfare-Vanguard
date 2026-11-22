@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { mapa, casilla, terreno } from '../models/mapa';
 import { casillaalcanzable, casillatablero } from '../models/tablero';
 import { resultadoataque, unidadservidor } from '../models/unidad';
+import type { CasillaAlcanceAtaque } from './alcanceataque';
 
 export const TAM_CASILLA = 40;
 
@@ -31,6 +32,7 @@ export interface DatosEscena {
   unidades?: unidadservidor[];
   unidadSeleccionadaId?: number | null;
   movimientosDisponibles?: casillaalcanzable[];
+  alcancesAtaque?: CasillaAlcanceAtaque[];
   alPasarSobre: (casilla: casilla | null) => void;
   alClicCasilla?: (x: number, y: number) => void;
   alCancelarSeleccion?: () => void;
@@ -54,6 +56,7 @@ export class EscenaMapa extends Phaser.Scene {
   private capaUnidades!: Phaser.GameObjects.Container;
   private capaSeleccion!: Phaser.GameObjects.Graphics;
   private capaMovimientos!: Phaser.GameObjects.Graphics;
+  private capaAtaque!: Phaser.GameObjects.Graphics;
   private resaltado!: Phaser.GameObjects.Graphics;
   private readonly vistas = new Map<number, VistaUnidad>();
   private ultimaCasilla: string | null = null;
@@ -213,6 +216,7 @@ export class EscenaMapa extends Phaser.Scene {
     this.capaEdificios = this.add.container(0, 0).setDepth(2);
     this.capaUnidades = this.add.container(0, 0).setDepth(5);
     this.capaMovimientos = this.add.graphics().setDepth(6);
+    this.capaAtaque = this.add.graphics().setDepth(7);
     this.capaSeleccion = this.add.graphics().setDepth(8);
     this.resaltado = this.add.graphics().setDepth(10);
     this.dibujarTerrenos();
@@ -220,6 +224,7 @@ export class EscenaMapa extends Phaser.Scene {
     this.actualizarUnidades(this.datos.unidades ?? [], false);
     this.actualizarMarcado();
     this.dibujarMovimientosDisponibles();
+    this.dibujarAlcanceAtaque();
     this.centrarEnJugador(this.datos.jugadorEnTurno ?? 1);
     this.activarMouse();
   }
@@ -598,13 +603,45 @@ export class EscenaMapa extends Phaser.Scene {
     }
   }
 
+  /** Resalta en rojo el alcance, y en ámbar los enemigos atacables. */
+  marcarAlcanceAtaque(casillas: CasillaAlcanceAtaque[]): void {
+    this.datos.alcancesAtaque = [...casillas];
+    this.dibujarAlcanceAtaque();
+  }
+
+  /** La zona roja queda encima del movimiento azul sin ocultar la selección. */
+  private dibujarAlcanceAtaque(): void {
+    if (!this.capaAtaque || !this.sys.isActive()) return;
+    this.capaAtaque.clear();
+    if (this.unidadMarcadaId === null) return;
+    for (const casilla of this.datos.alcancesAtaque ?? []) {
+      if (!Number.isInteger(casilla.x) || !Number.isInteger(casilla.y)
+        || casilla.x < 0 || casilla.y < 0
+        || casilla.x >= this.datos.mapa.width || casilla.y >= this.datos.mapa.height) continue;
+      const px = casilla.x * TAM_CASILLA;
+      const py = casilla.y * TAM_CASILLA;
+      this.capaAtaque.fillStyle(0xff5368, casilla.objetivoAtacable ? 0.24 : 0.15);
+      this.capaAtaque.fillRect(px + 3, py + 3, TAM_CASILLA - 6, TAM_CASILLA - 6);
+      this.capaAtaque.lineStyle(2, 0xff657b, 0.94);
+      this.capaAtaque.strokeRect(px + 1, py + 1, TAM_CASILLA - 2, TAM_CASILLA - 2);
+      if (casilla.objetivoAtacable) {
+        this.capaAtaque.lineStyle(3, 0xffcc65, 1);
+        this.capaAtaque.strokeRect(px + 5, py + 5, TAM_CASILLA - 10, TAM_CASILLA - 10);
+      }
+    }
+  }
+
   /** Mantiene la selección visual separada de las validaciones del backend. */
   marcarUnidadSeleccionada(id: number | null): void {
     this.unidadMarcadaId = id;
     this.datos.unidadSeleccionadaId = id;
-    if (id === null) this.datos.movimientosDisponibles = [];
+    if (id === null) {
+      this.datos.movimientosDisponibles = [];
+      this.datos.alcancesAtaque = [];
+    }
     this.actualizarMarcado();
     this.dibujarMovimientosDisponibles();
+    this.dibujarAlcanceAtaque();
   }
 
   /** Un único marco azul, siempre dentro de una sola casilla de 40 × 40. */
