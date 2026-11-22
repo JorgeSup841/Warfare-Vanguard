@@ -31,11 +31,13 @@ export class Crearpartidacomponent {
       nuevos.push(this.nombres[i] || `Jugador ${i + 1}`);
     }
     this.nombres = nuevos;
+    this.cdr.markForCheck();
   }
 
   /** Pone una semilla aleatoria. */
   semillaAlAzar(): void {
     this.semilla = Math.floor(Math.random() * 1000000);
+    this.cdr.markForCheck();
   }
 
   /** Revisa los datos y pide al back crear la partida. */
@@ -44,15 +46,18 @@ export class Crearpartidacomponent {
 
     if (nombres.some((n) => n === '')) {
       this.mensaje = 'Ningún jugador puede quedar sin nombre';
+      this.cdr.markForCheck();
       return;
     }
     if (this.ancho < 5 || this.ancho > 50 || this.alto < 5 || this.alto > 50) {
       this.mensaje = 'El mapa debe medir entre 5 y 50 casillas por lado';
+      this.cdr.markForCheck();
       return;
     }
 
     this.creando = true;
     this.mensaje = '';
+    this.cdr.markForCheck();
 
     const datos = {
       playerNames: nombres,
@@ -64,7 +69,11 @@ export class Crearpartidacomponent {
     this.servicio.crearPartida(datos).subscribe({
       next: (p) => {
         this.creando = false;
-        this.router.navigate(['/partidas', p.id, 'configurar']);
+        this.cdr.markForCheck();
+        this.router.navigate(['/partidas', p.id, 'configurar']).catch(() => {
+          this.mensaje = 'No se pudo abrir la configuración de la partida.';
+          this.cdr.markForCheck();
+        });
       },
       error: (e) => {
         this.creando = false;

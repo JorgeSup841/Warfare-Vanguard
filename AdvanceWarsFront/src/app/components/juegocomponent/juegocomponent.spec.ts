@@ -1,43 +1,33 @@
-
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { RouterModule } from '@angular/router';
-import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-
+import { TestBed } from '@angular/core/testing';
+import { ActivatedRoute, convertToParamMap, RouterModule } from '@angular/router';
 import { Juegocomponent } from './juegocomponent';
 
-describe('Juegocomponent', () => {
-
-  let component: Juegocomponent;
-  let fixture: ComponentFixture<Juegocomponent>;
-
+describe('Juegocomponent - tablero de prueba', () => {
   beforeEach(async () => {
-
     await TestBed.configureTestingModule({
-      imports: [
-        CommonModule,
-        FormsModule,
-        RouterModule.forRoot([])
-      ],
-      declarations: [
-        Juegocomponent
-      ],
+      imports: [CommonModule, RouterModule.forRoot([])],
+      declarations: [Juegocomponent],
       providers: [
         provideHttpClient(),
-        provideHttpClientTesting()
-      ]
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(Juegocomponent);
-    component = fixture.componentInstance;
-
-    await fixture.whenStable();
+        provideHttpClientTesting(),
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { data: { demo: true }, paramMap: convertToParamMap({}) } },
+        },
+      ],
+    })
+      // Probamos la activación del modo demo sin cargar Phaser ni pedir catálogos.
+      .overrideComponent(Juegocomponent, { set: { template: '' } })
+      .compileComponents();
   });
 
-  it('debe crear el componente correctamente', () => {
-    expect(component).toBeTruthy();
+  it('habilita el modo demo sin un identificador de partida en el backend', () => {
+    const fixture = TestBed.createComponent(Juegocomponent);
+    expect(fixture.componentInstance.modoDemo).toBe(true);
+    expect(fixture.componentInstance.id).toBe(0);
+    fixture.destroy();
   });
-
 });

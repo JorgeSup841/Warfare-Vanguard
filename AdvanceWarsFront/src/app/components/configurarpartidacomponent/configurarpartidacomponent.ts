@@ -66,6 +66,7 @@ export class Configurarpartidacomponent implements OnInit {
   /** Actualiza la elección del comandante antes de guardar. */
   cambiarComandante(orden: number, value: string): void {
     if (this.seleccion[orden]) this.seleccion[orden].commanderId = Number(value);
+    this.cdr.markForCheck();
   }
 
   /** La selección no se confirma hasta recibir el GameDTO actualizado. */
@@ -74,6 +75,7 @@ export class Configurarpartidacomponent implements OnInit {
     if (!data?.factionId || !data.commanderId || this.guardando !== null) return;
     this.guardando = orden;
     this.mensaje = '';
+    this.cdr.markForCheck();
     this.servicio.seleccionarJugador(this.id, orden, data).subscribe({
       next: p => { this.partida = p; this.guardando = null; this.sincronizarSeleccion(); this.cdr.detectChanges(); },
       error: e => { this.mensaje = e.error?.message || 'No se pudo guardar la selección'; this.guardando = null; this.cdr.detectChanges(); },
@@ -123,11 +125,13 @@ export class Configurarpartidacomponent implements OnInit {
   /** Muestra la pregunta de confirmación. */
   solicitarInicio(): void {
     this.confirmar = true;
+    this.cdr.markForCheck();
   }
 
   /** Oculta la pregunta de confirmación. */
   cancelarInicio(): void {
     this.confirmar = false;
+    this.cdr.markForCheck();
   }
 
   /** Pide al back iniciar la partida y abre el tablero. */
@@ -135,10 +139,15 @@ export class Configurarpartidacomponent implements OnInit {
     this.iniciando = true;
     this.confirmar = false;
     this.mensaje = '';
+    this.cdr.markForCheck();
     this.servicio.iniciarPartida(this.id).subscribe({
       next: () => {
         this.iniciando = false;
-        this.router.navigate(['/partidas', this.id, 'jugar']);
+        this.cdr.markForCheck();
+        this.router.navigate(['/partidas', this.id, 'jugar']).catch(() => {
+          this.mensaje = 'No se pudo abrir el tablero.';
+          this.cdr.markForCheck();
+        });
       },
       error: (e) => {
         this.iniciando = false;

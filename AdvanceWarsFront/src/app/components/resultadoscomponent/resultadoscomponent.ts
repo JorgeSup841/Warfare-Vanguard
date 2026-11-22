@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { forkJoin } from 'rxjs'; //Ejecuta varias peticiones al mismo tiempo, en vez de esperar en fila una por una
+import { forkJoin } from 'rxjs';
 import { tableroservice } from '../../services/tableroservice';
 import { ReporteService } from '../../services/reporte.service';
 import { partidaresumen, unidadservidor } from '../../models/tablero';
@@ -35,6 +35,7 @@ export class Resultadoscomponent implements OnInit {
   /** Pide al back la partida y sus unidades. */
   cargar(): void {
     this.cargando = true;
+    this.cdr.markForCheck();
     forkJoin({
       partida: this.servicio.getPartida(this.id),
       unidades: this.servicio.getUnidades(this.id),
@@ -56,8 +57,8 @@ export class Resultadoscomponent implements OnInit {
   /** Nombre del ganador, si ya lo hay. */
   get ganador(): string {
     if (!this.partida) return '';
-    const winner = this.partida.players.find((player) => player.status === 'WINNER');
-    return winner ? winner.name : '';
+    const g = this.partida.players.find((j) => j.status === 'WINNER');
+    return g ? g.name : '';
   }
 
   /** Cuántas unidades le quedan a un jugador. */
@@ -70,6 +71,7 @@ export class Resultadoscomponent implements OnInit {
     this.descargando = true;
     this.mensaje = '';
     this.error = '';
+    this.cdr.markForCheck();
     this.pdf.obtener(this.id).subscribe({
       next: (archivo) => {
         this.pdf.guardarArchivo(archivo, this.id);

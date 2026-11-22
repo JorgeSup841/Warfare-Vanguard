@@ -32,6 +32,7 @@ export class Panelcomponent implements OnInit, OnDestroy {
 
     this.cargando = true;
     this.error = '';
+    this.cdr.markForCheck();
 
     this.subs.add(
       this.auth.getPerfil().subscribe({
