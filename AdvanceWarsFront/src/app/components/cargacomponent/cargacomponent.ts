@@ -19,6 +19,5 @@ export class Cargacomponent {
   entrar(): void {
     this.visible = false;
 
-    this.router.navigate(['/']).catch(() => undefined);
   }
 }
