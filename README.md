@@ -68,7 +68,7 @@ Warfare-Vanguard/
 
 - **JDK 21** y Maven (el backend incluye Maven Wrapper).
 - **Node.js y npm** compatibles con Angular 22.
-- Una cuenta SMTP configurada si se van a probar el registro, el inicio de sesión y los códigos OTP.
+- Una cuenta de Gmail configurada para  aprobar el registro, el inicio de sesión y los códigos OTP.
 
 ### 1. Backend
 
