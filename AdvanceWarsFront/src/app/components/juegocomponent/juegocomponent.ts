@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, ChangeDetectorRef, OnDestroy, OnInit, ViewEncapsulation, inject } from '@angular/core';
+import { Component, AfterViewInit, ChangeDetectorRef, NgZone, OnDestroy, OnInit, ViewChild, ViewEncapsulation, inject } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import Phaser from 'phaser';
@@ -11,6 +11,9 @@ import { EscenaMapa, DatosEscena, TAM_CASILLA } from '../../phaser/escenamapa';
 import { casilla, configuracionmapa, terreno, mapa, tipoterreno } from '../../models/mapa';
 import { tablero, partidaresumen, unidadservidor, casillatablero, turnoactual, casillaalcanzable, eventojuego } from '../../models/tablero';
 import { unidad as unidadcatalogo, resultadoataque } from '../../models/unidad';
+import { Juegounidadescomponent } from '../juegounidadescomponent/juegounidadescomponent';
+import { Juegoaccionescomponent } from '../juegoaccionescomponent/juegoaccionescomponent';
+import { Juegohistorialcomponent } from '../juegohistorialcomponent/juegohistorialcomponent';
 
 /** Convierte el coste de desplazamiento de una casilla en una etiqueta legible. */
 function costoTerrenoInspector(terrenoActual: terreno, tipo: string): string {
@@ -34,6 +37,10 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly api = inject(tableroservice);
   private readonly pdf = inject(ReporteService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly zone = inject(NgZone);
+  @ViewChild(Juegounidadescomponent) private panelUnidades?: Juegounidadescomponent;
+  @ViewChild(Juegoaccionescomponent) private panelAcciones?: Juegoaccionescomponent;
+  @ViewChild(Juegohistorialcomponent) private panelHistorial?: Juegohistorialcomponent;
   private readonly subs = new Subscription();
 
   private phaser?: Phaser.Game;
@@ -44,6 +51,15 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
   private datosEscenaActuales: DatosEscena | null = null;
   private tableroActual: tablero | null = null;
   private destruido = false;
+
+  /** Notifica también a los paneles: reciben siempre la misma referencia del juego. */
+  private refrescarVista(): void {
+    if (this.destruido) return;
+    this.cdr.markForCheck();
+    this.panelUnidades?.marcarCambio();
+    this.panelAcciones?.marcarCambio();
+    this.panelHistorial?.marcarCambio();
+  }
 
   readonly modoDemo = Boolean(this.ruta.snapshot.data['demo']);
   readonly id = Number(this.ruta.snapshot.paramMap.get('id')) || 0;
@@ -124,12 +140,13 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     const turno = this.turnoActual();
     if (!turno || !this.poderDisponible || this.accionEnCurso || this.esperaCambio) return;
     this.terminando = true;
-    this.api.poder(this.id, turno).subscribe({
+    this.refrescarVista();
+    this.subs.add(this.api.poder(this.id, turno).subscribe({
       next: partida => { this.partida = partida; this.terminando = false; this.mensaje = 'Poder activado en el servidor.';
-        this.cargarDatos(); this.cdr.detectChanges(); },
+        this.cargarDatos(); this.refrescarVista(); },
       error: e => { this.terminando = false; this.error = Juegocomponent.obtenerMensajeError(e, 'Poder no disponible');
-        this.cdr.detectChanges(); },
-    });
+        this.refrescarVista(); },
+    }));
   }
   get esperaCambio(): boolean { return this.esperandoEntrega; }
   /** Habilita los controles después del cambio local de turno. */
@@ -138,7 +155,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     this.avisoTurno = '';
     this.ganancias = {};
     this.obtenerEscenaMapa()?.centrarEnJugador(this.partida?.currentPlayerOrder ?? 1);
-    this.cdr.detectChanges();
+    this.refrescarVista();
   }
 
   /** Usa solamente los retratos originales incluidos en el paquete AURA WARS. */
@@ -160,13 +177,23 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
   consultarHistorial(): void {
     if (this.modoDemo || this.cargandoHistorial) return;
     this.mostrandoHistorial = !this.mostrandoHistorial;
-    if (!this.mostrandoHistorial) return;
+    if (!this.mostrandoHistorial) {
+      this.refrescarVista();
+      return;
+    }
     this.cargandoHistorial = true;
-    this.api.getLogs(this.id).subscribe({
-      next: list => { this.historial = list; this.cargandoHistorial = false; this.cdr.detectChanges(); },
-      error: e => { this.cargandoHistorial = false;
-        this.error = Juegocomponent.obtenerMensajeError(e, 'No se pudo cargar historial'); this.cdr.detectChanges(); },
-    });
+    this.refrescarVista();
+    this.subs.add(this.api.getLogs(this.id).subscribe({
+      next: list => {
+        if (this.destruido) return;
+        this.historial = list; this.cargandoHistorial = false; this.refrescarVista();
+      },
+      error: e => {
+        if (this.destruido) return;
+        this.cargandoHistorial = false;
+        this.error = Juegocomponent.obtenerMensajeError(e, 'No se pudo cargar historial'); this.refrescarVista();
+      },
+    }));
   }
   get zoomPorcentaje(): string {
     return `${Math.round(this.zoom * 100)}%`;
@@ -193,14 +220,14 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     const siguiente = Math.max(0, Math.min(this.nivelesZoom.length - 1, indiceActual + paso));
     this.zoom = this.nivelesZoom[siguiente];
     this.obtenerEscenaMapa()?.cambiarZoom(this.zoom);
-    this.cdr.markForCheck();
+    this.refrescarVista();
   }
 
   /** Restablece el zoom base del mapa completo. */
   zoomRestablecer(): void {
     this.zoom = 1;
     this.obtenerEscenaMapa()?.cambiarZoom(this.zoom);
-    this.cdr.markForCheck();
+    this.refrescarVista();
   }
   terminando = false;
   colores = ['#e74b40', '#366cb1', '#3f9e4d', '#e0b020'];
@@ -241,7 +268,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
           if (this.modoDemo) this.generarDemo();
           else this.cargarMapa();
 
-          this.cdr.detectChanges();
+          this.refrescarVista();
         },
         error: (error: unknown) => {
           if (this.destruido) return;
@@ -250,7 +277,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
             error,
             'No se pudieron cargar los catálogos JSON.',
           );
-          this.cdr.detectChanges();
+          this.refrescarVista();
         },
       }),
     );
@@ -277,7 +304,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.modoDemo || !this.id || this.destruido || this.accionEnCurso) return;
     this.cargando = true;
     this.error = '';
-    this.cdr.markForCheck();
+    this.refrescarVista();
     this.subs.add(
       forkJoin({
         partidaActual: this.api.getPartida(this.id),
@@ -290,13 +317,13 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
           this.unidades = unidadesRecibidas;
           this.dibujar(tableroRecibido);
           this.mensaje = 'Partida sincronizada con Spring Boot.';
-          this.cdr.detectChanges();
+          this.refrescarVista();
         },
         error: (error: unknown) => {
           if (this.destruido) return;
           this.cargando = false;
           this.error = Juegocomponent.obtenerMensajeError(error, 'No se pudo cargar la partida.');
-          this.cdr.detectChanges();
+          this.refrescarVista();
         }
       })
     );
@@ -317,13 +344,13 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
           this.unidades = unidades;
           this.actualizarUnidadesEscena();
           this.mensaje = 'Partida y unidades actualizadas desde Spring Boot.';
-          this.cdr.detectChanges();
+          this.refrescarVista();
         },
         error: (error: unknown) => {
           if (this.destruido) return;
           this.error = Juegocomponent.obtenerMensajeError(error,
             'No se pudieron consultar los datos de la partida.');
-          this.cdr.detectChanges();
+          this.refrescarVista();
         }
       })
     );
@@ -338,7 +365,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     this.recargandoUnidades = true;
     this.error = '';
     this.establecerUnidadActiva(null);
-    this.cdr.detectChanges();
+    this.refrescarVista();
 
     const peticion = this.api.getUnidades(this.id).subscribe({
       next: (unidadesRecibidas) => {
@@ -346,7 +373,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
         this.unidades = unidadesRecibidas;
         this.actualizarUnidadesEscena();
         this.recargandoUnidades = false;
-        this.cdr.detectChanges();
+        this.refrescarVista();
       },
       error: (error: unknown) => {
         if (this.destruido) return;
@@ -355,7 +382,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
           error,
           'No se pudieron actualizar las unidades.',
         );
-        this.cdr.detectChanges();
+        this.refrescarVista();
       },
     });
 
@@ -363,7 +390,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     this.subs.add(peticion);
   }
 
-  /** Conserva la selección solamente si pertenece al turno actual y puede moverse. */
+  /** Conserva la ficha de una unidad propia viva, aunque ya haya gastado sus acciones. */
   private comprobarUnidadActiva(): void {
     if (!this.unidadActiva) return;
     const partidaActual = this.partida;
@@ -373,7 +400,6 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
       !partidaActual ||
       !actualizada ||
       actualizada.health <= 0 ||
-      (actualizada.movedThisTurn && actualizada.attackedThisTurn) ||
       actualizada.ownerOrder !== partidaActual.currentPlayerOrder
     ) {
       this.unidadActiva = null;
@@ -405,12 +431,14 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
         this.unidades = unidades;
         this.obtenerEscenaMapa()?.actualizarPropiedades(tablero.tiles);
         this.actualizarUnidadesEscena();
-        this.cdr.detectChanges();
+        this.capturando = false;
+        this.refrescarVista();
       },
       error: e => {
         if (this.destruido) return;
+        this.capturando = false;
         this.error = Juegocomponent.obtenerMensajeError(e, 'No se pudo sincronizar la captura.');
-        this.cdr.detectChanges();
+        this.refrescarVista();
       }
     }));
   }
@@ -455,10 +483,13 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.datosEscenaActuales) this.datosEscenaActuales.movimientosDisponibles = [];
     this.unidadActiva = unidad;
     this.actualizarSeleccionEscena();
-    if (!unidad || this.modoDemo || !this.id || this.partida?.status !== 'IN_PROGRESS') return;
+    this.refrescarVista();
+    if (!unidad || unidad.movedThisTurn ||
+      unidad.ownerOrder !== this.partida?.currentPlayerOrder ||
+      this.modoDemo || !this.id || this.partida?.status !== 'IN_PROGRESS') return;
 
     this.consultandoMovimientos = true;
-    this.cdr.markForCheck();
+    this.refrescarVista();
     const peticion = this.api.movimientosDisponibles(this.id, unidad.id).subscribe({
       next: (casillas) => {
         if (this.destruido || this.unidadActiva?.id !== unidad.id) return;
@@ -467,7 +498,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.datosEscenaActuales) this.datosEscenaActuales.movimientosDisponibles = [...casillas];
         const escena = this.obtenerEscenaMapa();
         if (escena?.sys.isActive()) escena.marcarMovimientosDisponibles(casillas);
-        this.cdr.markForCheck();
+        this.refrescarVista();
       },
       error: (error: unknown) => {
         if (this.destruido || this.unidadActiva?.id !== unidad.id) return;
@@ -475,7 +506,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
         this.movimientosDisponibles = [];
         this.error = Juegocomponent.obtenerMensajeError(error,
           'No se pudieron consultar los destinos de movimiento.');
-        this.cdr.markForCheck();
+        this.refrescarVista();
       }
     });
     this.suscripcionMovimientos = peticion;
@@ -490,22 +521,22 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (!unidad || !partidaActual) {
       this.error = 'Selecciona una unidad disponible.';
-      this.cdr.detectChanges();
+      this.refrescarVista();
       return;
     }
     if (partidaActual.status !== 'IN_PROGRESS') {
       this.error = 'La partida no está en curso.';
-      this.cdr.detectChanges();
+      this.refrescarVista();
       return;
     }
     if (this.consultandoMovimientos) {
       this.mensaje = 'Consultando los movimientos disponibles...';
-      this.cdr.detectChanges();
+      this.refrescarVista();
       return;
     }
     if (!this.movimientosDisponibles.some(casilla => casilla.x === x && casilla.y === y)) {
       this.mensaje = `La casilla (${x}, ${y}) no está marcada como destino permitido.`;
-      this.cdr.detectChanges();
+      this.refrescarVista();
       return;
     }
     if (
@@ -513,9 +544,8 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
       unidad.movedThisTurn ||
       unidad.ownerOrder !== partidaActual.currentPlayerOrder
     ) {
-      this.establecerUnidadActiva(null);
       this.error = 'La unidad seleccionada no puede moverse.';
-      this.cdr.detectChanges();
+      this.refrescarVista();
       return;
     }
 
@@ -523,7 +553,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     this.resultadoCombate = null;
     this.error = '';
     this.mensaje = 'Procesando movimiento...';
-    this.cdr.detectChanges();
+    this.refrescarVista();
 
     this.subs.add(
       this.api
@@ -538,18 +568,18 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
             if (actualizada.id !== unidad.id) {
               this.error = 'El servidor devolvió una unidad diferente.';
               this.mensaje = '';
-              this.cdr.detectChanges();
+              this.refrescarVista();
               return;
             }
             // Nunca se usan x/y de la solicitud para mover el sprite.
             this.unidades = this.unidades.map((actual) =>
               actual.id === actualizada.id ? actualizada : actual,
             );
-            this.establecerUnidadActiva(null);
+            this.establecerUnidadActiva(actualizada);
             this.actualizarUnidadesEscena();
             this.error = '';
             this.mensaje = `Unidad #${actualizada.id} movida a (${actualizada.x}, ${actualizada.y}).`;
-            this.cdr.detectChanges();
+            this.refrescarVista();
           },
           error: (error: unknown) => {
             if (this.destruido) return;
@@ -557,7 +587,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
             // Una respuesta de error no cambia la posición de ninguna unidad.
             this.error = Juegocomponent.obtenerMensajeError(error, 'Movimiento rechazado.');
             this.mensaje = '';
-            this.cdr.detectChanges();
+            this.refrescarVista();
           },
         }),
     );
@@ -571,12 +601,12 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (!atacante || !partidaActual) {
       this.error = 'Selecciona una unidad atacante.';
-      this.cdr.detectChanges();
+      this.refrescarVista();
       return;
     }
     if (partidaActual.status !== 'IN_PROGRESS') {
       this.error = 'La partida no está en curso.';
-      this.cdr.detectChanges();
+      this.refrescarVista();
       return;
     }
     if (
@@ -584,14 +614,13 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
       atacante.attackedThisTurn ||
       atacante.ownerOrder !== partidaActual.currentPlayerOrder
     ) {
-      this.establecerUnidadActiva(null);
       this.error = 'La unidad seleccionada no puede atacar.';
-      this.cdr.detectChanges();
+      this.refrescarVista();
       return;
     }
     if (objetivo.health <= 0 || objetivo.ownerOrder === atacante.ownerOrder) {
       this.error = 'Selecciona una unidad enemiga válida.';
-      this.cdr.detectChanges();
+      this.refrescarVista();
       return;
     }
 
@@ -599,7 +628,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     this.error = '';
     this.resultadoCombate = null;
     this.mensaje = `Unidad #${atacante.id} atacando a unidad #${objetivo.id}...`;
-    this.cdr.detectChanges();
+    this.refrescarVista();
 
     this.subs.add(
       this.api
@@ -625,7 +654,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
               )
               .map((unidad) => {
                 if (unidad.id === resultado.attackerUnitId) {
-                  return { ...unidad, health: resultado.attackerHealth };
+                  return { ...unidad, health: resultado.attackerHealth, attackedThisTurn: true };
                 }
                 if (unidad.id === resultado.targetUnitId) {
                   return { ...unidad, health: resultado.targetHealth };
@@ -633,9 +662,10 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
                 return unidad;
               });
 
-            this.establecerUnidadActiva(null);
+            // La ficha permanece seleccionada si el atacante sobrevivió.
+            // Los datos completos se sincronizan al terminar la recarga HTTP.
             this.actualizarUnidadesEscena();
-            this.cdr.detectChanges();
+            this.refrescarVista();
 
             // La lista completa del back es la fuente final de verdad.
             this.subs.add(
@@ -652,7 +682,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
                   if (partidaActual.status === 'FINISHED') {
                     this.router.navigate(['/partidas', this.id, 'resultados']);
                   }
-                  this.cdr.detectChanges();
+                  this.refrescarVista();
                 },
                 error: (error: unknown) => {
                   if (this.destruido) return;
@@ -660,7 +690,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
                   this.error =
                     'El ataque fue confirmado, pero no se pudieron recargar las unidades. ' +
                     Juegocomponent.obtenerMensajeError(error, 'Actualiza la partida.');
-                  this.cdr.detectChanges();
+                  this.refrescarVista();
                 },
               }),
             );
@@ -671,7 +701,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
             // No se altera el tablero si Spring Boot rechaza el ataque.
             this.error = Juegocomponent.obtenerMensajeError(error, 'Ataque rechazado.');
             this.mensaje = '';
-            this.cdr.detectChanges();
+            this.refrescarVista();
           },
         }),
     );
@@ -710,7 +740,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     this.fabricaActiva = null;
     this.resultadoCombate = null;
     this.dibujar(this.demoMap(this.configuracion));
-    this.cdr.markForCheck();
+    this.refrescarVista();
   }
 
   /** Genera un mapa determinista a partir de la semilla. */
@@ -803,38 +833,46 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
       jugadorEnTurno: this.partida?.currentPlayerOrder ?? 1,
       unidades: [...this.unidades],
       unidadSeleccionadaId: null,
-      alPasarSobre: (actual: casilla | null) => this.alPasarSobre(actual),
-      alClicCasilla: (x: number, y: number) => this.alClicCasilla(x, y),
-      alCancelarSeleccion: () => {
+      alPasarSobre: (actual: casilla | null) => {
+        // Solo reentrar en Angular cuando cambia la casilla inspeccionada.
+        if (actual?.x === this.seleccion?.x && actual?.y === this.seleccion?.y) return;
+        if (!actual && !this.seleccion) return;
+        this.zone.run(() => this.alPasarSobre(actual));
+      },
+      alClicCasilla: (x: number, y: number) => this.zone.run(() => this.alClicCasilla(x, y)),
+      alCancelarSeleccion: () => this.zone.run(() => {
         if (this.accionEnCurso || !this.unidadActiva) return;
         this.establecerUnidadActiva(null);
         this.mensaje = 'Selección cancelada.';
-        this.cdr.detectChanges();
-      },
+        this.refrescarVista();
+      }),
     };
     this.datosEscenaActuales = datos;
-    this.cdr.markForCheck();
+    this.refrescarVista();
 
     const anchoPixeles = anchoVista;
     const altoPixeles = altoVista;
-    if (!this.phaser) {
-      this.phaser = new Phaser.Game({
-        type: Phaser.AUTO,
-        parent: 'contenedor-juego',
-        width: anchoPixeles,
-        height: altoPixeles,
-        backgroundColor: '#14201a',
-        input: { keyboard: false },
-        scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.NO_CENTER },
-        render: { pixelArt: true },
-        scene: [],
-      });
-      this.phaser.scene.add('EscenaMapa', EscenaMapa, true, datos);
-    } else {
-      this.phaser.scale.resize(anchoPixeles, altoPixeles);
-      this.phaser.scene.getScene('EscenaMapa').scene.restart(datos);
-    }
-    this.cdr.markForCheck();
+    // Phaser anima fuera de Angular; solo sus callbacks notifican cambios de UI.
+    this.zone.runOutsideAngular(() => {
+      if (!this.phaser) {
+        this.phaser = new Phaser.Game({
+          type: Phaser.AUTO,
+          parent: 'contenedor-juego',
+          width: anchoPixeles,
+          height: altoPixeles,
+          backgroundColor: '#14201a',
+          input: { keyboard: false },
+          scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.NO_CENTER },
+          render: { pixelArt: true },
+          scene: [],
+        });
+        this.phaser.scene.add('EscenaMapa', EscenaMapa, true, datos);
+      } else {
+        this.phaser.scale.resize(anchoPixeles, altoPixeles);
+        this.phaser.scene.getScene('EscenaMapa').scene.restart(datos);
+      }
+    });
+    this.refrescarVista();
   }
 
   /** Actualiza únicamente el inspector de casillas bajo el cursor. */
@@ -843,7 +881,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     if (!actual) {
       if (this.seleccion) {
         this.seleccion = null;
-        this.cdr.markForCheck();
+        this.refrescarVista();
       }
       return;
     }
@@ -853,7 +891,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
       y: actual.y,
       terreno: this.terrenos.find((item) => item.terrainType === actual.terrainType),
     };
-    this.cdr.markForCheck();
+    this.refrescarVista();
   }
 
   /** Selecciona una unidad, mueve a una casilla vacía o ataca a un enemigo. */
@@ -861,12 +899,12 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.destruido || this.accionEnCurso) return;
     if (this.modoDemo) {
       this.mensaje = `Casilla (${x}, ${y}) del mapa de demostración.`;
-      this.cdr.detectChanges();
+      this.refrescarVista();
       return;
     }
     if (!this.partida) {
       this.error = 'Todavía no se han cargado los datos de la partida.';
-      this.cdr.detectChanges();
+      this.refrescarVista();
       return;
     }
 
@@ -886,7 +924,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
       this.mensaje = fabrica
         ? `${this.etiquetaPropiedadTienda}. Elige qué producir.`
         : `Casilla (${x}, ${y}) sin unidad.`;
-      this.cdr.detectChanges();
+      this.refrescarVista();
       return;
     }
     if (encontrada.ownerOrder !== this.partida.currentPlayerOrder) {
@@ -895,18 +933,13 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
       this.mensaje = 'Selecciona primero una unidad propia para atacar.';
-      this.cdr.detectChanges();
-      return;
-    }
-    if (encontrada.movedThisTurn && encontrada.attackedThisTurn) {
-      this.mensaje = `La unidad #${encontrada.id} ya gastó sus acciones.`;
-      this.cdr.detectChanges();
+      this.refrescarVista();
       return;
     }
     if (this.unidadActiva?.id === encontrada.id) {
       this.establecerUnidadActiva(null);
       this.mensaje = `Unidad #${encontrada.id} deseleccionada.`;
-      this.cdr.detectChanges();
+      this.refrescarVista();
       return;
     }
 
@@ -919,7 +952,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
       `Unidad ${this.nombreUnidad(encontrada.unitType)} ` +
       `(#${encontrada.id}) seleccionada. Clic en casilla vacía para mover ` +
       'o en enemigo para atacar.';
-    this.cdr.detectChanges();
+    this.refrescarVista();
   }
 
   /** Obtiene la unidad bajo el cursor del inspector existente. */
@@ -945,7 +978,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     const numero = Number(this.semilla);
     if (!Number.isFinite(numero)) {
       this.error = 'Introduce una semilla válida.';
-      this.cdr.markForCheck();
+      this.refrescarVista();
       return;
     }
     this.semilla = Math.floor(numero);
@@ -976,12 +1009,12 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
           } catch (error) {
             this.error = Juegocomponent.obtenerMensajeError(error, 'No se pudo guardar el PDF.');
           }
-          this.cdr.detectChanges();
+          this.refrescarVista();
         },
         error: (error: unknown) => {
           if (this.destruido) return;
           this.error = Juegocomponent.obtenerMensajeError(error, 'No se pudo descargar el PDF.');
-          this.cdr.detectChanges();
+          this.refrescarVista();
         },
       }),
     );
@@ -1005,7 +1038,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     for (const jugador of this.partida.players) dineroAntes[jugador.turnOrder] = jugador.money;
     const turno = this.turnoActual();
     if (!turno) { this.terminando = false; return; }
-    this.cdr.markForCheck();
+    this.refrescarVista();
     this.subs.add(this.api.finTurno(this.id, turno).subscribe({
       next: (actualizada) => {
         if (this.destruido) return;
@@ -1025,14 +1058,14 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
         }
         this.mostrarAviso();
         this.recargarUnidades();
-        this.cdr.detectChanges();
+        this.refrescarVista();
       },
       error: (error: unknown) => {
         if (this.destruido) return;
         this.terminando = false;
         this.error = Juegocomponent.obtenerMensajeError(error, 'No se pudo terminar el turno.');
         this.cargarDatos();
-        this.cdr.detectChanges();
+        this.refrescarVista();
       }
     }));
   }
@@ -1062,23 +1095,23 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     if (!unidad || !turno || !this.puedeCapturar || this.accionEnCurso) return;
     this.capturando = true;
     this.error = '';
+    this.refrescarVista();
     this.subs.add(this.api.capturar(this.id, unidad.id, turno).subscribe({
       next: (resultado) => {
         if (this.destruido) return;
-        this.capturando = false;
-        this.establecerUnidadActiva(null);
+        // Conserva la ficha hasta recibir los nuevos datos de unidad y propiedad.
         this.mensaje = resultado.captured
           ? 'Propiedad capturada. Control actualizado desde el servidor.'
           : `Captura en progreso: ${resultado.captureProgress}/${resultado.requiredProgress}.`;
         this.obtenerEscenaMapa()?.mostrarCaptura(unidad.id);
         this.sincronizarDespuesDeCaptura();
-        this.cdr.detectChanges();
+        this.refrescarVista();
       },
       error: (error: unknown) => {
         if (this.destruido) return;
         this.capturando = false;
         this.error = Juegocomponent.obtenerMensajeError(error, 'Captura rechazada.');
-        this.cdr.detectChanges();
+        this.refrescarVista();
       }
     }));
   }
@@ -1124,7 +1157,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
       this.tiendaAbierta = false;
       this.fabricaActiva = null;
       this.error = 'No tienes fábricas, aeropuertos ni puertos conquistados. Captura uno antes de comprar.';
-      this.cdr.detectChanges();
+      this.refrescarVista();
       return;
     }
     const libre = propias.find(t => !this.unidades.some(u =>
@@ -1133,14 +1166,14 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
     this.fabricaActiva = libre ?? propias[0];
     this.tiendaAbierta = true;
     this.error = '';
-    this.cdr.detectChanges();
+    this.refrescarVista();
   }
 
   /** Cierra la tienda. */
   cerrarTienda(): void {
     this.tiendaAbierta = false;
     this.fabricaActiva = null;
-    this.cdr.detectChanges();
+    this.refrescarVista();
   }
 
   /** Compra una tropa en la fábrica elegida. El back valida el costo y el turno. */
@@ -1151,6 +1184,7 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
       this.partida?.status !== 'IN_PROGRESS') return;
     this.produciendo = true;
     this.error = '';
+    this.refrescarVista();
     this.subs.add(this.api.producir(this.id, propiedad.propertyId, tipo, turno).subscribe({
       next: (unidad) => {
         if (this.destruido) return;
@@ -1159,13 +1193,13 @@ export class Juegocomponent implements OnInit, AfterViewInit, OnDestroy {
         this.tiendaAbierta = false;
         this.mensaje = `${this.nombreUnidad(unidad.unitType)} comprada. Podrá moverse en tu próximo turno.`;
         this.cargarDatos();
-        this.cdr.detectChanges();
+        this.refrescarVista();
       },
       error: (error: unknown) => {
         if (this.destruido) return;
         this.produciendo = false;
         this.error = Juegocomponent.obtenerMensajeError(error, 'Producción rechazada.');
-        this.cdr.detectChanges();
+        this.refrescarVista();
       }
     }));
   }

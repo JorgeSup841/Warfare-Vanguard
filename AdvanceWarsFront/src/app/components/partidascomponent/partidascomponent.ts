@@ -35,6 +35,7 @@ export class Partidascomponent implements OnInit {
   cargar(): void {
     this.cargando = true;
     this.mensaje = '';
+    this.cdr.markForCheck();
     this.servicio.listarPartidas().subscribe({
       next: (datos) => {
         this.partidas = datos;
